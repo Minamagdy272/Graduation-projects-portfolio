@@ -4,170 +4,310 @@
 
 ## Executive Summary
 
-This project proposes the design and implementation of an **In-Vehicle Network (IVN) Security Gateway with a CAN-Bus Intrusion Detection Layer**. Modern vehicles contain 70–150 Electronic Control Units (ECUs) communicating over the CAN (Controller Area Network) bus — a protocol with zero authentication or encryption. This gateway sits between internal vehicle networks, enforces communication policies between domains (powertrain, chassis, infotainment), and uses an anomaly-detection module to identify malicious CAN frame injections that indicate an active cyberattack.
+This project proposes the design and implementation of a **In-Vehicle Network Gateway with CAN-Bus Security Layer** — a production-grade system engineered for high performance, reliability, and enterprise scalability. The system addresses critical operational challenges in Automotive / Embedded Systems by building a robust architecture that integrates modern software engineering practices with a bounded AI subsystem.
 
-**Motivation:** Vehicle cybersecurity is a critical and rapidly growing field. Since 2015, researchers have demonstrated remote takeover of Jeep Cherokee, Tesla, BMW, and other vehicles by exploiting the unprotected CAN bus. Modern regulations (UNECE WP.29 / ISO 21434) now mandate cybersecurity management for all new vehicle models globally. Yet CAN bus security education is extremely rare — there are almost no academic projects in this domain. Building this gateway provides unique expertise in automotive protocols, embedded security, and real-time anomaly detection on constrained hardware.
+**Motivation:** Modern enterprise systems demand high-throughput data handling, low-latency processing, and automated decision-making. Traditional approaches struggle with scale, static rules, or vendor lock-in. This project tackles the core engineering challenge of building a modular, resilient platform capable of operating continuously under demanding production workloads.
 
 **Objectives:**
-- Implement a CAN frame parser for standard and extended CAN frames, plus CAN-FD.
-- Build a configurable firewall (message filtering table) that enforces communication policies between vehicle domains.
-- Implement rule-based detection signatures for known attack patterns (replay attacks, frame spoofing, ID flooding).
-- Build an anomaly-detection ML module that learns normal CAN traffic patterns and flags statistical deviations.
-- Log all security events to an immutable audit trail and expose a secure diagnostic interface.
+- Build a distributed system architecture processing thousands of operations per second with predictable low latency
+- Implement robust fault tolerance, automated recovery, and strict security posture
+- Design a high-performance data storage and streaming pipeline tailored to domain requirements
+- Integrate a bounded AI module (ONNX embedded Isolation Forest CAN frame anomaly detector) to enhance operational decision-making without creating single-point-of-failure model dependencies
+- Create an intuitive, real-time web dashboard for system monitoring, administration, and operational workflows
 
-**Expected Impact:** An automotive-grade security gateway demonstrating expertise in safety-critical embedded systems, real-time signal processing, and applied anomaly detection — one of the most specialized and valuable skills in the automotive industry.
+**Expected Impact:** A production-grade architecture demonstrating mastery of distributed systems, backend engineering, cloud infrastructure, and applied machine learning.
 
-**Target Users:** Automotive OEMs (car manufacturers), Tier-1 automotive suppliers (Bosch, Continental, Aptiv), and national vehicle type-approval agencies.
+**Target Users:** Enterprise IT operations, security teams, engineering lead practitioners, and domain-specific operations personnel.
 
 ---
 
 ## Problem Statement
 
-The CAN bus was designed in 1983 for reliability, not security:
+1. **System Scalability & Performance:** High-throughput processing demands optimized concurrency, non-blocking I/O, and efficient data serialization to prevent bottlenecks.
 
-1. **No Authentication:** Any ECU on the CAN bus can send any message. A compromised infotainment system (connected to the internet via Bluetooth/Wi-Fi) can inject brake or steering commands to powertrain ECUs.
-2. **No Encryption:** All CAN messages are transmitted in plaintext. Physical access to the OBD-II port gives full read/write access to all ECU communications.
-3. **No Authorization:** The CAN bus has no concept of "only the ABS module should send wheel speed messages."
-4. **Real-Time Constraint:** CAN operates at up to 5 Mbps. Security processing must happen within the message's time-critical window (often < 1ms) without disrupting real-time communication.
-5. **Regulatory Pressure:** ISO 21434 and UNECE WP.29 R155/R156 now mandate vehicle cybersecurity management, creating an immediate commercial need for products like this gateway.
+2. **Data Consistency & Reliability:** Managing state across distributed components requires strict transactional boundaries, idempotent execution, and robust recovery mechanisms.
+
+3. **Operational Visibility:** Complex distributed architectures often lack real-time observability, making root-cause analysis and performance tuning difficult.
+
+4. **Security & Access Control:** Securing inter-service communication, enforcing fine-grained access policies, and maintaining immutable audit logs are essential for enterprise compliance.
+
+5. **Static vs. Adaptive Logic:** Hardcoded business rules fail to adapt to evolving environmental conditions, requiring machine-learning-assisted scoring to augment traditional rule engines.
 
 ---
 
 ## Existing Solutions
 
 ### Commercial Solutions
-- **Argus Cyber Security / Upstream Security:** Leading vehicle IDS vendors. Proprietary, enterprise.
-- **Vector Informatik / ETAS:** Automotive tool vendors with security modules.
-- **Bosch / Continental:** Implementing security gateways in production vehicles.
+- **Enterprise SaaS Vendors:** Closed-source commercial products with high licensing costs and rigid integration paths.
+- **Cloud Provider Managed Services:** Proprietary offerings creating vendor lock-in.
+
+### Academic Solutions
+- Research literature focusing on algorithmic accuracy or theoretical proofs without providing deployable software architectures.
 
 ### Open-Source Solutions
-- **SocketCAN (Linux):** Linux CAN subsystem for accessing CAN hardware. (Driver layer only, no security.)
-- **OpenXC (Ford):** Vehicle data API. (Read-only, no security enforcement.)
+- Fragmented individual libraries and frameworks requiring extensive integration and glue code to form a functional platform.
 
 ### Limitations
-- No open-source project implements a complete IVN security gateway with both rule-based filtering and ML anomaly detection.
-- The regulatory and safety requirements make this a uniquely challenging domain rarely explored in academia.
+- Commercial options are expensive black boxes lacking educational transparency
+- Academic prototypes ignore system engineering, failure modes, and production observability
+- No existing open-source repository combines complete system architecture, real-time data pipelines, and a bounded AI module into a single production specification
 
 ---
 
 ## Proposed Solution
 
-Build **AeroGateway IVN**, an in-vehicle security gateway:
+Build a complete end-to-end platform consisting of:
 
-1. **Hardware Platform:** A Raspberry Pi 4 with a MCP2515 CAN controller or a dedicated automotive development board (e.g., PiRacer with CAN HAT). Connects to a CAN bus network composed of multiple ECU simulators.
-2. **ECU Simulation Network:** Python-based ECU simulators (using `python-can`) generating realistic CAN traffic: engine RPM messages, ABS wheel speed reports, airbag system status, and infotainment heartbeats.
-3. **CAN Frame Parser:** A C/C++ parser that decodes raw CAN frames (arbitration ID, DLC, data bytes) and maps them to signal definitions using a DBC (Database CAN) file.
-4. **Domain Firewall Engine:** A configurable message filtering table enforcing routing policies between network domains. Example: "Messages from the Infotainment domain with Engine Control IDs (0x100–0x1FF) shall be DROPPED." Rules are stored as a JSON policy file and hot-reloadable.
-5. **Anomaly Detection Module:** An ML model trained on normal CAN traffic patterns (inter-frame timing distribution, message frequency per ID, payload value ranges). Flags deviations such as unexpected message bursts (ID flooding attack), unusual payload values, or timing irregularities.
-6. **Security Event Logger:** All detected incidents are written to an immutable append-only log (with cryptographic hash chaining) on the gateway. A secure UDS diagnostic service exposes logs to authorized tools.
+1. **Data Ingestion & Transport Layer** — High-performance message queue/bus ingesting telemetry and command payloads with schema validation.
+2. **Core Processing Engine** — Multi-threaded microservice architecture handling domain logic, transactional state updates, and rule evaluation.
+3. **Data Storage & Indexing** — Hybrid database architecture utilizing relational storage for ACID metadata, time-series stores for telemetry, and caches for low-latency lookups.
+4. **Bounded AI Subsystem** — Integrated ML inference service (ONNX embedded Isolation Forest CAN frame anomaly detector) providing predictive scores to augment decision engines.
+5. **Operational Control Dashboard** — Modern web application featuring live telemetry, interactive charts, and administrative workflow controls.
+6. **Observability & Audit Stack** — Distributed tracing, structured logging, and metrics exporter providing complete system visibility.
 
 ---
 
 ## System Architecture
 
-### Hardware / Embedded
-- **Platform:** Raspberry Pi 4 (Linux) with CAN HAT (MCP2515) or Vector VN1630A interface.
-- **CAN Interfaces:** Two or more CAN buses (simulating domain separation: powertrain, body, infotainment).
+### Backend
+- **Core Engine:** Written in C++ / Python for high-concurrency performance and thread-safe memory handling
+- **API Framework:** High-performance REST / gRPC services for inter-component communication
+- **Message Broker:** Distributed event bus managing asynchronous tasks and telemetry streams
 
-### Backend (Gateway Software)
-- **Language:** C/C++ for the performance-critical CAN frame processing loop and firewall engine (real-time constraints).
-- **Language:** Python for the anomaly detection training and inference pipeline (offline training + C inference via ONNX Runtime).
-- **Language:** Go for the management API and secure logging service.
+### Frontend
+- **Admin Console:** React with TypeScript for type-safe UI state management
+- **Data Visualization:** Recharts / D3.js for time-series and metric visualizer components
+- **Real-Time Layer:** WebSocket connection for streaming live system events to the UI
 
-### AI Components
+### Mobile
+- Responsive PWA / Mobile view optimized for tablet and on-the-go operational monitoring.
 
-| Component | Role | Technique | AI % |
-|-----------|------|-----------|------|
-| CAN Traffic Anomaly Detection | Flag statistically unusual CAN frames (ID flooding, replay, out-of-range payload values, timing anomalies) | Isolation Forest on message frequency + inter-frame timing features | ~20% |
-
-**Total AI effort: ~20%.** Remove it → the gateway still enforces domain firewall rules and detects rule-based attacks. The ML layer catches novel, signature-free attacks.
-
-### Databases
-- **SQLite (on-device):** Local append-only security event log with hash chaining for tamper evidence.
-- **PostgreSQL (optional cloud backend):** Aggregates security events from multiple gateways for fleet-wide threat intelligence.
-
-### Networking
-- **CAN Bus:** Physical communication with ECU simulators.
-- **Ethernet / SOME/IP:** Diagnostic interface and remote log upload.
-- **UDS (Unified Diagnostic Services):** ISO 14229 — standard automotive diagnostic protocol exposed on the secure diagnostic port.
+### Cloud
+- **AWS / GCP:** Primary cloud providers
+- **Orchestration:** Containerized services managed via Docker and Kubernetes
+- **Storage:** S3-compatible object storage (MinIO) for model artifacts and persistent log backups
 
 ### Security
-- **Secure Boot:** Gateway software signed and verified on startup.
-- **Tamper-Evident Logging:** Hash chaining on event log ensures log entries cannot be deleted or modified.
-- **Domain Isolation:** Physical separation of CAN networks; cross-domain traffic must pass through the gateway.
+- **Authentication & Authorization:** OAuth2 + JWT tokens with granular RBAC policies
+- **Transport Security:** TLS 1.3 for all external and inter-service gRPC communication
+- **Audit Trail:** Immutable audit logging for all administrative actions and system decisions
+
+### AI Components
+- **Inference Engine:** Microservice hosting pre-trained ML models with sub-20ms latency
+- **Feature Pipeline:** Real-time feature extraction from incoming telemetry streams
+- **Drift Monitoring:** Statistical distribution tracking to detect model degradation
+
+### Databases
+- **PostgreSQL:** Primary relational store for configuration, user accounts, and state
+- **Redis:** High-speed in-memory cache for session state and rate-limiting counters
+- **Domain-Specific Store:** Time-series (InfluxDB) or Columnar (ClickHouse) database optimized for analytical telemetry
+
+### Networking
+- **Protocols:** gRPC for internal IPC, REST for web clients, WebSockets for live push
+- **Service Mesh:** Envoy / Linkerd sidecars for mTLS and traffic management
+
+### DevOps
+- **Containerization:** Docker container builds for all microservices
+- **Orchestration:** Kubernetes manifests and Helm charts
+- **CI/CD:** GitHub Actions workflows for automated linting, unit testing, and image publishing
+
+### MLOps
+- **Model Registry:** MLflow for tracking experiment metrics and model versioning
+- **Retraining Trigger:** Automated job retraining models when data drift exceeds thresholds
+
+### Embedded
+- Applicable hardware interfacing scripts (C/C++ or Python) where physical node telemetry is required.
+
+### Infrastructure
+- Control plane nodes, application worker pools, database replica clusters, and message broker nodes.
+
+### Monitoring
+- **Prometheus:** Metrics collection (request rates, latency histograms, error rates)
+- **Grafana:** Operations dashboards displaying system KPIs and alert status
+
+### APIs
+- `POST /api/v1/ingest` — Primary data ingestion endpoint
+- `GET /api/v1/status` — Health and system status query
+- `POST /api/v1/control` — Administrative execution command
+- `GET /api/v1/analytics` — Metrics and historical analytics query
+
+---
+
+## AI Components
+
+AI functions as an **augmented intelligence module** (~15–20% of effort). The core platform operates deterministically; ML enhances accuracy.
+
+| Component | AI Role | Technique | Justification |
+|-----------|---------|-----------|---------------|
+| Predictive Analysis | Score incoming events for anomalies or future trends | ONNX embedded Isolation Forest CAN frame anomaly detector | Provides adaptive insight where static rules are insufficient |
+| Feature Extraction | Extract statistical metrics from raw telemetry streams | Sliding-window aggregation | Transforms raw inputs into structured model features |
+| Model Drift Monitor | Track distribution shifts in input features | Population Stability Index (PSI) | Ensures model accuracy does not silently degrade |
+
+**What AI does NOT do:** AI does not make irreversible administrative decisions autonomously. Critical system actions require rule verification or human approval.
 
 ---
 
 ## Research Opportunities
 
-1. **CAN Attack Dataset Generation:** Create a labeled CAN attack dataset by injecting known attacks (fuzzing, replay, targeted ID spoofing) into the simulated network. This dataset itself is a research contribution.
-2. **Real-Time ML Inference on Constrained Hardware:** Benchmark the latency of Isolation Forest inference on a Raspberry Pi 4 vs. the CAN bus message arrival rate to determine feasibility under real-time constraints.
-3. **DBC Parsing and Signal Normalization:** Research the coverage and accuracy of automated DBC-based signal normalization for anomaly feature extraction.
-4. **Gateway Overhead Impact:** Measure the latency overhead introduced by the security gateway on CAN bus message propagation under maximum load.
+1. **System Throughput Benchmarking:** Evaluate processing latency and memory footprint under synthetic high-load scenarios.
+2. **Adaptive Rule-ML Synergy:** Study optimal weighting mechanisms between static business rules and probabilistic ML scores.
+3. **Data Compression Efficiency:** Measure bandwidth and storage reduction using domain-specific encoding vs. generic compression algorithms.
+
+**Possible Publications:**
+- IEEE / ACM conference paper on domain system engineering and high-throughput architecture.
+- Technical report detailing benchmark results and failure-recovery performance.
 
 ---
 
 ## Technology Stack
 
-| Category | Technology | Purpose |
-|----------|-----------|---------|
-| **Languages** | C/C++ | CAN frame processing, firewall engine |
-| | Python | ML training, python-can for ECU simulation |
-| | Go | Management API, secure logging |
-| **Hardware** | Raspberry Pi 4 | Gateway hardware platform |
-| | MCP2515 / Vector interface | CAN hardware interface |
-| **CAN Tools** | SocketCAN / python-can | CAN bus access |
-| | DBC files | CAN signal database format |
-| **AI** | Scikit-learn (Isolation Forest) | Anomaly detection training |
-| | ONNX Runtime | On-device inference |
-| **Standards** | ISO 11898 (CAN), ISO 14229 (UDS) | Automotive protocol standards |
-| **DevOps** | Docker (for dev), cross-compilation | Build toolchain |
+| Category | Technology | Version | Purpose |
+|----------|-----------|---------|---------|
+| **Primary Stack** | C++, SocketCAN, DBC files, Python, ONNX Runtime, Raspberry Pi 4, Go, SQLite, React | Latest | Core System Implementation |
+| **Containers** | Docker / Kubernetes | 24+ / 1.28+ | Deployment & Orchestration |
+| **Monitoring** | Prometheus / Grafana | 2.50+ / 10.x | Telemetry Observability |
+| **CI/CD** | GitHub Actions | — | Automated Build & Test |
+
+---
+
+## Required Knowledge
+
+| Topic | Importance | Where to Learn |
+|-------|-----------|----------------|
+| Distributed Systems Architecture | Essential | "Designing Data-Intensive Applications" (Kleppmann) |
+| C++ / Python Programming | Essential | Language Official Documentation & Guides |
+| Database Design & Optimization | Essential | Database Internal Literature |
+| Cloud Containerization | Important | Docker & Kubernetes Tutorials |
+
+---
+
+## Required Skills
+
+| Skill | Level Required | Notes |
+|-------|---------------|-------|
+| C++ / Python Development | Advanced | Core service implementation |
+| System Architecture | Advanced | Microservice design and IPC |
+| SQL & Data Modeling | Intermediate | Schema optimization |
+| React / TypeScript | Intermediate | Frontend dashboard creation |
 
 ---
 
 ## Suggested Team Distribution
 
-| Member | Role | Responsibilities | Technologies |
-|--------|------|-----------------|--------------|
-| **Member 1** | Embedded & CAN Systems | Implement the CAN frame capture loop, DBC parser, and domain firewall engine in C/C++. Configure SocketCAN. | C/C++, SocketCAN, DBC |
-| **Member 2** | ECU Simulation Engineer | Build realistic Python ECU simulators generating authentic CAN traffic for all vehicle domains. | Python, python-can |
-| **Member 3** | Anomaly Detection Engineer | Design features from CAN traffic, train Isolation Forest model offline, convert to ONNX for on-device inference. | Python, Scikit-learn, ONNX |
-| **Member 4** | Security & Logging | Implement the hash-chained security event logger, UDS diagnostic service, and secure boot verification. | C/Go, Cryptography |
-| **Member 5** | Dashboard & Attack Simulation | Build the remote monitoring dashboard; implement attack injection scripts (replay, ID flooding) for testing. | React, Python, Go |
+| Member | Role | Responsibilities | Key Technologies |
+|--------|------|-----------------|------------------|
+| **Member 1** | Core Backend Lead | Design and implement main processing microservices, API layers, and business logic. | C++ / Python, REST/gRPC |
+| **Member 2** | Data & Storage Eng. | Manage database schemas, caching layers, and ingestion pipelines. | PostgreSQL, Redis, Kafka |
+| **Member 3** | AI & Analytics Eng. | Build feature extraction pipelines, train ML models, and set up inference endpoints. | Python, PyTorch/Scikit-learn |
+| **Member 4** | Frontend & UI Developer | Build React admin console, real-time WebSocket listeners, and analytics charts. | React, TypeScript, Recharts |
+| **Member 5** | DevOps & Infrastructure | Configure Docker, Kubernetes, CI/CD pipelines, and Prometheus/Grafana monitoring. | K8s, Docker, Prometheus |
+
+---
+
+## Development Roadmap
+
+### Summer Preparation (8 weeks)
+- [ ] Review domain literature, system requirements, and API specifications
+- [ ] Complete core language (C++ / Python) and streaming architecture training
+- [ ] Setup initial project repository, linters, and Docker environment
+
+### Fall Semester (16 weeks)
+- **Weeks 1–4:** Core Ingestion & Storage Setup
+- **Weeks 5–8:** Business Logic & Processing Engine Implementation
+- **Weeks 9–12:** AI Model Training & Inference Endpoint Integration
+- **Weeks 13–16:** Initial Dashboard & Mid-Semester Review
+
+### Spring Semester (16 weeks)
+- **Weeks 1–4:** System Integration & End-to-End Pipeline Testing
+- **Weeks 5–8:** Advanced Observability, Security Audit & Drift Monitoring
+- **Weeks 9–12:** Load Testing, Profiling & Latency Benchmarking
+- **Weeks 13–16:** Final Documentation, Video Demo, and Project Defense
+
+---
+
+## Risks
+
+### Technical Risks
+| Risk | Probability | Impact | Mitigation |
+|------|------------|--------|------------|
+| High Latency under Load | Medium | High | Profile critical path using pprof; optimize queries and caching |
+| Data Consistency Edge Cases | Low | High | Implement strict transactional boundaries and integration tests |
+
+### Security & Deployment Risks
+| Risk | Probability | Impact | Mitigation |
+|------|------------|--------|------------|
+| Unauthorized Access to APIs | Low | Critical | Enforce JWT validation and strict RBAC policies |
+| Deployment Complexity | Medium | Medium | Use Helm charts for reproducible Kubernetes setups |
+
+---
+
+## Deliverables
+
+### Software
+- [ ] Core processing backend microservices
+- [ ] Real-time data ingestion and storage pipeline
+- [ ] Interactive React administration dashboard
+- [ ] ML inference service and feature pipeline
+
+### Documentation & Research
+- [ ] Architecture Design Document & API Reference
+- [ ] System Benchmark Report
+- [ ] Final Presentation Slides & Project Poster
+
+---
+
+## Sponsor Analysis
+
+### Potential Sponsors
+| Entity | Category | Interest Reason |
+|--------|----------|----------------|
+| **Valeo Egypt** | Domestic Industry | Direct commercial alignment with project domain |
+| ** Brightskies Automotive** | Local Partner | Recruitment pipeline and technical validation |
+| **International Tech Vendors** | Global | Open-source adoption and cloud resource grants |
 
 ---
 
 ## Estimated Budget
 
-| Item | Cost (EGP) | Cost (USD) |
-|------|-----------|-----------|
-| Raspberry Pi 4 (4GB) + CAN HAT | 5,000 | ~100 |
-| CAN transceivers, wiring, breadboard | 1,500 | ~30 |
-| Additional CAN hardware for ECU simulation | 2,000 | ~40 |
-| **Total** | **~8,500 EGP** | **~170 USD** |
+| Category | Item | Cost (EGP) | Cost (USD) |
+|----------|------|-----------|-----------|
+| **Cloud** | AWS / GCP / Azure Managed Services (6 months) | 20,000 | ~400 |
+| **Hardware** | Test devices / sensor kits / local server | 8,500 | ~170 |
+| **Total** | | **~28500 EGP** | **~570 USD** |
 
 ---
 
-## Difficulty
-**Score: 8/10** — Working with automotive protocols at the bit level, meeting real-time constraints on embedded Linux, and building a tamper-evident logging system requires deep embedded systems expertise.
+## Evaluation Metrics
 
-## Innovation
-**Score: 9/10** — An open-source, hardware-demonstrated IVN security gateway with ML anomaly detection is essentially nonexistent in the academic project space. This would be immediately relevant to the automotive cybersecurity industry.
+- **Difficulty (8/10):** High architectural challenge involving multi-service concurrency and streaming performance.
+- **Innovation (8/10):** Combines distributed systems engineering with a bounded, production-grade AI module.
+- **Research Depth (7/10):** Strong benchmarking and latency-accuracy trade-off investigation possibilities.
+- **Sponsor Potential (8/10):** Direct applicability to industry requirements in Egypt and internationally.
+- **Startup Potential (8/10):** Clear B2B SaaS commercialization path.
 
-## Sponsor Potential
-**Score: 9/10** — Tier-1 automotive suppliers (Bosch, Continental, Valeo), OEMs, national transport authorities, and vehicle cybersecurity startups.
+---
 
 ## Career Value
-**Automotive Cybersecurity Engineer:** ⭐⭐⭐⭐⭐
-**Embedded Systems Engineer:** ⭐⭐⭐⭐⭐
-**Security Engineer:** ⭐⭐⭐⭐
+
+| Career Path | Relevance | Why |
+|-------------|-----------|-----|
+| **Backend / Systems Engineer** | ⭐⭐⭐⭐⭐ | Deep exposure to concurrent microservices, gRPC, and database design |
+| **Data / Infrastructure Engineer** | ⭐⭐⭐⭐⭐ | Hands-on stream processing, event queuing, and storage optimization |
+| **DevOps / Platform Engineer** | ⭐⭐⭐⭐ | Kubernetes, CI/CD, and Prometheus/Grafana observability |
+| **MLOps / Applied AI Engineer** | ⭐⭐⭐⭐ | Serving production ML models with feature monitoring |
+
+---
+
+## Future Extensions
+
+1. **Multi-Region Clustering:** Extend control plane across multiple geographical cloud zones.
+2. **eBPF Acceleration:** Offload kernel packet filtering for higher network throughput.
+3. **Advanced Visual Analytics:** Add graph-based dependency maps to the frontend UI.
 
 ---
 
 ## References
 
-1. Miller, C., & Valasek, C. (2015). "Remote Exploitation of an Unaltered Passenger Vehicle." *DEF CON 23.*
-2. ISO/SAE 21434:2021 — Road vehicles: Cybersecurity engineering.
-3. UNECE WP.29 R155 — Cyber Security Regulation.
-4. Avatefipour, O., & Rawassizadeh, R. (2019). "State-of-the-Art Survey on In-Vehicle Network Communication (CAN-Bus) Security." *arXiv.*
-5. SocketCAN documentation: https://www.kernel.org/doc/html/latest/networking/can.html
+1. Kleppmann, M. (2017). *Designing Data-Intensive Applications.* O'Reilly Media.
+2. Official Documentation for C++ and  SocketCAN.
+3. IEEE / ACM Conference proceedings on Distributed Systems and Cloud Computing.

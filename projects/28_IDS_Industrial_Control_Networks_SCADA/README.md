@@ -4,204 +4,310 @@
 
 ## Executive Summary
 
-This project proposes the design and implementation of a **Network-Based Intrusion Detection System (NIDS) specifically designed for Industrial Control System (ICS) and SCADA (Supervisory Control and Data Acquisition) networks.** The system passively captures and deep-inspects industrial protocol traffic (Modbus, DNP3, IEC 61850, OPC-UA), enforces a rule-based behavioral baseline, and uses an anomaly-detection ML module as a second layer to flag unusual command sequences that rule signatures cannot anticipate.
+This project proposes the design and implementation of a **Intrusion Detection System for Industrial Control Networks (SCADA/ICS)** — a production-grade system engineered for high performance, reliability, and enterprise scalability. The system addresses critical operational challenges in Cybersecurity / Industrial Automation by building a robust architecture that integrates modern software engineering practices with a bounded AI subsystem.
 
-**Motivation:** Industrial control systems manage power grids, water treatment plants, oil pipelines, and manufacturing facilities. Cyberattacks on ICS have caused real-world physical damage (Stuxnet destroyed Iranian centrifuges; the 2021 Oldsmar water treatment attack could have poisoned drinking water). These networks run legacy protocols with zero authentication or encryption, making them critically vulnerable. Yet traditional IT intrusion detection systems (like Snort or Suricata) are useless here because they do not understand Modbus or DNP3 packets. This project builds an ICS-native IDS from scratch.
+**Motivation:** Modern enterprise systems demand high-throughput data handling, low-latency processing, and automated decision-making. Traditional approaches struggle with scale, static rules, or vendor lock-in. This project tackles the core engineering challenge of building a modular, resilient platform capable of operating continuously under demanding production workloads.
 
 **Objectives:**
-- Implement a packet capture and deep inspection engine for industrial protocols (Modbus TCP, DNP3, IEC 60870-5-104).
-- Build a rule-based detection engine enforcing protocol-level signatures (e.g., "write to coil address X during production hours is forbidden").
-- Implement a behavioral baseline engine that learns normal command sequences during a training period.
-- Add an anomaly-detection ML module that scores real-time traffic against the behavioral baseline.
-- Provide a security operations dashboard visualizing active alerts, protocol traffic breakdown, and device communication graphs.
+- Build a distributed system architecture processing thousands of operations per second with predictable low latency
+- Implement robust fault tolerance, automated recovery, and strict security posture
+- Design a high-performance data storage and streaming pipeline tailored to domain requirements
+- Integrate a bounded AI module (Isolation Forest network behavioral anomaly detector) to enhance operational decision-making without creating single-point-of-failure model dependencies
+- Create an intuitive, real-time web dashboard for system monitoring, administration, and operational workflows
 
-**Expected Impact:** A specialized cybersecurity platform protecting critical infrastructure — one of the most underfunded and vulnerable sectors in the world — with a unique combination of protocol-aware rule enforcement and ML anomaly detection.
+**Expected Impact:** A production-grade architecture demonstrating mastery of distributed systems, backend engineering, cloud infrastructure, and applied machine learning.
 
-**Target Users:** Power utilities, water treatment operators, oil & gas companies, manufacturing plants, and national cybersecurity agencies.
+**Target Users:** Enterprise IT operations, security teams, engineering lead practitioners, and domain-specific operations personnel.
 
 ---
 
 ## Problem Statement
 
-ICS/SCADA networks are uniquely vulnerable:
+1. **System Scalability & Performance:** High-throughput processing demands optimized concurrency, non-blocking I/O, and efficient data serialization to prevent bottlenecks.
 
-1. **Legacy Protocols Without Security:** Modbus (1979) and DNP3 (1990s) were designed for closed, air-gapped networks. They have no authentication, no encryption, and no integrity checking. Any device on the network can send any command.
-2. **Operational Continuity Constraint:** Unlike IT systems, ICS cannot simply be patched or rebooted. A patch to a power plant controller could cause an outage. Security must be passive and non-intrusive.
-3. **Protocol Diversity:** A single industrial facility may run Modbus, DNP3, IEC 61850, OPC-UA, and PROFINET simultaneously — each requiring specialized parsing.
-4. **Slow, Low-Bandwidth Traffic:** ICS traffic is not high-throughput web traffic. It is slow, deterministic, and highly patterned — making anomaly detection both more achievable and more consequential when deviations occur.
-5. **IT/OT Convergence:** As industrial networks connect to corporate IT networks and cloud systems for monitoring, they become exposed to internet-facing attacks.
+2. **Data Consistency & Reliability:** Managing state across distributed components requires strict transactional boundaries, idempotent execution, and robust recovery mechanisms.
+
+3. **Operational Visibility:** Complex distributed architectures often lack real-time observability, making root-cause analysis and performance tuning difficult.
+
+4. **Security & Access Control:** Securing inter-service communication, enforcing fine-grained access policies, and maintaining immutable audit logs are essential for enterprise compliance.
+
+5. **Static vs. Adaptive Logic:** Hardcoded business rules fail to adapt to evolving environmental conditions, requiring machine-learning-assisted scoring to augment traditional rule engines.
 
 ---
 
 ## Existing Solutions
 
 ### Commercial Solutions
-- **Claroty / Dragos / Nozomi Networks:** The leading ICS security vendors. Extremely expensive (enterprise licensing), closed source, and not accessible to students or smaller utilities.
-- **Forescout:** General network visibility platform with ICS modules.
+- **Enterprise SaaS Vendors:** Closed-source commercial products with high licensing costs and rigid integration paths.
+- **Cloud Provider Managed Services:** Proprietary offerings creating vendor lock-in.
+
+### Academic Solutions
+- Research literature focusing on algorithmic accuracy or theoretical proofs without providing deployable software architectures.
 
 ### Open-Source Solutions
-- **Snort / Suricata:** Excellent general-purpose NIDS but no native ICS protocol parsers.
-- **Bro/Zeek:** Network analysis framework with some community ICS protocol analyzers (basic Modbus support).
-- **GRASSMARLIN (NSA):** Open-source ICS network mapping tool (topology only, no active detection).
+- Fragmented individual libraries and frameworks requiring extensive integration and glue code to form a functional platform.
 
-### Limitations of Existing Solutions
-- No open-source solution provides a complete pipeline: ICS protocol parsing → rule-based detection → ML anomaly scoring → security dashboard — in one integrated platform.
-- GRASSMARLIN only maps topology; it does not detect attacks.
-- Zeek's Modbus analyzer is basic; it does not support behavioral baselining or ML-based anomaly scoring.
+### Limitations
+- Commercial options are expensive black boxes lacking educational transparency
+- Academic prototypes ignore system engineering, failure modes, and production observability
+- No existing open-source repository combines complete system architecture, real-time data pipelines, and a bounded AI module into a single production specification
 
 ---
 
 ## Proposed Solution
 
-Build **AeroICS Guard**, an ICS-native NIDS:
+Build a complete end-to-end platform consisting of:
 
-1. **Packet Capture Engine:** A Go/C daemon using `libpcap`/`gopacket` to passively capture network traffic on a monitoring port (network TAP or SPAN port) without injecting any packets into the OT network.
-2. **ICS Protocol Parser:** Implements parsers for:
-   - **Modbus TCP:** Function codes (read/write coils, registers), slave addresses.
-   - **DNP3:** Operation requests, data link layer parsing.
-   - **IEC 60870-5-104:** ASDU (Application Service Data Unit) parsing.
-3. **Rule-Based Detection Engine:** An efficient signature matcher (like a state machine) that evaluates parsed packets against a library of ICS-specific rules. Examples:
-   - "Alert if a WRITE command is sent to PLC #3 coil address 100 outside maintenance window."
-   - "Alert if any device sends a STOP CPU command to the PLC."
-4. **Behavioral Baseline Engine:** During a learning period (e.g., 7 days), the system records the normal communication patterns: which source talks to which destination, which function codes are used, at what intervals. This becomes the baseline.
-5. **Anomaly Detection Module:** An ML model (Isolation Forest or Autoencoder) that scores each packet's feature vector against the learned baseline. High anomaly scores trigger alerts.
-6. **Security Dashboard:** A React UI showing live traffic graphs, device communication topology (force-directed graph), active alerts with severity, and protocol breakdown.
+1. **Data Ingestion & Transport Layer** — High-performance message queue/bus ingesting telemetry and command payloads with schema validation.
+2. **Core Processing Engine** — Multi-threaded microservice architecture handling domain logic, transactional state updates, and rule evaluation.
+3. **Data Storage & Indexing** — Hybrid database architecture utilizing relational storage for ACID metadata, time-series stores for telemetry, and caches for low-latency lookups.
+4. **Bounded AI Subsystem** — Integrated ML inference service (Isolation Forest network behavioral anomaly detector) providing predictive scores to augment decision engines.
+5. **Operational Control Dashboard** — Modern web application featuring live telemetry, interactive charts, and administrative workflow controls.
+6. **Observability & Audit Stack** — Distributed tracing, structured logging, and metrics exporter providing complete system visibility.
 
 ---
 
 ## System Architecture
 
 ### Backend
-- **Packet Capture + Parsing:** Go with `gopacket` library (wraps libpcap). Parses raw bytes into structured Modbus/DNP3 events.
-- **Detection Engine:** Go for rule evaluation (performance-critical, pattern matching).
-- **Baseline & ML Scoring:** Python microservice consuming parsed events, maintaining the baseline, and running inference.
-- **Alert Manager:** Go service that deduplicates, enriches, and routes alerts to the dashboard.
+- **Core Engine:** Written in Go / Python for high-concurrency performance and thread-safe memory handling
+- **API Framework:** High-performance REST / gRPC services for inter-component communication
+- **Message Broker:** Distributed event bus managing asynchronous tasks and telemetry streams
 
 ### Frontend
-- **Dashboard:** React with TypeScript.
-- **Network Topology:** D3.js force-directed graph showing which PLCs/RTUs communicate with which HMIs and servers.
-- **Protocol Analysis:** Real-time counters showing function code distribution.
+- **Admin Console:** React with TypeScript for type-safe UI state management
+- **Data Visualization:** Recharts / D3.js for time-series and metric visualizer components
+- **Real-Time Layer:** WebSocket connection for streaming live system events to the UI
+
+### Mobile
+- Responsive PWA / Mobile view optimized for tablet and on-the-go operational monitoring.
+
+### Cloud
+- **AWS / GCP:** Primary cloud providers
+- **Orchestration:** Containerized services managed via Docker and Kubernetes
+- **Storage:** S3-compatible object storage (MinIO) for model artifacts and persistent log backups
 
 ### Security
-- **Passive-Only Design:** The system NEVER injects packets. It operates in read-only mode on a mirrored network port. This is non-negotiable for safety-critical environments.
-- **Secure Storage:** Alerts and captured metadata stored with encryption at rest.
-- **Access Control:** Role-based dashboard access (analyst, admin).
+- **Authentication & Authorization:** OAuth2 + JWT tokens with granular RBAC policies
+- **Transport Security:** TLS 1.3 for all external and inter-service gRPC communication
+- **Audit Trail:** Immutable audit logging for all administrative actions and system decisions
 
 ### AI Components
-
-| Component | Role | Technique | AI % |
-|-----------|------|-----------|------|
-| Anomaly Detection | Score unusual command sequences against learned behavioral baseline | Isolation Forest on packet feature vectors (src, dst, function code, interval) | ~20% |
-
-**Total AI effort: ~20%.** Remove it → rule engine still detects known attack signatures. The ML layer catches novel attacks that rules cannot anticipate.
+- **Inference Engine:** Microservice hosting pre-trained ML models with sub-20ms latency
+- **Feature Pipeline:** Real-time feature extraction from incoming telemetry streams
+- **Drift Monitoring:** Statistical distribution tracking to detect model degradation
 
 ### Databases
-- **PostgreSQL:** Alert records, rule library, device inventory.
-- **InfluxDB:** Time-series storage of per-device traffic metrics (function code counts per minute).
-- **Redis:** Real-time sliding window state for anomaly detection.
+- **PostgreSQL:** Primary relational store for configuration, user accounts, and state
+- **Redis:** High-speed in-memory cache for session state and rate-limiting counters
+- **Domain-Specific Store:** Time-series (InfluxDB) or Columnar (ClickHouse) database optimized for analytical telemetry
 
 ### Networking
-- **SPAN/TAP Port:** The IDS connects passively to a network switch monitoring port.
-- **REST API:** Alert retrieval, rule management from the dashboard.
-- **WebSocket:** Live alert streaming to the dashboard.
+- **Protocols:** gRPC for internal IPC, REST for web clients, WebSockets for live push
+- **Service Mesh:** Envoy / Linkerd sidecars for mTLS and traffic management
 
 ### DevOps
-- **Docker:** All backend services containerized.
-- **ICS Simulator:** ScadaBR or a custom Python Modbus server to generate realistic test traffic.
-- **GitHub Actions:** CI/CD for automated testing.
+- **Containerization:** Docker container builds for all microservices
+- **Orchestration:** Kubernetes manifests and Helm charts
+- **CI/CD:** GitHub Actions workflows for automated linting, unit testing, and image publishing
+
+### MLOps
+- **Model Registry:** MLflow for tracking experiment metrics and model versioning
+- **Retraining Trigger:** Automated job retraining models when data drift exceeds thresholds
+
+### Embedded
+- Applicable hardware interfacing scripts (C/C++ or Python) where physical node telemetry is required.
+
+### Infrastructure
+- Control plane nodes, application worker pools, database replica clusters, and message broker nodes.
 
 ### Monitoring
-- **Prometheus:** Parser throughput, rule engine latency, alert rates.
-- **Grafana:** Operational dashboards for the security team.
+- **Prometheus:** Metrics collection (request rates, latency histograms, error rates)
+- **Grafana:** Operations dashboards displaying system KPIs and alert status
+
+### APIs
+- `POST /api/v1/ingest` — Primary data ingestion endpoint
+- `GET /api/v1/status` — Health and system status query
+- `POST /api/v1/control` — Administrative execution command
+- `GET /api/v1/analytics` — Metrics and historical analytics query
 
 ---
 
 ## AI Components
 
-| Component | Technique | Training Data | Justification |
-|-----------|-----------|---------------|---------------|
-| Network Behavioral Anomaly Scoring | Isolation Forest trained on 7-day baseline of normal ICS traffic | Packet feature vectors: (src IP, dst IP, function code, register address, inter-packet interval) | Isolation Forests are fast for inference, require no labeled attack data (unsupervised), and produce interpretable anomaly scores. This is essential because labeled ICS attack datasets are extremely rare. |
+AI functions as an **augmented intelligence module** (~15–20% of effort). The core platform operates deterministically; ML enhances accuracy.
+
+| Component | AI Role | Technique | Justification |
+|-----------|---------|-----------|---------------|
+| Predictive Analysis | Score incoming events for anomalies or future trends | Isolation Forest network behavioral anomaly detector | Provides adaptive insight where static rules are insufficient |
+| Feature Extraction | Extract statistical metrics from raw telemetry streams | Sliding-window aggregation | Transforms raw inputs into structured model features |
+| Model Drift Monitor | Track distribution shifts in input features | Population Stability Index (PSI) | Ensures model accuracy does not silently degrade |
+
+**What AI does NOT do:** AI does not make irreversible administrative decisions autonomously. Critical system actions require rule verification or human approval.
 
 ---
 
 ## Research Opportunities
 
-1. **ICS Protocol Fingerprinting:** Research the feasibility of passively identifying device types (vendor, model, firmware) solely from their Modbus/DNP3 communication patterns.
-2. **Anomaly Detection on Slow, Bursty ICS Traffic:** Investigate whether standard anomaly detection methods (designed for high-rate IT traffic) require adaptation for the low-frequency, highly periodic nature of ICS communication.
-3. **Attack Dataset Generation:** Create a novel labeled ICS attack dataset using simulation (replay attacks, command injection, unauthorized writes) — itself a research contribution.
-4. **False Positive Rate in Operational Environments:** Evaluate whether behavioral baselining without ML produces an acceptable false positive rate in a real-world-simulated ICS environment.
+1. **System Throughput Benchmarking:** Evaluate processing latency and memory footprint under synthetic high-load scenarios.
+2. **Adaptive Rule-ML Synergy:** Study optimal weighting mechanisms between static business rules and probabilistic ML scores.
+3. **Data Compression Efficiency:** Measure bandwidth and storage reduction using domain-specific encoding vs. generic compression algorithms.
+
+**Possible Publications:**
+- IEEE / ACM conference paper on domain system engineering and high-throughput architecture.
+- Technical report detailing benchmark results and failure-recovery performance.
 
 ---
 
 ## Technology Stack
 
-| Category | Technology | Purpose |
-|----------|-----------|---------|
-| **Languages** | Go | Packet capture, protocol parsing, rule engine |
-| | Python | ML anomaly detection service, baseline training |
-| | TypeScript | Dashboard frontend |
-| **Packet Capture** | gopacket (libpcap) | Raw network packet capture |
-| **AI** | Scikit-learn (Isolation Forest) | Anomaly scoring |
-| **Databases** | PostgreSQL | Alerts, rules, device inventory |
-| | InfluxDB | Per-device traffic time-series |
-| | Redis | Sliding window anomaly state |
-| **Frontend** | React, D3.js | Dashboard and topology graph |
-| **Simulation** | pyModbus / ScadaBR | Generate realistic ICS test traffic |
-| **DevOps** | Docker, GitHub Actions | Deployment and CI/CD |
+| Category | Technology | Version | Purpose |
+|----------|-----------|---------|---------|
+| **Primary Stack** | Go, gopacket, Modbus TCP, DNP3, Python, Scikit-learn, InfluxDB, PostgreSQL, React, D3.js | Latest | Core System Implementation |
+| **Containers** | Docker / Kubernetes | 24+ / 1.28+ | Deployment & Orchestration |
+| **Monitoring** | Prometheus / Grafana | 2.50+ / 10.x | Telemetry Observability |
+| **CI/CD** | GitHub Actions | — | Automated Build & Test |
+
+---
+
+## Required Knowledge
+
+| Topic | Importance | Where to Learn |
+|-------|-----------|----------------|
+| Distributed Systems Architecture | Essential | "Designing Data-Intensive Applications" (Kleppmann) |
+| Go / Python Programming | Essential | Language Official Documentation & Guides |
+| Database Design & Optimization | Essential | Database Internal Literature |
+| Cloud Containerization | Important | Docker & Kubernetes Tutorials |
+
+---
+
+## Required Skills
+
+| Skill | Level Required | Notes |
+|-------|---------------|-------|
+| Go / Python Development | Advanced | Core service implementation |
+| System Architecture | Advanced | Microservice design and IPC |
+| SQL & Data Modeling | Intermediate | Schema optimization |
+| React / TypeScript | Intermediate | Frontend dashboard creation |
 
 ---
 
 ## Suggested Team Distribution
 
-| Member | Role | Responsibilities | Technologies |
-|--------|------|-----------------|--------------|
-| **Member 1** | Protocol Parser Engineer | Implement the Modbus TCP and DNP3 binary parsers from RFCs. Extract function codes, addresses, and values from raw packet bytes. | Go, gopacket, Binary Parsing |
-| **Member 2** | Rule Engine Engineer | Build the rule evaluation engine, design the rule DSL (domain-specific language), maintain the rule library for common ICS attacks (replay, unauthorized write). | Go, Pattern Matching |
-| **Member 3** | Anomaly Detection Engineer | Build the behavioral baselining pipeline, train and deploy Isolation Forest, implement the sliding window feature extractor. | Python, Scikit-learn, Redis |
-| **Member 4** | Alert Management & Backend | Build the alert deduplication, enrichment, and routing system; design PostgreSQL schema; build the REST API. | Go, Python, PostgreSQL |
-| **Member 5** | Dashboard & ICS Simulation | Build the React dashboard and D3.js topology graph; set up ScadaBR or pyModbus to simulate realistic ICS traffic for testing. | React, D3.js, Python (pyModbus) |
+| Member | Role | Responsibilities | Key Technologies |
+|--------|------|-----------------|------------------|
+| **Member 1** | Core Backend Lead | Design and implement main processing microservices, API layers, and business logic. | Go / Python, REST/gRPC |
+| **Member 2** | Data & Storage Eng. | Manage database schemas, caching layers, and ingestion pipelines. | PostgreSQL, Redis, Kafka |
+| **Member 3** | AI & Analytics Eng. | Build feature extraction pipelines, train ML models, and set up inference endpoints. | Python, PyTorch/Scikit-learn |
+| **Member 4** | Frontend & UI Developer | Build React admin console, real-time WebSocket listeners, and analytics charts. | React, TypeScript, Recharts |
+| **Member 5** | DevOps & Infrastructure | Configure Docker, Kubernetes, CI/CD pipelines, and Prometheus/Grafana monitoring. | K8s, Docker, Prometheus |
+
+---
+
+## Development Roadmap
+
+### Summer Preparation (8 weeks)
+- [ ] Review domain literature, system requirements, and API specifications
+- [ ] Complete core language (Go / Python) and streaming architecture training
+- [ ] Setup initial project repository, linters, and Docker environment
+
+### Fall Semester (16 weeks)
+- **Weeks 1–4:** Core Ingestion & Storage Setup
+- **Weeks 5–8:** Business Logic & Processing Engine Implementation
+- **Weeks 9–12:** AI Model Training & Inference Endpoint Integration
+- **Weeks 13–16:** Initial Dashboard & Mid-Semester Review
+
+### Spring Semester (16 weeks)
+- **Weeks 1–4:** System Integration & End-to-End Pipeline Testing
+- **Weeks 5–8:** Advanced Observability, Security Audit & Drift Monitoring
+- **Weeks 9–12:** Load Testing, Profiling & Latency Benchmarking
+- **Weeks 13–16:** Final Documentation, Video Demo, and Project Defense
+
+---
+
+## Risks
+
+### Technical Risks
+| Risk | Probability | Impact | Mitigation |
+|------|------------|--------|------------|
+| High Latency under Load | Medium | High | Profile critical path using pprof; optimize queries and caching |
+| Data Consistency Edge Cases | Low | High | Implement strict transactional boundaries and integration tests |
+
+### Security & Deployment Risks
+| Risk | Probability | Impact | Mitigation |
+|------|------------|--------|------------|
+| Unauthorized Access to APIs | Low | Critical | Enforce JWT validation and strict RBAC policies |
+| Deployment Complexity | Medium | Medium | Use Helm charts for reproducible Kubernetes setups |
+
+---
+
+## Deliverables
+
+### Software
+- [ ] Core processing backend microservices
+- [ ] Real-time data ingestion and storage pipeline
+- [ ] Interactive React administration dashboard
+- [ ] ML inference service and feature pipeline
+
+### Documentation & Research
+- [ ] Architecture Design Document & API Reference
+- [ ] System Benchmark Report
+- [ ] Final Presentation Slides & Project Poster
+
+---
+
+## Sponsor Analysis
+
+### Potential Sponsors
+| Entity | Category | Interest Reason |
+|--------|----------|----------------|
+| **EG-CERT** | Domestic Industry | Direct commercial alignment with project domain |
+| ** Electricity & Water Utilities** | Local Partner | Recruitment pipeline and technical validation |
+| **International Tech Vendors** | Global | Open-source adoption and cloud resource grants |
 
 ---
 
 ## Estimated Budget
 
-| Item | Cost (EGP) | Cost (USD) |
-|------|-----------|-----------|
-| Cloud VMs for ICS simulation network | 5,000 | ~100 |
-| Network TAP hardware (optional for demo) | 2,500 | ~50 |
-| **Total** | **~7,500 EGP** | **~150 USD** |
+| Category | Item | Cost (EGP) | Cost (USD) |
+|----------|------|-----------|-----------|
+| **Cloud** | AWS / GCP / Azure Managed Services (6 months) | 20,000 | ~400 |
+| **Hardware** | Test devices / sensor kits / local server | 7,500 | ~150 |
+| **Total** | | **~27500 EGP** | **~550 USD** |
 
 ---
 
-## Difficulty
-**Score: 8/10** — Writing binary protocol parsers from RFCs without libraries is extremely tedious and error-prone. The passive-only constraint and the absence of labeled attack data make the ML design more sophisticated than typical supervised learning projects.
+## Evaluation Metrics
 
-## Innovation
-**Score: 9/10** — An open-source, multi-protocol ICS NIDS with integrated ML anomaly detection is a genuine research contribution. No comparable open-source tool exists.
-
-## Sponsor Potential
-**Score: 9/10** — National cybersecurity agencies (Egypt CERT), electricity utilities, oil & gas companies, and ICS security firms.
-
-## Startup Potential
-**Score: 8/10** — ICS security is one of the fastest-growing cybersecurity verticals. A lightweight, affordable ICS-native IDS targeting developing-world utilities is a clear market gap.
+- **Difficulty (8/10):** High architectural challenge involving multi-service concurrency and streaming performance.
+- **Innovation (8/10):** Combines distributed systems engineering with a bounded, production-grade AI module.
+- **Research Depth (7/10):** Strong benchmarking and latency-accuracy trade-off investigation possibilities.
+- **Sponsor Potential (8/10):** Direct applicability to industry requirements in Egypt and internationally.
+- **Startup Potential (8/10):** Clear B2B SaaS commercialization path.
 
 ---
 
 ## Career Value
 
-| Career Path | Relevance |
-|-------------|-----------|
-| ICS / OT Security Engineer | ⭐⭐⭐⭐⭐ |
-| Network Security Analyst | ⭐⭐⭐⭐⭐ |
-| Cybersecurity Engineer | ⭐⭐⭐⭐ |
-| Embedded / Systems Engineer | ⭐⭐⭐ |
+| Career Path | Relevance | Why |
+|-------------|-----------|-----|
+| **Backend / Systems Engineer** | ⭐⭐⭐⭐⭐ | Deep exposure to concurrent microservices, gRPC, and database design |
+| **Data / Infrastructure Engineer** | ⭐⭐⭐⭐⭐ | Hands-on stream processing, event queuing, and storage optimization |
+| **DevOps / Platform Engineer** | ⭐⭐⭐⭐ | Kubernetes, CI/CD, and Prometheus/Grafana observability |
+| **MLOps / Applied AI Engineer** | ⭐⭐⭐⭐ | Serving production ML models with feature monitoring |
+
+---
+
+## Future Extensions
+
+1. **Multi-Region Clustering:** Extend control plane across multiple geographical cloud zones.
+2. **eBPF Acceleration:** Offload kernel packet filtering for higher network throughput.
+3. **Advanced Visual Analytics:** Add graph-based dependency maps to the frontend UI.
 
 ---
 
 ## References
 
-1. Stouffer, K., et al. (2015). *Guide to Industrial Control Systems (ICS) Security.* NIST SP 800-82 Rev. 2.
-2. CISA ICS Advisories: https://www.cisa.gov/ics-advisories
-3. Modbus Application Protocol Specification V1.1b3.
-4. DNP3 Technical Reference: https://www.dnp.org/
-5. Chandola, V., Banerjee, A., & Kumar, V. (2009). "Anomaly Detection: A Survey." *ACM Computing Surveys.*
+1. Kleppmann, M. (2017). *Designing Data-Intensive Applications.* O'Reilly Media.
+2. Official Documentation for Go and  gopacket.
+3. IEEE / ACM Conference proceedings on Distributed Systems and Cloud Computing.

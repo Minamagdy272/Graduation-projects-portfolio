@@ -1,176 +1,313 @@
-# Insider-Threat Behavioral Monitoring Platform
+# Insider-Threat Behavioral Monitoring Platform (UEBA)
 
 ---
 
 ## Executive Summary
 
-This project proposes the design and implementation of an **Insider-Threat Behavioral Monitoring Platform (UEBA — User and Entity Behavior Analytics)**. The system collects user activity signals across an organization's infrastructure (authentication logs, VPN access, file access events, email metadata, and API call patterns), builds behavioral baselines per user and peer group, and flags users whose recent behavior deviates significantly from their established norm using a behavioral deviation scoring module.
+This project proposes the design and implementation of a **Insider-Threat Behavioral Monitoring Platform (UEBA)** — a production-grade system engineered for high performance, reliability, and enterprise scalability. The system addresses critical operational challenges in Cybersecurity / Data Analytics by building a robust architecture that integrates modern software engineering practices with a bounded AI subsystem.
 
-**Motivation:** Most high-profile data breaches involve insiders — employees, contractors, or compromised accounts. Unlike external attacks that trigger network-level alerts, insider threats are invisible to traditional firewalls and antivirus tools because the actor is already authenticated and authorized. Detecting them requires analyzing patterns of behavior over time: "This database administrator suddenly downloaded 500,000 rows at 2 AM on a weekend" is not a violation of any access control rule, but it is deeply anomalous behavior. This project teaches students how to build a privacy-respecting behavioral analytics pipeline at enterprise scale.
+**Motivation:** Modern enterprise systems demand high-throughput data handling, low-latency processing, and automated decision-making. Traditional approaches struggle with scale, static rules, or vendor lock-in. This project tackles the core engineering challenge of building a modular, resilient platform capable of operating continuously under demanding production workloads.
 
 **Objectives:**
-- Build a log ingestion pipeline that collects authentication, file access, and API call events from simulated or real enterprise systems.
-- Implement a peer-group behavioral baseline engine (users in the same role/department should have similar activity patterns).
-- Build a multi-signal risk scoring engine that combines deviations across multiple behavioral dimensions into a composite risk score.
-- Implement a case management system for security analysts to investigate flagged users.
-- Enforce privacy controls (data masking, audit trails, approval workflows for accessing sensitive behavioral data).
+- Build a distributed system architecture processing thousands of operations per second with predictable low latency
+- Implement robust fault tolerance, automated recovery, and strict security posture
+- Design a high-performance data storage and streaming pipeline tailored to domain requirements
+- Integrate a bounded AI module (Isolation Forest multi-signal anomaly detection & SHAP explainability) to enhance operational decision-making without creating single-point-of-failure model dependencies
+- Create an intuitive, real-time web dashboard for system monitoring, administration, and operational workflows
 
-**Expected Impact:** A complete enterprise UEBA platform demonstrating advanced security analytics, big data processing, and privacy-by-design engineering — directly applicable to SOC (Security Operations Center) work.
+**Expected Impact:** A production-grade architecture demonstrating mastery of distributed systems, backend engineering, cloud infrastructure, and applied machine learning.
 
-**Target Users:** Enterprise security operations centers, HR security teams, financial institutions, government agencies, and any organization with privileged data access requirements.
+**Target Users:** Enterprise IT operations, security teams, engineering lead practitioners, and domain-specific operations personnel.
 
 ---
 
 ## Problem Statement
 
-1. **Detection Gap:** Perimeter security (firewalls, IDS) cannot detect insider threats because insiders are already inside. Behavioral analytics fills this gap.
-2. **Alert Fatigue:** Simple threshold-based rules ("alert if a user downloads > 100 files") generate massive false positives (a legitimate data scientist downloads 10,000 files daily). Behavioral context eliminates most false positives.
-3. **Scale and Latency:** Large organizations generate billions of log events per day. Processing this in real-time while maintaining rolling behavioral baselines per user is a significant data engineering challenge.
-4. **Privacy vs. Security Tension:** Monitoring employee behavior raises GDPR and workplace privacy concerns. The system must enforce strict data governance — only analysts with explicit authorization should access specific users' behavioral profiles.
+1. **System Scalability & Performance:** High-throughput processing demands optimized concurrency, non-blocking I/O, and efficient data serialization to prevent bottlenecks.
+
+2. **Data Consistency & Reliability:** Managing state across distributed components requires strict transactional boundaries, idempotent execution, and robust recovery mechanisms.
+
+3. **Operational Visibility:** Complex distributed architectures often lack real-time observability, making root-cause analysis and performance tuning difficult.
+
+4. **Security & Access Control:** Securing inter-service communication, enforcing fine-grained access policies, and maintaining immutable audit logs are essential for enterprise compliance.
+
+5. **Static vs. Adaptive Logic:** Hardcoded business rules fail to adapt to evolving environmental conditions, requiring machine-learning-assisted scoring to augment traditional rule engines.
 
 ---
 
 ## Existing Solutions
 
 ### Commercial Solutions
-- **Varonis:** Leading UEBA platform. Very expensive, proprietary.
-- **Securonix:** Cloud SIEM/UEBA. Enterprise pricing.
-- **Microsoft Sentinel (UEBA):** Azure-integrated, powerful but vendor-locked.
-- **Splunk UBA:** Part of the Splunk enterprise platform. Massive cost.
+- **Enterprise SaaS Vendors:** Closed-source commercial products with high licensing costs and rigid integration paths.
+- **Cloud Provider Managed Services:** Proprietary offerings creating vendor lock-in.
+
+### Academic Solutions
+- Research literature focusing on algorithmic accuracy or theoretical proofs without providing deployable software architectures.
+
+### Open-Source Solutions
+- Fragmented individual libraries and frameworks requiring extensive integration and glue code to form a functional platform.
 
 ### Limitations
-- All commercial UEBA platforms are closed-source and extremely expensive.
-- No open-source platform provides a complete end-to-end UEBA pipeline with a built-in case management system.
+- Commercial options are expensive black boxes lacking educational transparency
+- Academic prototypes ignore system engineering, failure modes, and production observability
+- No existing open-source repository combines complete system architecture, real-time data pipelines, and a bounded AI module into a single production specification
 
 ---
 
 ## Proposed Solution
 
-Build **AeroBehavior**, a UEBA platform:
+Build a complete end-to-end platform consisting of:
 
-1. **Log Collectors (Agents/Syslog Receivers):** Lightweight agents or syslog receivers that normalize logs from Active Directory, VPN, SIEM, file servers, and cloud APIs (AWS CloudTrail) into a unified JSON event schema.
-2. **Stream Processing Pipeline:** Apache Kafka ingests events; an Apache Flink job processes them in real-time — enriching events with user metadata (department, role, location) from an HR directory.
-3. **Behavioral Baseline Engine:** For each user, computes rolling feature vectors: typical login hours, average daily file access count, typical data volume downloaded, typical peer communication patterns. These baselines update continuously.
-4. **Peer Group Engine:** Groups users by role and department. A baseline for "Finance Analyst" represents the normal behavior of that peer group. Individual deviations from the peer group baseline are more sensitive indicators than deviations from absolute thresholds.
-5. **Risk Scoring Module:** A multi-signal anomaly detection model that scores each behavioral dimension (time-of-access anomaly, volume anomaly, location anomaly, peer deviation) and combines them into a composite risk score with explainability output (SHAP values for each contributing factor).
-6. **Case Management:** A React dashboard where security analysts manage flagged users, add investigation notes, escalate cases, and close with disposition.
-7. **Privacy Controls:** Data masking for non-analyst roles; all access to user behavioral data is logged; manager/CISO approval required to view certain signals.
+1. **Data Ingestion & Transport Layer** — High-performance message queue/bus ingesting telemetry and command payloads with schema validation.
+2. **Core Processing Engine** — Multi-threaded microservice architecture handling domain logic, transactional state updates, and rule evaluation.
+3. **Data Storage & Indexing** — Hybrid database architecture utilizing relational storage for ACID metadata, time-series stores for telemetry, and caches for low-latency lookups.
+4. **Bounded AI Subsystem** — Integrated ML inference service (Isolation Forest multi-signal anomaly detection & SHAP explainability) providing predictive scores to augment decision engines.
+5. **Operational Control Dashboard** — Modern web application featuring live telemetry, interactive charts, and administrative workflow controls.
+6. **Observability & Audit Stack** — Distributed tracing, structured logging, and metrics exporter providing complete system visibility.
 
 ---
 
 ## System Architecture
 
 ### Backend
-- **Ingestion:** Apache Kafka (log event bus).
-- **Stream Processing:** Apache Flink (real-time enrichment, feature extraction, baseline updates).
-- **API:** FastAPI (Python) for the case management and risk scoring APIs.
+- **Core Engine:** Written in Python / Go for high-concurrency performance and thread-safe memory handling
+- **API Framework:** High-performance REST / gRPC services for inter-component communication
+- **Message Broker:** Distributed event bus managing asynchronous tasks and telemetry streams
 
 ### Frontend
-- **Dashboard:** React with TypeScript — case management, risk score explorer, behavioral timeline view.
+- **Admin Console:** React with TypeScript for type-safe UI state management
+- **Data Visualization:** Recharts / D3.js for time-series and metric visualizer components
+- **Real-Time Layer:** WebSocket connection for streaming live system events to the UI
+
+### Mobile
+- Responsive PWA / Mobile view optimized for tablet and on-the-go operational monitoring.
+
+### Cloud
+- **AWS / GCP:** Primary cloud providers
+- **Orchestration:** Containerized services managed via Docker and Kubernetes
+- **Storage:** S3-compatible object storage (MinIO) for model artifacts and persistent log backups
+
+### Security
+- **Authentication & Authorization:** OAuth2 + JWT tokens with granular RBAC policies
+- **Transport Security:** TLS 1.3 for all external and inter-service gRPC communication
+- **Audit Trail:** Immutable audit logging for all administrative actions and system decisions
 
 ### AI Components
-
-| Component | Role | Technique | AI % |
-|-----------|------|-----------|------|
-| Behavioral Deviation Scoring | Compare user's recent behavior to their own baseline and peer group baseline; produce a composite anomaly score | Isolation Forest per behavioral dimension + weighted composite score | ~25% |
-| Signal Explainability | Tell the analyst WHY a user was flagged (which signals contributed most) | SHAP values on the Isolation Forest output | ~5% |
-
-**Total AI effort: ~25–30%.** Remove it → the system still collects, enriches, stores, and displays behavioral data. The case management system and log pipeline remain fully functional. Alert generation would fall back to simple threshold rules.
+- **Inference Engine:** Microservice hosting pre-trained ML models with sub-20ms latency
+- **Feature Pipeline:** Real-time feature extraction from incoming telemetry streams
+- **Drift Monitoring:** Statistical distribution tracking to detect model degradation
 
 ### Databases
-- **PostgreSQL:** User profiles, cases, investigation notes, peer group definitions.
-- **ClickHouse:** Behavioral event storage and fast analytical queries (e.g., "show all events for user X in the last 30 days").
-- **Redis:** Rolling feature vectors (current behavior state per user).
+- **PostgreSQL:** Primary relational store for configuration, user accounts, and state
+- **Redis:** High-speed in-memory cache for session state and rate-limiting counters
+- **Domain-Specific Store:** Time-series (InfluxDB) or Columnar (ClickHouse) database optimized for analytical telemetry
 
 ### Networking
-- **Kafka:** Event ingestion bus.
-- **REST + WebSocket:** Dashboard API and live alert streaming.
-- **Syslog / HTTPS webhooks:** Log collection from external systems.
-
-### Security & Privacy
-- **Data Masking:** User identities masked for non-privileged analysts.
-- **Audit Log:** Every access to a user's behavioral profile is immutably logged.
-- **RBAC:** Analyst, Senior Analyst, CISO roles with escalating access.
-- **Approval Workflow:** Unmasking a user's identity requires a second approver.
+- **Protocols:** gRPC for internal IPC, REST for web clients, WebSockets for live push
+- **Service Mesh:** Envoy / Linkerd sidecars for mTLS and traffic management
 
 ### DevOps
-- **Docker + Kubernetes:** Full containerized deployment.
-- **GitHub Actions:** CI/CD with automated unit and integration tests.
+- **Containerization:** Docker container builds for all microservices
+- **Orchestration:** Kubernetes manifests and Helm charts
+- **CI/CD:** GitHub Actions workflows for automated linting, unit testing, and image publishing
+
+### MLOps
+- **Model Registry:** MLflow for tracking experiment metrics and model versioning
+- **Retraining Trigger:** Automated job retraining models when data drift exceeds thresholds
+
+### Embedded
+- Applicable hardware interfacing scripts (C/C++ or Python) where physical node telemetry is required.
+
+### Infrastructure
+- Control plane nodes, application worker pools, database replica clusters, and message broker nodes.
+
+### Monitoring
+- **Prometheus:** Metrics collection (request rates, latency histograms, error rates)
+- **Grafana:** Operations dashboards displaying system KPIs and alert status
+
+### APIs
+- `POST /api/v1/ingest` — Primary data ingestion endpoint
+- `GET /api/v1/status` — Health and system status query
+- `POST /api/v1/control` — Administrative execution command
+- `GET /api/v1/analytics` — Metrics and historical analytics query
+
+---
+
+## AI Components
+
+AI functions as an **augmented intelligence module** (~15–20% of effort). The core platform operates deterministically; ML enhances accuracy.
+
+| Component | AI Role | Technique | Justification |
+|-----------|---------|-----------|---------------|
+| Predictive Analysis | Score incoming events for anomalies or future trends | Isolation Forest multi-signal anomaly detection & SHAP explainability | Provides adaptive insight where static rules are insufficient |
+| Feature Extraction | Extract statistical metrics from raw telemetry streams | Sliding-window aggregation | Transforms raw inputs into structured model features |
+| Model Drift Monitor | Track distribution shifts in input features | Population Stability Index (PSI) | Ensures model accuracy does not silently degrade |
+
+**What AI does NOT do:** AI does not make irreversible administrative decisions autonomously. Critical system actions require rule verification or human approval.
 
 ---
 
 ## Research Opportunities
 
-1. **Peer Group Definition Strategies:** Compare behavioral anomaly detection accuracy when peer groups are defined by job title vs. department vs. graph-based clustering of communication patterns.
-2. **Baseline Drift:** Research how frequently behavioral baselines must be updated to remain accurate as user behavior legitimately changes over time (new projects, role changes).
-3. **False Positive Rates Across Industries:** Benchmark the false positive rate of Isolation Forest-based UEBA against simulated insider attack scenarios in finance vs. healthcare vs. technology organizations.
-4. **Privacy-Preserving UEBA:** Investigate whether differential privacy can be applied to behavioral baseline computation without unacceptably degrading detection accuracy.
+1. **System Throughput Benchmarking:** Evaluate processing latency and memory footprint under synthetic high-load scenarios.
+2. **Adaptive Rule-ML Synergy:** Study optimal weighting mechanisms between static business rules and probabilistic ML scores.
+3. **Data Compression Efficiency:** Measure bandwidth and storage reduction using domain-specific encoding vs. generic compression algorithms.
+
+**Possible Publications:**
+- IEEE / ACM conference paper on domain system engineering and high-throughput architecture.
+- Technical report detailing benchmark results and failure-recovery performance.
 
 ---
 
 ## Technology Stack
 
-| Category | Technology | Purpose |
-|----------|-----------|---------|
-| **Languages** | Python | Flink jobs, ML scoring, FastAPI |
-| | Go | High-performance log ingestion agents |
-| | TypeScript | Frontend dashboard |
-| **Streaming** | Apache Kafka | Log event ingestion bus |
-| | Apache Flink | Real-time stream processing, feature extraction |
-| **AI** | Scikit-learn (Isolation Forest) | Behavioral anomaly detection |
-| | SHAP | Score explainability |
-| **Databases** | PostgreSQL | Cases, users, peer groups |
-| | ClickHouse | Behavioral event analytics |
-| | Redis | Rolling feature cache |
-| **Frontend** | React, Recharts | Dashboard, timeline, case management |
-| **Security** | OPA (Open Policy Agent) | Policy-based access control for data unmasking |
-| **DevOps** | Docker, Kubernetes, GitHub Actions | Deployment and CI/CD |
+| Category | Technology | Version | Purpose |
+|----------|-----------|---------|---------|
+| **Primary Stack** | Python, Apache Kafka, Apache Flink, ClickHouse, Redis, PostgreSQL, Isolation Forest, SHAP, React | Latest | Core System Implementation |
+| **Containers** | Docker / Kubernetes | 24+ / 1.28+ | Deployment & Orchestration |
+| **Monitoring** | Prometheus / Grafana | 2.50+ / 10.x | Telemetry Observability |
+| **CI/CD** | GitHub Actions | — | Automated Build & Test |
+
+---
+
+## Required Knowledge
+
+| Topic | Importance | Where to Learn |
+|-------|-----------|----------------|
+| Distributed Systems Architecture | Essential | "Designing Data-Intensive Applications" (Kleppmann) |
+| Python / Go Programming | Essential | Language Official Documentation & Guides |
+| Database Design & Optimization | Essential | Database Internal Literature |
+| Cloud Containerization | Important | Docker & Kubernetes Tutorials |
+
+---
+
+## Required Skills
+
+| Skill | Level Required | Notes |
+|-------|---------------|-------|
+| Python / Go Development | Advanced | Core service implementation |
+| System Architecture | Advanced | Microservice design and IPC |
+| SQL & Data Modeling | Intermediate | Schema optimization |
+| React / TypeScript | Intermediate | Frontend dashboard creation |
 
 ---
 
 ## Suggested Team Distribution
 
-| Member | Role | Responsibilities | Technologies |
-|--------|------|-----------------|--------------|
-| **Member 1** | Log Ingestion & Pipeline | Build Kafka topic schema, log normalizers for AD/VPN/Cloud logs, and Flink enrichment jobs. | Python, Kafka, Flink |
-| **Member 2** | Behavioral Baseline Engine | Implement rolling feature vector computation per user, peer group assignment, and baseline update logic. | Python, Redis, ClickHouse |
-| **Member 3** | AI Scoring & Explainability | Train Isolation Forest models per behavioral dimension; implement SHAP-based explainability; build retraining pipeline. | Python, Scikit-learn, SHAP |
-| **Member 4** | Case Management Backend | Build FastAPI service for case CRUD, investigation workflows, escalation, and privacy controls (RBAC, audit log). | Python, PostgreSQL, OPA |
-| **Member 5** | Frontend & Dashboard | Build React case management UI, risk score timeline visualization, and behavioral drill-down views. | React, TypeScript, Recharts |
+| Member | Role | Responsibilities | Key Technologies |
+|--------|------|-----------------|------------------|
+| **Member 1** | Core Backend Lead | Design and implement main processing microservices, API layers, and business logic. | Python / Go, REST/gRPC |
+| **Member 2** | Data & Storage Eng. | Manage database schemas, caching layers, and ingestion pipelines. | PostgreSQL, Redis, Kafka |
+| **Member 3** | AI & Analytics Eng. | Build feature extraction pipelines, train ML models, and set up inference endpoints. | Python, PyTorch/Scikit-learn |
+| **Member 4** | Frontend & UI Developer | Build React admin console, real-time WebSocket listeners, and analytics charts. | React, TypeScript, Recharts |
+| **Member 5** | DevOps & Infrastructure | Configure Docker, Kubernetes, CI/CD pipelines, and Prometheus/Grafana monitoring. | K8s, Docker, Prometheus |
+
+---
+
+## Development Roadmap
+
+### Summer Preparation (8 weeks)
+- [ ] Review domain literature, system requirements, and API specifications
+- [ ] Complete core language (Python / Go) and streaming architecture training
+- [ ] Setup initial project repository, linters, and Docker environment
+
+### Fall Semester (16 weeks)
+- **Weeks 1–4:** Core Ingestion & Storage Setup
+- **Weeks 5–8:** Business Logic & Processing Engine Implementation
+- **Weeks 9–12:** AI Model Training & Inference Endpoint Integration
+- **Weeks 13–16:** Initial Dashboard & Mid-Semester Review
+
+### Spring Semester (16 weeks)
+- **Weeks 1–4:** System Integration & End-to-End Pipeline Testing
+- **Weeks 5–8:** Advanced Observability, Security Audit & Drift Monitoring
+- **Weeks 9–12:** Load Testing, Profiling & Latency Benchmarking
+- **Weeks 13–16:** Final Documentation, Video Demo, and Project Defense
+
+---
+
+## Risks
+
+### Technical Risks
+| Risk | Probability | Impact | Mitigation |
+|------|------------|--------|------------|
+| High Latency under Load | Medium | High | Profile critical path using pprof; optimize queries and caching |
+| Data Consistency Edge Cases | Low | High | Implement strict transactional boundaries and integration tests |
+
+### Security & Deployment Risks
+| Risk | Probability | Impact | Mitigation |
+|------|------------|--------|------------|
+| Unauthorized Access to APIs | Low | Critical | Enforce JWT validation and strict RBAC policies |
+| Deployment Complexity | Medium | Medium | Use Helm charts for reproducible Kubernetes setups |
+
+---
+
+## Deliverables
+
+### Software
+- [ ] Core processing backend microservices
+- [ ] Real-time data ingestion and storage pipeline
+- [ ] Interactive React administration dashboard
+- [ ] ML inference service and feature pipeline
+
+### Documentation & Research
+- [ ] Architecture Design Document & API Reference
+- [ ] System Benchmark Report
+- [ ] Final Presentation Slides & Project Poster
+
+---
+
+## Sponsor Analysis
+
+### Potential Sponsors
+| Entity | Category | Interest Reason |
+|--------|----------|----------------|
+| **CIB InfoSec** | Domestic Industry | Direct commercial alignment with project domain |
+| ** Banque Misr** | Local Partner | Recruitment pipeline and technical validation |
+| **International Tech Vendors** | Global | Open-source adoption and cloud resource grants |
 
 ---
 
 ## Estimated Budget
 
-| Item | Cost (EGP) | Cost (USD) |
-|------|-----------|-----------|
-| Cloud VMs for Kafka + Flink cluster | 12,000 | ~240 |
-| ClickHouse instance | 3,000 | ~60 |
-| Synthetic dataset generation tools | 0 | 0 |
-| **Total** | **~15,000 EGP** | **~300 USD** |
+| Category | Item | Cost (EGP) | Cost (USD) |
+|----------|------|-----------|-----------|
+| **Cloud** | AWS / GCP / Azure Managed Services (6 months) | 20,000 | ~400 |
+| **Hardware** | Test devices / sensor kits / local server | 15,000 | ~300 |
+| **Total** | | **~35000 EGP** | **~700 USD** |
 
 ---
 
-## Difficulty
-**Score: 8/10** — The primary difficulty is building a real-time feature extraction pipeline that maintains accurate per-user behavioral baselines under continuous stream processing. Multi-signal anomaly scoring with explainability adds considerable algorithmic complexity.
+## Evaluation Metrics
 
-## Innovation
-**Score: 9/10** — An open-source, complete UEBA platform with privacy-by-design controls and SHAP-based explainability fills a genuine gap in the security tooling ecosystem.
+- **Difficulty (8/10):** High architectural challenge involving multi-service concurrency and streaming performance.
+- **Innovation (8/10):** Combines distributed systems engineering with a bounded, production-grade AI module.
+- **Research Depth (7/10):** Strong benchmarking and latency-accuracy trade-off investigation possibilities.
+- **Sponsor Potential (8/10):** Direct applicability to industry requirements in Egypt and internationally.
+- **Startup Potential (8/10):** Clear B2B SaaS commercialization path.
 
-## Sponsor Potential
-**Score: 9/10** — Banks, telecom companies, government ministries, and any organization with significant data access compliance requirements.
+---
 
 ## Career Value
-**Security Operations Analyst / SOC Engineer:** ⭐⭐⭐⭐⭐
-**Data Engineer (Security):** ⭐⭐⭐⭐⭐
-**ML Engineer (Applied Security):** ⭐⭐⭐⭐
+
+| Career Path | Relevance | Why |
+|-------------|-----------|-----|
+| **Backend / Systems Engineer** | ⭐⭐⭐⭐⭐ | Deep exposure to concurrent microservices, gRPC, and database design |
+| **Data / Infrastructure Engineer** | ⭐⭐⭐⭐⭐ | Hands-on stream processing, event queuing, and storage optimization |
+| **DevOps / Platform Engineer** | ⭐⭐⭐⭐ | Kubernetes, CI/CD, and Prometheus/Grafana observability |
+| **MLOps / Applied AI Engineer** | ⭐⭐⭐⭐ | Serving production ML models with feature monitoring |
+
+---
+
+## Future Extensions
+
+1. **Multi-Region Clustering:** Extend control plane across multiple geographical cloud zones.
+2. **eBPF Acceleration:** Offload kernel packet filtering for higher network throughput.
+3. **Advanced Visual Analytics:** Add graph-based dependency maps to the frontend UI.
 
 ---
 
 ## References
 
-1. Tuor, A., et al. (2017). "Deep Learning for Unsupervised Insider Threat Detection in Structured Cybersecurity Data Streams." *AAAI Workshop.*
-2. CERT Insider Threat Dataset: https://resources.sei.cmu.edu/library/asset-view.cfm?assetID=508099
-3. NIST SP 800-53 Rev. 5: Security Controls for Insider Threat.
-4. Shapley, L.S. (1953). "A Value for n-Person Games." *Contributions to the Theory of Games.*
-5. Apache Flink UEBA Tutorial: https://flink.apache.org/
+1. Kleppmann, M. (2017). *Designing Data-Intensive Applications.* O'Reilly Media.
+2. Official Documentation for Python and  Apache Kafka.
+3. IEEE / ACM Conference proceedings on Distributed Systems and Cloud Computing.

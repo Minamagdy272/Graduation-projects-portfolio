@@ -4,150 +4,158 @@
 
 ## Executive Summary
 
-This project proposes the design and implementation of a **Multi-Tenant GPU Scheduling Platform** — a cloud-native infrastructure system that allows multiple teams or users to share a pool of GPU resources fairly and efficiently. The platform manages job queuing, resource isolation, priority scheduling, and billing, while a predictive demand-forecasting module anticipates workload surges and pre-provisions capacity before queues back up.
+This project proposes the design and implementation of a **Multi-Tenant GPU Scheduling Platform** — a production-grade system engineered for high performance, reliability, and enterprise scalability. The system addresses critical operational challenges in Cloud & Platform Infrastructure by building a robust architecture that integrates modern software engineering practices with a bounded AI subsystem.
 
-**Motivation:** GPUs are expensive. A single NVIDIA A100 GPU costs over $10,000 to buy or $3/hour to rent on AWS. In universities, research labs, and AI startups, GPU clusters are shared among dozens of teams — but without proper scheduling infrastructure, idle GPUs sit unused while urgent jobs queue for hours, causing massive inefficiency and team frustration. Building a proper multi-tenant scheduling system teaches the deepest aspects of operating systems, resource management, distributed queues, and fair-share scheduling algorithms.
+**Motivation:** Modern enterprise systems demand high-throughput data handling, low-latency processing, and automated decision-making. Traditional approaches struggle with scale, static rules, or vendor lock-in. This project tackles the core engineering challenge of building a modular, resilient platform capable of operating continuously under demanding production workloads.
 
 **Objectives:**
-- Design a job submission API that accepts training/inference workloads with resource declarations (GPU count, VRAM, runtime limit).
-- Implement a priority-aware, fair-share scheduling algorithm (e.g., Dominant Resource Fairness — DRF) that allocates GPUs across competing teams without starvation.
-- Enforce tenant isolation using Linux cgroups, NVIDIA MIG (Multi-Instance GPU), or Kubernetes resource quotas.
-- Build a predictive demand-forecasting module that analyzes historical job submission patterns and pre-scales node capacity.
-- Provide a web dashboard for cluster administrators and individual users to monitor queue depth, GPU utilization, and billing.
+- Build a distributed system architecture processing thousands of operations per second with predictable low latency
+- Implement robust fault tolerance, automated recovery, and strict security posture
+- Design a high-performance data storage and streaming pipeline tailored to domain requirements
+- Integrate a bounded AI module (Prophet demand-forecasting module) to enhance operational decision-making without creating single-point-of-failure model dependencies
+- Create an intuitive, real-time web dashboard for system monitoring, administration, and operational workflows
 
-**Expected Impact:** A production-grade GPU resource management platform demonstrating mastery of distributed scheduling, resource isolation, and capacity planning — directly applicable to cloud providers, research clusters, and AI infrastructure teams.
+**Expected Impact:** A production-grade architecture demonstrating mastery of distributed systems, backend engineering, cloud infrastructure, and applied machine learning.
 
-**Target Users:** University research labs, AI startups, enterprise ML teams, and cloud providers offering managed GPU compute.
+**Target Users:** Enterprise IT operations, security teams, engineering lead practitioners, and domain-specific operations personnel.
 
 ---
 
 ## Problem Statement
 
-Shared GPU clusters without proper scheduling suffer from critical failures:
+1. **System Scalability & Performance:** High-throughput processing demands optimized concurrency, non-blocking I/O, and efficient data serialization to prevent bottlenecks.
 
-1. **Starvation:** A high-priority team submits a large job and monopolizes all GPUs for 12 hours, blocking dozens of smaller jobs.
-2. **Fragmentation:** GPU memory is not fully utilized because jobs are scheduled to whole GPUs even when they only need 10% of VRAM.
-3. **No Isolation:** A runaway job (memory leak, infinite loop) degrades the performance of neighboring jobs on the same node.
-4. **Reactive Scaling:** Cluster operators only add nodes after queues are already 3 hours deep.
-5. **Opacity:** Users have no visibility into why their job is queued or how long until it runs.
+2. **Data Consistency & Reliability:** Managing state across distributed components requires strict transactional boundaries, idempotent execution, and robust recovery mechanisms.
+
+3. **Operational Visibility:** Complex distributed architectures often lack real-time observability, making root-cause analysis and performance tuning difficult.
+
+4. **Security & Access Control:** Securing inter-service communication, enforcing fine-grained access policies, and maintaining immutable audit logs are essential for enterprise compliance.
+
+5. **Static vs. Adaptive Logic:** Hardcoded business rules fail to adapt to evolving environmental conditions, requiring machine-learning-assisted scoring to augment traditional rule engines.
 
 ---
 
 ## Existing Solutions
 
 ### Commercial Solutions
-- **NVIDIA Base Command Platform:** Enterprise GPU cluster management. Very expensive, proprietary.
-- **AWS SageMaker Training Jobs:** Managed but completely black-box and vendor-locked.
-- **Coreweave / Lambda Labs:** Cloud GPU providers with proprietary scheduling.
+- **Enterprise SaaS Vendors:** Closed-source commercial products with high licensing costs and rigid integration paths.
+- **Cloud Provider Managed Services:** Proprietary offerings creating vendor lock-in.
+
+### Academic Solutions
+- Research literature focusing on algorithmic accuracy or theoretical proofs without providing deployable software architectures.
 
 ### Open-Source Solutions
-- **Kubernetes + NVIDIA Device Plugin:** Schedules GPUs as K8s resources. Lacks fair-share scheduling and GPU-specific features like MIG.
-- **Slurm:** HPC job scheduler, mature but designed for static batch workloads, not dynamic cloud environments.
-- **Apache Hadoop YARN:** Generic resource scheduler, not GPU-aware.
-- **Volcano:** Kubernetes batch scheduling system for ML workloads (closest open-source analogue).
+- Fragmented individual libraries and frameworks requiring extensive integration and glue code to form a functional platform.
 
-### Limitations of Existing Solutions
-- Slurm lacks Kubernetes integration and modern cloud elasticity.
-- Kubernetes + device plugin lacks sophisticated fair-share policies and GPU sub-allocation (MIG).
-- No open-source solution combines fair-share scheduling, MIG partitioning, real-time monitoring, and predictive autoscaling in a single cohesive platform.
+### Limitations
+- Commercial options are expensive black boxes lacking educational transparency
+- Academic prototypes ignore system engineering, failure modes, and production observability
+- No existing open-source repository combines complete system architecture, real-time data pipelines, and a bounded AI module into a single production specification
 
 ---
 
 ## Proposed Solution
 
-Build **AeroGPU**, a complete multi-tenant GPU scheduling platform:
+Build a complete end-to-end platform consisting of:
 
-1. **Job API Service:** A REST/gRPC API where users submit jobs (container image, GPU request, priority class, time limit). Validates resource declarations and enqueues jobs.
-2. **Scheduler Engine:** A Go service implementing Dominant Resource Fairness (DRF) or Weighted Fair Queuing across tenant quotas. Makes bin-packing decisions to minimize GPU fragmentation.
-3. **Isolation Layer:** Integrates with NVIDIA MIG (Multi-Instance GPU) to partition a single A100 into 7 isolated instances, or uses Kubernetes resource quotas and cgroups for process-level isolation.
-4. **Node Manager Agent:** A daemon running on each GPU node, reporting real-time GPU utilization (via NVIDIA SMI), memory usage, and running job states back to the scheduler.
-5. **Demand Forecasting Module:** A time-series model (Prophet or ARIMA) trained on historical job submission patterns. Outputs a "next 4-hour demand forecast," which the autoscaler uses to pre-provision cloud GPU nodes before the queue backs up.
-6. **Admin & User Dashboard:** A React web application showing cluster-wide GPU utilization heatmaps, per-tenant quota usage, live queue, and individual job logs.
+1. **Data Ingestion & Transport Layer** — High-performance message queue/bus ingesting telemetry and command payloads with schema validation.
+2. **Core Processing Engine** — Multi-threaded microservice architecture handling domain logic, transactional state updates, and rule evaluation.
+3. **Data Storage & Indexing** — Hybrid database architecture utilizing relational storage for ACID metadata, time-series stores for telemetry, and caches for low-latency lookups.
+4. **Bounded AI Subsystem** — Integrated ML inference service (Prophet demand-forecasting module) providing predictive scores to augment decision engines.
+5. **Operational Control Dashboard** — Modern web application featuring live telemetry, interactive charts, and administrative workflow controls.
+6. **Observability & Audit Stack** — Distributed tracing, structured logging, and metrics exporter providing complete system visibility.
 
 ---
 
 ## System Architecture
 
 ### Backend
-- **Language:** Go for the Scheduler Engine and Node Manager Agent (performance-critical, goroutine concurrency).
-- **Job API:** FastAPI (Python) for job submission and status queries.
-- **Scheduler Algorithm:** DRF (Dominant Resource Fairness) with priority classes (critical, high, normal, batch).
+- **Core Engine:** Written in Go / Python for high-concurrency performance and thread-safe memory handling
+- **API Framework:** High-performance REST / gRPC services for inter-component communication
+- **Message Broker:** Distributed event bus managing asynchronous tasks and telemetry streams
 
 ### Frontend
-- **Dashboard:** React with TypeScript.
-- **Visualization:** Recharts for utilization time-series, D3.js heatmap for per-node GPU usage.
+- **Admin Console:** React with TypeScript for type-safe UI state management
+- **Data Visualization:** Recharts / D3.js for time-series and metric visualizer components
+- **Real-Time Layer:** WebSocket connection for streaming live system events to the UI
+
+### Mobile
+- Responsive PWA / Mobile view optimized for tablet and on-the-go operational monitoring.
 
 ### Cloud
-- **Orchestration:** Kubernetes (GKE or self-managed) as the underlying compute layer.
-- **Auto-scaling:** Kubernetes Cluster Autoscaler + custom controller that pre-scales based on forecasted demand.
-- **Node Types:** GPU nodes (NVIDIA T4 or A100 for MIG testing), CPU nodes for the control plane.
+- **AWS / GCP:** Primary cloud providers
+- **Orchestration:** Containerized services managed via Docker and Kubernetes
+- **Storage:** S3-compatible object storage (MinIO) for model artifacts and persistent log backups
 
 ### Security
-- **Multi-tenancy Isolation:** Kubernetes Namespaces + RBAC per tenant; NVIDIA MIG for hardware-level GPU partitioning.
-- **Network Policies:** Kubernetes NetworkPolicy preventing tenant-to-tenant traffic.
-- **API Authentication:** OAuth2 + JWT tokens with tenant-scoped permissions.
+- **Authentication & Authorization:** OAuth2 + JWT tokens with granular RBAC policies
+- **Transport Security:** TLS 1.3 for all external and inter-service gRPC communication
+- **Audit Trail:** Immutable audit logging for all administrative actions and system decisions
 
 ### AI Components
-
-| Component | Role | Technique | AI % |
-|-----------|------|-----------|------|
-| Demand Forecasting | Predict next 4-hour job submission volume per tenant | Prophet / ARIMA time-series model | ~15% |
-| Scheduling Hint (Optional) | Suggest optimal node placement based on job history | Simple rule-based regression, not deep learning | ~5% |
-
-**Total AI effort: ~15–20% of project.** Remove forecasting → scheduler still works perfectly via reactive autoscaling.
+- **Inference Engine:** Microservice hosting pre-trained ML models with sub-20ms latency
+- **Feature Pipeline:** Real-time feature extraction from incoming telemetry streams
+- **Drift Monitoring:** Statistical distribution tracking to detect model degradation
 
 ### Databases
-- **PostgreSQL:** Job metadata, tenant configurations, quota definitions, billing records.
-- **Redis:** Live job queue state, scheduler lock, real-time GPU metrics (fast read/write for the scheduler hot path).
-- **InfluxDB:** Time-series storage for GPU utilization metrics and historical job patterns (feeds the forecasting model).
+- **PostgreSQL:** Primary relational store for configuration, user accounts, and state
+- **Redis:** High-speed in-memory cache for session state and rate-limiting counters
+- **Domain-Specific Store:** Time-series (InfluxDB) or Columnar (ClickHouse) database optimized for analytical telemetry
 
 ### Networking
-- **gRPC:** Node Manager Agent → Scheduler (low-latency telemetry streaming).
-- **REST:** User-facing Job API, dashboard API.
-- **Kubernetes CNI:** Calico or Cilium for network policy enforcement between tenant pods.
+- **Protocols:** gRPC for internal IPC, REST for web clients, WebSockets for live push
+- **Service Mesh:** Envoy / Linkerd sidecars for mTLS and traffic management
 
 ### DevOps
-- **Docker:** All services containerized.
-- **Helm Charts:** Kubernetes deployment packaging for the entire platform.
-- **GitHub Actions:** CI/CD — build, test, lint, push images, deploy to staging cluster.
-- **Terraform:** Provision the Kubernetes cluster and GPU node pools.
+- **Containerization:** Docker container builds for all microservices
+- **Orchestration:** Kubernetes manifests and Helm charts
+- **CI/CD:** GitHub Actions workflows for automated linting, unit testing, and image publishing
 
 ### MLOps
-- **Model Retraining:** The forecasting model is retrained weekly on the latest 90 days of submission history using a scheduled Kubernetes CronJob.
-- **Model Versioning:** MLflow tracks model versions and metrics.
+- **Model Registry:** MLflow for tracking experiment metrics and model versioning
+- **Retraining Trigger:** Automated job retraining models when data drift exceeds thresholds
+
+### Embedded
+- Applicable hardware interfacing scripts (C/C++ or Python) where physical node telemetry is required.
 
 ### Infrastructure
-- Kubernetes control plane (3 nodes), GPU worker nodes (1–3 for testing), PostgreSQL (primary + replica), Redis cluster, InfluxDB.
+- Control plane nodes, application worker pools, database replica clusters, and message broker nodes.
 
 ### Monitoring
-- **Prometheus:** Scrapes NVIDIA SMI metrics (via `dcgm-exporter`), queue depth, scheduler latency.
-- **Grafana:** Cluster-wide GPU utilization dashboards, per-tenant usage, autoscaler activity.
-- **Alerting:** Alert when GPU utilization drops below 40% (under-provisioned cluster) or queue wait time exceeds 30 minutes.
+- **Prometheus:** Metrics collection (request rates, latency histograms, error rates)
+- **Grafana:** Operations dashboards displaying system KPIs and alert status
 
 ### APIs
-- `POST /api/v1/jobs` — Submit a job
-- `GET /api/v1/jobs/{id}` — Get job status and logs
-- `GET /api/v1/queues` — View current queue state and estimated wait time
-- `GET /api/v1/tenants/{id}/quota` — View tenant quota usage
-- `GET /api/v1/forecast` — Get the 4-hour demand forecast
-- `POST /api/v1/admin/nodes` — Add/remove GPU nodes
+- `POST /api/v1/ingest` — Primary data ingestion endpoint
+- `GET /api/v1/status` — Health and system status query
+- `POST /api/v1/control` — Administrative execution command
+- `GET /api/v1/analytics` — Metrics and historical analytics query
 
 ---
 
 ## AI Components
 
-| Component | Technique | Training Data | Inference Latency | Justification |
-|-----------|-----------|---------------|-------------------|---------------|
-| Job Submission Demand Forecasting | Prophet (additive seasonality model) | Historical job submission timestamps + GPU hours requested | Batch (runs hourly) | Predicts cluster load 4 hours ahead, allowing proactive node provisioning. This is bounded, transparent, and interpretable — not a black box. |
+AI functions as an **augmented intelligence module** (~15–20% of effort). The core platform operates deterministically; ML enhances accuracy.
+
+| Component | AI Role | Technique | Justification |
+|-----------|---------|-----------|---------------|
+| Predictive Analysis | Score incoming events for anomalies or future trends | Prophet demand-forecasting module | Provides adaptive insight where static rules are insufficient |
+| Feature Extraction | Extract statistical metrics from raw telemetry streams | Sliding-window aggregation | Transforms raw inputs into structured model features |
+| Model Drift Monitor | Track distribution shifts in input features | Population Stability Index (PSI) | Ensures model accuracy does not silently degrade |
+
+**What AI does NOT do:** AI does not make irreversible administrative decisions autonomously. Critical system actions require rule verification or human approval.
 
 ---
 
 ## Research Opportunities
 
-1. **Fair-Share Scheduling in Heterogeneous GPU Clusters:** Research the performance of DRF vs. Weighted Fair Queuing vs. Max-Min Fairness when job resource profiles vary widely (1 GPU vs. 64 GPUs).
-2. **GPU Fragmentation under MIG Partitioning:** Empirically measure how NVIDIA MIG affects utilization efficiency compared to whole-GPU allocation.
-3. **Demand Forecasting Accuracy vs. Pre-provisioning Cost:** Quantify the tradeoff between forecasting errors (over-provisioning costs money; under-provisioning causes queuing delays) across different forecast horizons.
-4. **Preemption Policies:** Study the performance impact of job preemption strategies (checkpoint-and-resume vs. kill-and-requeue) on cluster-wide throughput.
+1. **System Throughput Benchmarking:** Evaluate processing latency and memory footprint under synthetic high-load scenarios.
+2. **Adaptive Rule-ML Synergy:** Study optimal weighting mechanisms between static business rules and probabilistic ML scores.
+3. **Data Compression Efficiency:** Measure bandwidth and storage reduction using domain-specific encoding vs. generic compression algorithms.
+
+**Possible Publications:**
+- IEEE / ACM conference paper on domain system engineering and high-throughput architecture.
+- Technical report detailing benchmark results and failure-recovery performance.
 
 ---
 
@@ -155,25 +163,10 @@ Build **AeroGPU**, a complete multi-tenant GPU scheduling platform:
 
 | Category | Technology | Version | Purpose |
 |----------|-----------|---------|---------|
-| **Languages** | Go | 1.22+ | Scheduler engine, node agent |
-| | Python | 3.11+ | Job API (FastAPI), forecasting model |
-| | TypeScript | 5.x | Dashboard frontend |
-| **Frameworks** | FastAPI | 0.110+ | Job submission REST API |
-| | React | 18.x | Admin and user dashboard |
-| **Scheduling** | Custom DRF | — | Fair-share GPU scheduling |
-| **GPU** | NVIDIA MIG | — | GPU partitioning and isolation |
-| | DCGM Exporter | — | GPU metrics collection |
-| **Databases** | PostgreSQL | 16+ | Job and tenant metadata |
-| | Redis | 7+ | Queue state and real-time metrics |
-| | InfluxDB | 2.x | Time-series telemetry |
-| **AI** | Prophet | 1.1+ | Demand forecasting |
-| | MLflow | 2.x | Model tracking |
-| **Cloud** | Kubernetes | 1.28+ | Compute orchestration |
-| | Terraform | 1.7+ | Infrastructure as Code |
-| | Helm | 3.x | K8s deployment packaging |
-| **Monitoring** | Prometheus | 2.50+ | Metrics collection |
-| | Grafana | 10.x | Dashboards |
-| **CI/CD** | GitHub Actions | — | Build and deploy pipeline |
+| **Primary Stack** | Go, Kubernetes, NVIDIA MIG, Redis, PostgreSQL, FastAPI, Prophet, React, Prometheus | Latest | Core System Implementation |
+| **Containers** | Docker / Kubernetes | 24+ / 1.28+ | Deployment & Orchestration |
+| **Monitoring** | Prometheus / Grafana | 2.50+ / 10.x | Telemetry Observability |
+| **CI/CD** | GitHub Actions | — | Automated Build & Test |
 
 ---
 
@@ -181,153 +174,140 @@ Build **AeroGPU**, a complete multi-tenant GPU scheduling platform:
 
 | Topic | Importance | Where to Learn |
 |-------|-----------|----------------|
-| Operating Systems — CPU/GPU Scheduling Algorithms | Essential | OS textbooks (Tanenbaum), NVIDIA MIG documentation |
-| NVIDIA GPU Architecture (CUDA, MIG) | Essential | NVIDIA Developer documentation |
-| Kubernetes Operator Pattern and Custom Controllers | Essential | "Programming Kubernetes" (O'Reilly) |
-| Go Concurrency (goroutines, channels) | Essential | "The Go Programming Language" |
-| Fair-Share Scheduling (DRF algorithm) | Essential | DRF paper (Ghodsi et al., NSDI 2011) |
-| Time-Series Forecasting (Prophet) | Important | Meta Prophet documentation |
-| gRPC Protocol Buffers | Important | gRPC official documentation |
-| PostgreSQL + Redis Data Modeling | Important | PostgreSQL docs, Redis University |
+| Distributed Systems Architecture | Essential | "Designing Data-Intensive Applications" (Kleppmann) |
+| Go / Python Programming | Essential | Language Official Documentation & Guides |
+| Database Design & Optimization | Essential | Database Internal Literature |
+| Cloud Containerization | Important | Docker & Kubernetes Tutorials |
 
 ---
 
 ## Required Skills
 
-| Skill | Level | Notes |
-|-------|-------|-------|
-| Go Programming | Advanced | Scheduler engine is performance-critical |
-| Kubernetes API (client-go) | Advanced | Custom controller development |
-| Linux Systems (cgroups, processes) | Intermediate | Understanding isolation mechanisms |
-| GPU Programming Concepts | Intermediate | Understanding CUDA, MIG, VRAM limits |
-| Python / FastAPI | Intermediate | Job API service |
-| Time-Series ML (Prophet) | Beginner–Intermediate | Forecasting module only |
-| React / TypeScript | Intermediate | Dashboard development |
+| Skill | Level Required | Notes |
+|-------|---------------|-------|
+| Go / Python Development | Advanced | Core service implementation |
+| System Architecture | Advanced | Microservice design and IPC |
+| SQL & Data Modeling | Intermediate | Schema optimization |
+| React / TypeScript | Intermediate | Frontend dashboard creation |
 
 ---
 
 ## Suggested Team Distribution
 
-| Member | Role | Responsibilities | Technologies |
-|--------|------|-----------------|--------------|
-| **Member 1** | Scheduler Engine Lead | Implement the DRF scheduler in Go. Manage job queues, priority classes, and bin-packing decisions. | Go, Redis, Scheduling Algorithms |
-| **Member 2** | GPU Infrastructure Engineer | Configure NVIDIA MIG partitioning, build the Node Manager Agent, integrate DCGM exporter for GPU telemetry. | Go, NVIDIA MIG, Kubernetes |
-| **Member 3** | Platform & API Engineer | Build the Job submission API, tenant management system, quota enforcement, and billing tracking. | Python, FastAPI, PostgreSQL |
-| **Member 4** | AI & Forecasting Engineer | Train and deploy the demand forecasting model. Build the autoscaler controller that acts on forecasts. | Python, Prophet, MLflow, K8s |
-| **Member 5** | Frontend & Monitoring Engineer | Build the React dashboard, integrate Prometheus/Grafana, implement real-time queue and utilization views. | React, TypeScript, Prometheus, Grafana |
+| Member | Role | Responsibilities | Key Technologies |
+|--------|------|-----------------|------------------|
+| **Member 1** | Core Backend Lead | Design and implement main processing microservices, API layers, and business logic. | Go / Python, REST/gRPC |
+| **Member 2** | Data & Storage Eng. | Manage database schemas, caching layers, and ingestion pipelines. | PostgreSQL, Redis, Kafka |
+| **Member 3** | AI & Analytics Eng. | Build feature extraction pipelines, train ML models, and set up inference endpoints. | Python, PyTorch/Scikit-learn |
+| **Member 4** | Frontend & UI Developer | Build React admin console, real-time WebSocket listeners, and analytics charts. | React, TypeScript, Recharts |
+| **Member 5** | DevOps & Infrastructure | Configure Docker, Kubernetes, CI/CD pipelines, and Prometheus/Grafana monitoring. | K8s, Docker, Prometheus |
 
 ---
 
 ## Development Roadmap
 
 ### Summer Preparation (8 weeks)
-- Study DRF scheduling algorithm paper deeply
-- Complete NVIDIA CUDA/MIG fundamentals
-- Master Kubernetes Operator pattern with `client-go`
-- Set up a development Kubernetes cluster (Minikube or K3s)
+- [ ] Review domain literature, system requirements, and API specifications
+- [ ] Complete core language (Go / Python) and streaming architecture training
+- [ ] Setup initial project repository, linters, and Docker environment
 
 ### Fall Semester (16 weeks)
-- **Weeks 1–4:** Implement basic job submission API + PostgreSQL schema + Redis queue
-- **Weeks 5–8:** Build the core scheduler engine with DRF algorithm; implement Node Manager Agent
-- **Weeks 9–12:** Integrate NVIDIA MIG partitioning; implement cgroup isolation; build job log streaming
-- **Weeks 13–16:** Dashboard v1 (queue view, GPU utilization); mid-semester demo
+- **Weeks 1–4:** Core Ingestion & Storage Setup
+- **Weeks 5–8:** Business Logic & Processing Engine Implementation
+- **Weeks 9–12:** AI Model Training & Inference Endpoint Integration
+- **Weeks 13–16:** Initial Dashboard & Mid-Semester Review
 
 ### Spring Semester (16 weeks)
-- **Weeks 1–4:** Train demand forecasting model; implement autoscaler controller
-- **Weeks 5–8:** Billing system; per-tenant quota reporting; job preemption
-- **Weeks 9–12:** Performance benchmarking (scheduling latency, GPU utilization rates); load testing
-- **Weeks 13–16:** Final polish, documentation, defense preparation
+- **Weeks 1–4:** System Integration & End-to-End Pipeline Testing
+- **Weeks 5–8:** Advanced Observability, Security Audit & Drift Monitoring
+- **Weeks 9–12:** Load Testing, Profiling & Latency Benchmarking
+- **Weeks 13–16:** Final Documentation, Video Demo, and Project Defense
 
 ---
 
 ## Risks
 
+### Technical Risks
 | Risk | Probability | Impact | Mitigation |
 |------|------------|--------|------------|
-| No access to physical NVIDIA MIG-capable GPUs | High | High | Use Google Cloud T4/A100 instances with GCP credits; simulate MIG with software mocking |
-| DRF implementation bugs causing starvation | Medium | High | Implement extensive unit tests with synthetic workloads; start with simpler FIFO, then layer DRF |
-| Kubernetes operator complexity | Medium | Medium | Start with basic Reconcile loops; use `controller-runtime` framework |
-| Forecasting model accuracy insufficient to justify pre-scaling | Medium | Low | Forecasting is bounded — system falls back to reactive scaling without it |
+| High Latency under Load | Medium | High | Profile critical path using pprof; optimize queries and caching |
+| Data Consistency Edge Cases | Low | High | Implement strict transactional boundaries and integration tests |
+
+### Security & Deployment Risks
+| Risk | Probability | Impact | Mitigation |
+|------|------------|--------|------------|
+| Unauthorized Access to APIs | Low | Critical | Enforce JWT validation and strict RBAC policies |
+| Deployment Complexity | Medium | Medium | Use Helm charts for reproducible Kubernetes setups |
 
 ---
 
 ## Deliverables
 
-- Scheduler Engine (Go binary + Kubernetes Operator)
-- Node Manager Agent (Go daemon)
-- Job Submission API (Python/FastAPI)
-- React Admin Dashboard
-- Demand Forecasting Service + retrain pipeline
-- Helm Chart for full platform deployment
-- Benchmarking report (scheduling fairness, GPU utilization rates)
-- Architecture Design Document
+### Software
+- [ ] Core processing backend microservices
+- [ ] Real-time data ingestion and storage pipeline
+- [ ] Interactive React administration dashboard
+- [ ] ML inference service and feature pipeline
+
+### Documentation & Research
+- [ ] Architecture Design Document & API Reference
+- [ ] System Benchmark Report
+- [ ] Final Presentation Slides & Project Poster
 
 ---
 
 ## Sponsor Analysis
 
-| Sponsor | Reason |
-|---------|--------|
-| **NVIDIA** | Direct alignment with GPU infrastructure; actively sponsors academic research |
-| **Google Cloud / AWS** | Research into GPU scheduling efficiency improves their managed products |
-| **Inception AI (Egypt)** | Egyptian AI startup with GPU infrastructure needs |
-| **Cairo University AI Lab** | Primary end-user — researchers competing for GPU time |
-| **Smart Village companies** | Egyptian tech companies running ML training workloads |
+### Potential Sponsors
+| Entity | Category | Interest Reason |
+|--------|----------|----------------|
+| **Inception AI** | Domestic Industry | Direct commercial alignment with project domain |
+| ** Cairo University AI Lab** | Local Partner | Recruitment pipeline and technical validation |
+| **International Tech Vendors** | Global | Open-source adoption and cloud resource grants |
 
 ---
 
 ## Estimated Budget
 
-| Item | Cost (EGP) | Cost (USD) |
-|------|-----------|-----------|
-| GCP / AWS GPU compute (T4 instances, 4 months) | 20,000 | ~400 |
-| Kubernetes cluster (control plane nodes) | 5,000 | ~100 |
-| Domain + TLS cert | 500 | ~10 |
-| **Total** | **~25,500 EGP** | **~510 USD** |
+| Category | Item | Cost (EGP) | Cost (USD) |
+|----------|------|-----------|-----------|
+| **Cloud** | AWS / GCP / Azure Managed Services (6 months) | 20,000 | ~400 |
+| **Hardware** | Test devices / sensor kits / local server | 25,500 | ~510 |
+| **Total** | | **~45500 EGP** | **~910 USD** |
 
 ---
 
-## Difficulty
-**Score: 9/10** — Implementing a correct, starvation-free fair-share scheduler while managing GPU hardware-level isolation is one of the hardest infrastructure engineering challenges a student team can attempt.
+## Evaluation Metrics
 
-## Innovation
-**Score: 9/10** — No open-source project combines DRF scheduling, NVIDIA MIG partitioning, and predictive pre-scaling in a single cohesive, production-grade platform.
-
-## Research Depth
-**Score: 8/10** — Strong publication opportunity benchmarking DRF variants on heterogeneous GPU workloads.
-
-## Sponsor Potential
-**Score: 9/10** — Every university lab and AI startup with GPU needs will sponsor this.
-
-## Startup Potential
-**Score: 8/10** — GPU-as-a-Service is a massive market. A multi-tenant scheduler targeting African/MENA universities and AI companies has a clear niche.
+- **Difficulty (8/10):** High architectural challenge involving multi-service concurrency and streaming performance.
+- **Innovation (8/10):** Combines distributed systems engineering with a bounded, production-grade AI module.
+- **Research Depth (7/10):** Strong benchmarking and latency-accuracy trade-off investigation possibilities.
+- **Sponsor Potential (8/10):** Direct applicability to industry requirements in Egypt and internationally.
+- **Startup Potential (8/10):** Clear B2B SaaS commercialization path.
 
 ---
 
 ## Career Value
 
-| Career Path | Relevance |
-|-------------|-----------|
-| Cloud Platform / Infrastructure Engineer | ⭐⭐⭐⭐⭐ |
-| Systems Software Engineer (Go) | ⭐⭐⭐⭐⭐ |
-| ML Infrastructure / MLOps Engineer | ⭐⭐⭐⭐⭐ |
-| Site Reliability Engineer | ⭐⭐⭐⭐ |
+| Career Path | Relevance | Why |
+|-------------|-----------|-----|
+| **Backend / Systems Engineer** | ⭐⭐⭐⭐⭐ | Deep exposure to concurrent microservices, gRPC, and database design |
+| **Data / Infrastructure Engineer** | ⭐⭐⭐⭐⭐ | Hands-on stream processing, event queuing, and storage optimization |
+| **DevOps / Platform Engineer** | ⭐⭐⭐⭐ | Kubernetes, CI/CD, and Prometheus/Grafana observability |
+| **MLOps / Applied AI Engineer** | ⭐⭐⭐⭐ | Serving production ML models with feature monitoring |
 
 ---
 
 ## Future Extensions
 
-1. **Spot/Preemptible Instance Support:** Auto-checkpoint and migrate jobs when spot instances are reclaimed.
-2. **Multi-Cloud GPU Arbitrage:** Route jobs to the cheapest available GPU cloud (AWS vs. GCP vs. Lambda Labs) based on real-time pricing.
-3. **Gang Scheduling:** Schedule all N nodes of a distributed training job simultaneously or not at all (avoiding deadlock).
-4. **Federated Scheduling:** Allow multiple university clusters to share spare capacity.
+1. **Multi-Region Clustering:** Extend control plane across multiple geographical cloud zones.
+2. **eBPF Acceleration:** Offload kernel packet filtering for higher network throughput.
+3. **Advanced Visual Analytics:** Add graph-based dependency maps to the frontend UI.
 
 ---
 
 ## References
 
-1. Ghodsi, A., et al. (2011). "Dominant Resource Fairness: Fair Allocation of Multiple Resource Types." *NSDI 2011.*
-2. NVIDIA MIG User Guide: https://docs.nvidia.com/datacenter/tesla/mig-user-guide/
-3. Kubernetes Scheduling Framework: https://kubernetes.io/docs/concepts/scheduling-eviction/
-4. Volcano Scheduler (open source): https://volcano.sh/
-5. Taylor, S.J., & Letham, B. (2018). "Forecasting at Scale." *The American Statistician.*
+1. Kleppmann, M. (2017). *Designing Data-Intensive Applications.* O'Reilly Media.
+2. Official Documentation for Go and  Kubernetes.
+3. IEEE / ACM Conference proceedings on Distributed Systems and Cloud Computing.

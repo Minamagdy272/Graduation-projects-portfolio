@@ -4,92 +4,169 @@
 
 ## Executive Summary
 
-This project proposes the design and implementation of a **Real-time Data Lakehouse Platform**. A Lakehouse combines the flexibility and scale of a Data Lake (e.g., S3/HDFS) with the data management, ACID transactions, and fast query performance of a Data Warehouse. This platform will ingest streaming data, process it in real-time, store it in an open table format (like Apache Iceberg), and serve low-latency analytical queries.
+This project proposes the design and implementation of a **Real-time Data Lakehouse Platform** — a production-grade system engineered for high performance, reliability, and enterprise scalability. The system addresses critical operational challenges in Data Engineering / Big Data by building a robust architecture that integrates modern software engineering practices with a bounded AI subsystem.
 
-**Motivation:** Traditionally, organizations maintained two separate data stacks: a data lake for raw, unstructured data and machine learning, and a data warehouse for structured, BI (Business Intelligence) reporting. This dual architecture is complex, costly, and leads to data staleness. The "Lakehouse" paradigm unifies these. Building this platform exposes students to the absolute cutting edge of big data engineering, stream processing, and distributed query engines.
+**Motivation:** Modern enterprise systems demand high-throughput data handling, low-latency processing, and automated decision-making. Traditional approaches struggle with scale, static rules, or vendor lock-in. This project tackles the core engineering challenge of building a modular, resilient platform capable of operating continuously under demanding production workloads.
 
 **Objectives:**
-- Ingest real-time event streams (e.g., e-commerce clicks, IoT telemetry) using Apache Kafka.
-- Process and transform the data in real-time using Apache Flink.
-- Write the streaming data into object storage (MinIO/S3) using the Apache Iceberg table format, ensuring ACID transactions on object storage.
-- Deploy a distributed query engine (Trino/Presto) to allow users to query the live data using standard SQL.
-- Provide a data catalog UI to discover datasets and track data lineage.
+- Build a distributed system architecture processing thousands of operations per second with predictable low latency
+- Implement robust fault tolerance, automated recovery, and strict security posture
+- Design a high-performance data storage and streaming pipeline tailored to domain requirements
+- Integrate a bounded AI module (Great Expectations & ML data quality anomaly scoring) to enhance operational decision-making without creating single-point-of-failure model dependencies
+- Create an intuitive, real-time web dashboard for system monitoring, administration, and operational workflows
 
-**Expected Impact:** A production-grade data infrastructure platform demonstrating how modern enterprises handle petabyte-scale data with millisecond ingestion-to-query latency.
+**Expected Impact:** A production-grade architecture demonstrating mastery of distributed systems, backend engineering, cloud infrastructure, and applied machine learning.
 
-**Target Users:** Data Engineers, Data Analysts, and Data Scientists.
+**Target Users:** Enterprise IT operations, security teams, engineering lead practitioners, and domain-specific operations personnel.
 
 ---
 
 ## Problem Statement
 
-Modern data architectures suffer from several critical flaws:
-1. **Data Stagnation:** Moving data from a data lake to a data warehouse (ETL) is usually done in nightly batches. If a CEO asks for a report, the data is already 24 hours old.
-2. **Two-Tier Architecture Costs:** Maintaining both a massive data lake (for ML) and a massive data warehouse (for SQL analytics) means paying for storage and compute twice.
-3. **Data Swamps:** Data lakes often become disorganized "swamps" without schema enforcement, making the data unusable.
-4. **Lack of ACID on Object Storage:** If a job fails halfway through writing a massive file to AWS S3, readers might read corrupted, partial data. Standard object storage lacks transactional guarantees.
+1. **System Scalability & Performance:** High-throughput processing demands optimized concurrency, non-blocking I/O, and efficient data serialization to prevent bottlenecks.
+
+2. **Data Consistency & Reliability:** Managing state across distributed components requires strict transactional boundaries, idempotent execution, and robust recovery mechanisms.
+
+3. **Operational Visibility:** Complex distributed architectures often lack real-time observability, making root-cause analysis and performance tuning difficult.
+
+4. **Security & Access Control:** Securing inter-service communication, enforcing fine-grained access policies, and maintaining immutable audit logs are essential for enterprise compliance.
+
+5. **Static vs. Adaptive Logic:** Hardcoded business rules fail to adapt to evolving environmental conditions, requiring machine-learning-assisted scoring to augment traditional rule engines.
 
 ---
 
 ## Existing Solutions
 
 ### Commercial Solutions
-- **Databricks:** The pioneer of the Lakehouse architecture. Highly expensive, proprietary execution engine (Photon).
-- **Snowflake:** Traditional cloud data warehouse moving towards lakehouse capabilities.
-- **Dremio:** Data lakehouse platform.
+- **Enterprise SaaS Vendors:** Closed-source commercial products with high licensing costs and rigid integration paths.
+- **Cloud Provider Managed Services:** Proprietary offerings creating vendor lock-in.
+
+### Academic Solutions
+- Research literature focusing on algorithmic accuracy or theoretical proofs without providing deployable software architectures.
 
 ### Open-Source Solutions
-- **Apache Iceberg / Hudi / Delta Lake:** Open table formats.
-- **Apache Trino (formerly PrestoSQL):** Distributed SQL query engine.
-- **Apache Flink:** Stream processing engine.
+- Fragmented individual libraries and frameworks requiring extensive integration and glue code to form a functional platform.
 
-### Limitations of Existing Solutions
-- While the individual components (Kafka, Flink, Iceberg, Trino) are open-source, stitching them together into a cohesive, secure, and usable platform is a massive, highly sought-after engineering challenge.
+### Limitations
+- Commercial options are expensive black boxes lacking educational transparency
+- Academic prototypes ignore system engineering, failure modes, and production observability
+- No existing open-source repository combines complete system architecture, real-time data pipelines, and a bounded AI module into a single production specification
 
 ---
 
 ## Proposed Solution
 
-Build **AeroLake**, an integrated open-source data lakehouse platform consisting of:
+Build a complete end-to-end platform consisting of:
 
-1. **Ingestion Layer:** Kafka topics that accept high-throughput JSON/Protobuf event streams.
-2. **Stream Processing Layer:** Flink jobs that validate schemas, enrich data (e.g., joining a streaming click event with a static user table), and write the output continuously.
-3. **Storage & Table Format:** MinIO (S3-compatible local storage) acts as the data lake. Apache Iceberg is used as the table format, providing schema evolution, time-travel queries, and ACID transactions directly on MinIO.
-4. **Data Catalog:** A Hive Metastore or Nessie catalog to track table schemas and Iceberg snapshots.
-5. **Query Layer:** Trino cluster connected to the Iceberg catalog, exposing a standard JDBC/SQL interface for analytics.
-6. **Platform UI:** A React dashboard for managing Kafka topics, deploying Flink jobs, browsing the data catalog, and running SQL queries.
+1. **Data Ingestion & Transport Layer** — High-performance message queue/bus ingesting telemetry and command payloads with schema validation.
+2. **Core Processing Engine** — Multi-threaded microservice architecture handling domain logic, transactional state updates, and rule evaluation.
+3. **Data Storage & Indexing** — Hybrid database architecture utilizing relational storage for ACID metadata, time-series stores for telemetry, and caches for low-latency lookups.
+4. **Bounded AI Subsystem** — Integrated ML inference service (Great Expectations & ML data quality anomaly scoring) providing predictive scores to augment decision engines.
+5. **Operational Control Dashboard** — Modern web application featuring live telemetry, interactive charts, and administrative workflow controls.
+6. **Observability & Audit Stack** — Distributed tracing, structured logging, and metrics exporter providing complete system visibility.
 
 ---
 
 ## System Architecture
 
-### Backend / Big Data Stack
-- **Message Broker:** Apache Kafka.
-- **Stream Processing:** Apache Flink.
-- **Table Format:** Apache Iceberg.
-- **Query Engine:** Trino.
-- **Storage:** MinIO (Object Storage).
-- **Catalog:** Apache Hive Metastore.
+### Backend
+- **Core Engine:** Written in Java / Python for high-concurrency performance and thread-safe memory handling
+- **API Framework:** High-performance REST / gRPC services for inter-component communication
+- **Message Broker:** Distributed event bus managing asynchronous tasks and telemetry streams
 
-### Frontend & API
-- **Control Plane API:** Python (FastAPI) or Go to orchestrate the big data services.
-- **Dashboard:** React with a SQL editor component (e.g., Monaco Editor) and data visualization capabilities.
+### Frontend
+- **Admin Console:** React with TypeScript for type-safe UI state management
+- **Data Visualization:** Recharts / D3.js for time-series and metric visualizer components
+- **Real-Time Layer:** WebSocket connection for streaming live system events to the UI
+
+### Mobile
+- Responsive PWA / Mobile view optimized for tablet and on-the-go operational monitoring.
+
+### Cloud
+- **AWS / GCP:** Primary cloud providers
+- **Orchestration:** Containerized services managed via Docker and Kubernetes
+- **Storage:** S3-compatible object storage (MinIO) for model artifacts and persistent log backups
 
 ### Security
-- **Access Control:** RBAC implemented in Trino to restrict which users can query which Iceberg tables.
-- **Encryption:** TLS for all internal traffic; MinIO encryption at rest.
+- **Authentication & Authorization:** OAuth2 + JWT tokens with granular RBAC policies
+- **Transport Security:** TLS 1.3 for all external and inter-service gRPC communication
+- **Audit Trail:** Immutable audit logging for all administrative actions and system decisions
 
 ### AI Components
-- **Automated Data Quality (Optional):** A machine learning model that observes the incoming data stream and flags anomalous records (e.g., a massive spike in NULL values) before they are committed to the Lakehouse.
+- **Inference Engine:** Microservice hosting pre-trained ML models with sub-20ms latency
+- **Feature Pipeline:** Real-time feature extraction from incoming telemetry streams
+- **Drift Monitoring:** Statistical distribution tracking to detect model degradation
 
 ### Databases
-- The platform *is* a database (a Lakehouse). It uses PostgreSQL only internally for storing UI metadata and user accounts.
+- **PostgreSQL:** Primary relational store for configuration, user accounts, and state
+- **Redis:** High-speed in-memory cache for session state and rate-limiting counters
+- **Domain-Specific Store:** Time-series (InfluxDB) or Columnar (ClickHouse) database optimized for analytical telemetry
 
 ### Networking
-- **High-throughput internal networking** is required between Flink, MinIO, and Trino.
+- **Protocols:** gRPC for internal IPC, REST for web clients, WebSockets for live push
+- **Service Mesh:** Envoy / Linkerd sidecars for mTLS and traffic management
 
 ### DevOps
-- **Docker Compose / Kubernetes:** Essential for deploying this complex, multi-service architecture locally or in the cloud.
+- **Containerization:** Docker container builds for all microservices
+- **Orchestration:** Kubernetes manifests and Helm charts
+- **CI/CD:** GitHub Actions workflows for automated linting, unit testing, and image publishing
+
+### MLOps
+- **Model Registry:** MLflow for tracking experiment metrics and model versioning
+- **Retraining Trigger:** Automated job retraining models when data drift exceeds thresholds
+
+### Embedded
+- Applicable hardware interfacing scripts (C/C++ or Python) where physical node telemetry is required.
+
+### Infrastructure
+- Control plane nodes, application worker pools, database replica clusters, and message broker nodes.
+
+### Monitoring
+- **Prometheus:** Metrics collection (request rates, latency histograms, error rates)
+- **Grafana:** Operations dashboards displaying system KPIs and alert status
+
+### APIs
+- `POST /api/v1/ingest` — Primary data ingestion endpoint
+- `GET /api/v1/status` — Health and system status query
+- `POST /api/v1/control` — Administrative execution command
+- `GET /api/v1/analytics` — Metrics and historical analytics query
+
+---
+
+## AI Components
+
+AI functions as an **augmented intelligence module** (~15–20% of effort). The core platform operates deterministically; ML enhances accuracy.
+
+| Component | AI Role | Technique | Justification |
+|-----------|---------|-----------|---------------|
+| Predictive Analysis | Score incoming events for anomalies or future trends | Great Expectations & ML data quality anomaly scoring | Provides adaptive insight where static rules are insufficient |
+| Feature Extraction | Extract statistical metrics from raw telemetry streams | Sliding-window aggregation | Transforms raw inputs into structured model features |
+| Model Drift Monitor | Track distribution shifts in input features | Population Stability Index (PSI) | Ensures model accuracy does not silently degrade |
+
+**What AI does NOT do:** AI does not make irreversible administrative decisions autonomously. Critical system actions require rule verification or human approval.
+
+---
+
+## Research Opportunities
+
+1. **System Throughput Benchmarking:** Evaluate processing latency and memory footprint under synthetic high-load scenarios.
+2. **Adaptive Rule-ML Synergy:** Study optimal weighting mechanisms between static business rules and probabilistic ML scores.
+3. **Data Compression Efficiency:** Measure bandwidth and storage reduction using domain-specific encoding vs. generic compression algorithms.
+
+**Possible Publications:**
+- IEEE / ACM conference paper on domain system engineering and high-throughput architecture.
+- Technical report detailing benchmark results and failure-recovery performance.
+
+---
+
+## Technology Stack
+
+| Category | Technology | Version | Purpose |
+|----------|-----------|---------|---------|
+| **Primary Stack** | Java, Scala, Python, Apache Iceberg, Apache Flink, Apache Kafka, Trino, MinIO, Spark, React | Latest | Core System Implementation |
+| **Containers** | Docker / Kubernetes | 24+ / 1.28+ | Deployment & Orchestration |
+| **Monitoring** | Prometheus / Grafana | 2.50+ / 10.x | Telemetry Observability |
+| **CI/CD** | GitHub Actions | — | Automated Build & Test |
 
 ---
 
@@ -97,23 +174,96 @@ Build **AeroLake**, an integrated open-source data lakehouse platform consisting
 
 | Topic | Importance | Where to Learn |
 |-------|-----------|----------------|
-| Distributed Systems Concepts | Essential | "Designing Data-Intensive Applications" (Kleppmann) |
-| Apache Kafka & Stream Processing | Essential | Kafka docs, Flink training |
-| Open Table Formats (Iceberg) | Essential | Apache Iceberg documentation |
-| Distributed SQL (Trino) | Important | Trino definitive guide |
-| Docker & Container Orchestration| Essential | Docker documentation |
+| Distributed Systems Architecture | Essential | "Designing Data-Intensive Applications" (Kleppmann) |
+| Java / Python Programming | Essential | Language Official Documentation & Guides |
+| Database Design & Optimization | Essential | Database Internal Literature |
+| Cloud Containerization | Important | Docker & Kubernetes Tutorials |
+
+---
+
+## Required Skills
+
+| Skill | Level Required | Notes |
+|-------|---------------|-------|
+| Java / Python Development | Advanced | Core service implementation |
+| System Architecture | Advanced | Microservice design and IPC |
+| SQL & Data Modeling | Intermediate | Schema optimization |
+| React / TypeScript | Intermediate | Frontend dashboard creation |
 
 ---
 
 ## Suggested Team Distribution
 
 | Member | Role | Responsibilities | Key Technologies |
-|--------|------|-----------------|-----------------|
-| **Member 1** | Stream Processing Eng. | Set up Kafka, build the Flink jobs for data ingestion, transformation, and continuous writing to Iceberg. | Java/Scala, Flink, Kafka |
-| **Member 2** | Storage & Catalog Eng. | Configure MinIO, set up the Hive Metastore/Nessie, and ensure ACID compliance and snapshot management for Iceberg tables. | Iceberg, MinIO, Hive |
-| **Member 3** | Distributed Query Eng. | Deploy and tune the Trino cluster, configure connectors to Iceberg, and manage query optimization and RBAC. | Trino, SQL |
-| **Member 4** | Platform Backend Eng. | Build the FastAPI/Go control plane that interacts with Kafka APIs, Flink REST APIs, and Trino. | Python/Go, REST APIs |
-| **Member 5** | Frontend & Analytics Dev | Build the web dashboard, integrating the SQL editor, data catalog browser, and basic BI charting. | React, TypeScript, ECharts |
+|--------|------|-----------------|------------------|
+| **Member 1** | Core Backend Lead | Design and implement main processing microservices, API layers, and business logic. | Java / Python, REST/gRPC |
+| **Member 2** | Data & Storage Eng. | Manage database schemas, caching layers, and ingestion pipelines. | PostgreSQL, Redis, Kafka |
+| **Member 3** | AI & Analytics Eng. | Build feature extraction pipelines, train ML models, and set up inference endpoints. | Python, PyTorch/Scikit-learn |
+| **Member 4** | Frontend & UI Developer | Build React admin console, real-time WebSocket listeners, and analytics charts. | React, TypeScript, Recharts |
+| **Member 5** | DevOps & Infrastructure | Configure Docker, Kubernetes, CI/CD pipelines, and Prometheus/Grafana monitoring. | K8s, Docker, Prometheus |
+
+---
+
+## Development Roadmap
+
+### Summer Preparation (8 weeks)
+- [ ] Review domain literature, system requirements, and API specifications
+- [ ] Complete core language (Java / Python) and streaming architecture training
+- [ ] Setup initial project repository, linters, and Docker environment
+
+### Fall Semester (16 weeks)
+- **Weeks 1–4:** Core Ingestion & Storage Setup
+- **Weeks 5–8:** Business Logic & Processing Engine Implementation
+- **Weeks 9–12:** AI Model Training & Inference Endpoint Integration
+- **Weeks 13–16:** Initial Dashboard & Mid-Semester Review
+
+### Spring Semester (16 weeks)
+- **Weeks 1–4:** System Integration & End-to-End Pipeline Testing
+- **Weeks 5–8:** Advanced Observability, Security Audit & Drift Monitoring
+- **Weeks 9–12:** Load Testing, Profiling & Latency Benchmarking
+- **Weeks 13–16:** Final Documentation, Video Demo, and Project Defense
+
+---
+
+## Risks
+
+### Technical Risks
+| Risk | Probability | Impact | Mitigation |
+|------|------------|--------|------------|
+| High Latency under Load | Medium | High | Profile critical path using pprof; optimize queries and caching |
+| Data Consistency Edge Cases | Low | High | Implement strict transactional boundaries and integration tests |
+
+### Security & Deployment Risks
+| Risk | Probability | Impact | Mitigation |
+|------|------------|--------|------------|
+| Unauthorized Access to APIs | Low | Critical | Enforce JWT validation and strict RBAC policies |
+| Deployment Complexity | Medium | Medium | Use Helm charts for reproducible Kubernetes setups |
+
+---
+
+## Deliverables
+
+### Software
+- [ ] Core processing backend microservices
+- [ ] Real-time data ingestion and storage pipeline
+- [ ] Interactive React administration dashboard
+- [ ] ML inference service and feature pipeline
+
+### Documentation & Research
+- [ ] Architecture Design Document & API Reference
+- [ ] System Benchmark Report
+- [ ] Final Presentation Slides & Project Poster
+
+---
+
+## Sponsor Analysis
+
+### Potential Sponsors
+| Entity | Category | Interest Reason |
+|--------|----------|----------------|
+| **Vodafone Egypt Data Team** | Domestic Industry | Direct commercial alignment with project domain |
+| ** Fawry** | Local Partner | Recruitment pipeline and technical validation |
+| **International Tech Vendors** | Global | Open-source adoption and cloud resource grants |
 
 ---
 
@@ -121,24 +271,43 @@ Build **AeroLake**, an integrated open-source data lakehouse platform consisting
 
 | Category | Item | Cost (EGP) | Cost (USD) |
 |----------|------|-----------|-----------|
-| **Cloud** | High-RAM VMs (Trino and Flink are very memory-intensive) | 20,000 | ~400 |
-| **Total** | | **~20,000 EGP** | **~400 USD** |
+| **Cloud** | AWS / GCP / Azure Managed Services (6 months) | 20,000 | ~400 |
+| **Hardware** | Test devices / sensor kits / local server | 30,000 | ~600 |
+| **Total** | | **~50000 EGP** | **~1000 USD** |
 
 ---
 
-## Difficulty
-**Score: 9/10**
-This is a hardcore data engineering project. Configuring and tuning JVM-based distributed systems (Kafka, Flink, Trino) to talk to each other securely and efficiently requires immense patience and deep technical understanding.
+## Evaluation Metrics
 
----
-
-## Innovation
-**Score: 8/10**
-The Lakehouse architecture is the current frontier of data engineering. Implementing a real-time streaming Lakehouse using pure open-source components is highly impressive and mirrors the architecture of top-tier tech companies.
+- **Difficulty (8/10):** High architectural challenge involving multi-service concurrency and streaming performance.
+- **Innovation (8/10):** Combines distributed systems engineering with a bounded, production-grade AI module.
+- **Research Depth (7/10):** Strong benchmarking and latency-accuracy trade-off investigation possibilities.
+- **Sponsor Potential (8/10):** Direct applicability to industry requirements in Egypt and internationally.
+- **Startup Potential (8/10):** Clear B2B SaaS commercialization path.
 
 ---
 
 ## Career Value
-**Data Engineer:** ⭐⭐⭐⭐⭐ (This is the ultimate portfolio project for Data Engineering)
-**Backend / Systems Engineer:** ⭐⭐⭐⭐
-**Data Analyst:** ⭐⭐⭐ (Through using the platform)
+
+| Career Path | Relevance | Why |
+|-------------|-----------|-----|
+| **Backend / Systems Engineer** | ⭐⭐⭐⭐⭐ | Deep exposure to concurrent microservices, gRPC, and database design |
+| **Data / Infrastructure Engineer** | ⭐⭐⭐⭐⭐ | Hands-on stream processing, event queuing, and storage optimization |
+| **DevOps / Platform Engineer** | ⭐⭐⭐⭐ | Kubernetes, CI/CD, and Prometheus/Grafana observability |
+| **MLOps / Applied AI Engineer** | ⭐⭐⭐⭐ | Serving production ML models with feature monitoring |
+
+---
+
+## Future Extensions
+
+1. **Multi-Region Clustering:** Extend control plane across multiple geographical cloud zones.
+2. **eBPF Acceleration:** Offload kernel packet filtering for higher network throughput.
+3. **Advanced Visual Analytics:** Add graph-based dependency maps to the frontend UI.
+
+---
+
+## References
+
+1. Kleppmann, M. (2017). *Designing Data-Intensive Applications.* O'Reilly Media.
+2. Official Documentation for Java and  Scala.
+3. IEEE / ACM Conference proceedings on Distributed Systems and Cloud Computing.

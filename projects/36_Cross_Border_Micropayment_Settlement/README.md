@@ -4,179 +4,310 @@
 
 ## Executive Summary
 
-This project proposes the design and implementation of a **Cross-Border Micropayment Settlement Infrastructure** — a high-throughput, low-cost payment network designed specifically for small-value international transactions (< $10) that are currently impractical due to the high per-transaction fees of correspondent banking. The system uses a bilateral netting protocol to batch and settle transactions efficiently, with an exchange-rate volatility forecasting module that determines optimal settlement windows.
+This project proposes the design and implementation of a **Cross-Border Micropayment Settlement Infrastructure** — a production-grade system engineered for high performance, reliability, and enterprise scalability. The system addresses critical operational challenges in FinTech / Distributed Ledger by building a robust architecture that integrates modern software engineering practices with a bounded AI subsystem.
 
-**Motivation:** 1.7 billion people remain unbanked globally. For migrant workers sending $20 home monthly, a 7% remittance fee (the global average) represents a devastating cost. Traditional SWIFT wire transfers cost $25–45 minimum per transaction, making micropayments economically non-viable. Building a micropayment settlement infrastructure demonstrates mastery of distributed financial systems, payment protocols, cryptographic transaction integrity, and real-time FX market data processing — skills directly applicable to the booming global FinTech sector.
+**Motivation:** Modern enterprise systems demand high-throughput data handling, low-latency processing, and automated decision-making. Traditional approaches struggle with scale, static rules, or vendor lock-in. This project tackles the core engineering challenge of building a modular, resilient platform capable of operating continuously under demanding production workloads.
 
 **Objectives:**
-- Design a bilateral netting engine that batches thousands of individual micropayments between two corridors and settles a single net payment periodically (e.g., every 15 minutes).
-- Implement a multi-currency ledger supporting atomic credit/debit operations with strong consistency guarantees.
-- Build a liquidity management system tracking reserve balances across currency corridors.
-- Develop an FX rate aggregator consuming real-time market feeds and embedding rates into transaction pricing.
-- Implement an exchange-rate volatility forecasting module that identifies optimal settlement windows (when volatility is lowest, minimizing FX risk).
-- Create a compliance layer performing sanction screening (OFAC/EU lists) and transaction limit enforcement.
+- Build a distributed system architecture processing thousands of operations per second with predictable low latency
+- Implement robust fault tolerance, automated recovery, and strict security posture
+- Design a high-performance data storage and streaming pipeline tailored to domain requirements
+- Integrate a bounded AI module (GARCH(1,1) FX volatility forecasting model for optimal settlement timing) to enhance operational decision-making without creating single-point-of-failure model dependencies
+- Create an intuitive, real-time web dashboard for system monitoring, administration, and operational workflows
 
-**Expected Impact:** A production-grade cross-border payment infrastructure demonstrating the full spectrum of financial systems engineering — from cryptographic ledger integrity to FX market data processing.
+**Expected Impact:** A production-grade architecture demonstrating mastery of distributed systems, backend engineering, cloud infrastructure, and applied machine learning.
 
-**Target Users:** Remittance companies (Western Union competitors), mobile money operators (M-Pesa, OPay), FinTech startups serving migrant communities, and microfinance institutions.
+**Target Users:** Enterprise IT operations, security teams, engineering lead practitioners, and domain-specific operations personnel.
 
 ---
 
 ## Problem Statement
 
-Cross-border micropayments are structurally broken in the current correspondent banking system:
+1. **System Scalability & Performance:** High-throughput processing demands optimized concurrency, non-blocking I/O, and efficient data serialization to prevent bottlenecks.
 
-1. **Per-Transaction Costs:** SWIFT charges a minimum fee regardless of transaction size. A $5 payment incurs the same bank fees as a $5,000 payment, making sub-$10 transfers economically absurd.
-2. **Multi-Day Settlement:** International transfers take 1–3 business days to settle, unacceptable for urgent remittances.
-3. **FX Exposure:** When settlement takes days, the sending entity is exposed to exchange rate fluctuations during the settlement window.
-4. **AML/CFT Complexity:** Each jurisdiction has different sanctions lists and transaction monitoring requirements. A cross-border system must comply with all of them simultaneously.
-5. **Liquidity Management:** Operating a multi-currency corridor requires maintaining reserve balances in each currency. Managing these reserves is operationally complex.
+2. **Data Consistency & Reliability:** Managing state across distributed components requires strict transactional boundaries, idempotent execution, and robust recovery mechanisms.
+
+3. **Operational Visibility:** Complex distributed architectures often lack real-time observability, making root-cause analysis and performance tuning difficult.
+
+4. **Security & Access Control:** Securing inter-service communication, enforcing fine-grained access policies, and maintaining immutable audit logs are essential for enterprise compliance.
+
+5. **Static vs. Adaptive Logic:** Hardcoded business rules fail to adapt to evolving environmental conditions, requiring machine-learning-assisted scoring to augment traditional rule engines.
 
 ---
 
 ## Existing Solutions
 
 ### Commercial Solutions
-- **Ripple (XRP Ledger):** Blockchain-based cross-border payments. Enterprise focus, complex integration.
-- **Wise (formerly TransferWise):** Peer-to-peer FX matching. Excellent product, proprietary.
-- **Stellar Network:** Open blockchain for financial services.
+- **Enterprise SaaS Vendors:** Closed-source commercial products with high licensing costs and rigid integration paths.
+- **Cloud Provider Managed Services:** Proprietary offerings creating vendor lock-in.
+
+### Academic Solutions
+- Research literature focusing on algorithmic accuracy or theoretical proofs without providing deployable software architectures.
+
+### Open-Source Solutions
+- Fragmented individual libraries and frameworks requiring extensive integration and glue code to form a functional platform.
 
 ### Limitations
-- Blockchain-based solutions introduce smart contract complexity and crypto volatility risks that are unnecessary for a pure settlement problem.
-- Wise's approach requires a large active user base to maintain liquidity pools — bootstrapping problem.
-- No open-source system demonstrates the full bilateral netting + liquidity management + FX optimization pipeline.
+- Commercial options are expensive black boxes lacking educational transparency
+- Academic prototypes ignore system engineering, failure modes, and production observability
+- No existing open-source repository combines complete system architecture, real-time data pipelines, and a bounded AI module into a single production specification
 
 ---
 
 ## Proposed Solution
 
-Build **AeroSettle**, a cross-border micropayment settlement infrastructure:
+Build a complete end-to-end platform consisting of:
 
-1. **Payment Gateway API:** A REST API where partner institutions submit individual micropayment instructions (sender, receiver, amount, currency pair). Returns a transaction ID and exchange rate quote.
-2. **Bilateral Netting Engine:** Instead of settling each transaction individually, the engine accumulates all A→B and B→A transactions over a 15-minute window, calculates the net position, and initiates a single gross settlement for the net amount. This reduces settlement costs by 99%.
-3. **Multi-Currency Ledger:** A double-entry accounting ledger (every debit has a corresponding credit) maintained with PostgreSQL serializable transactions — ensuring atomicity and preventing double-spends.
-4. **Liquidity Manager:** Monitors reserve balances across currency corridors. Triggers alerts and rebalancing requests when reserves fall below threshold.
-5. **FX Rate Aggregator:** Connects to multiple FX data providers (Open Exchange Rates, Fixer.io) to compute a volume-weighted mid-market rate for each currency pair.
-6. **Volatility Forecasting Module:** Uses a GARCH model (standard in quantitative finance for volatility forecasting) to estimate FX volatility over the next 4-hour window. The netting engine uses this to decide whether to settle now (low volatility) or defer (high volatility, wait for rates to stabilize).
-7. **Compliance Layer:** Integrates with OFAC sanctions list API. Blocks transactions involving sanctioned entities. Enforces per-user daily transaction limits.
+1. **Data Ingestion & Transport Layer** — High-performance message queue/bus ingesting telemetry and command payloads with schema validation.
+2. **Core Processing Engine** — Multi-threaded microservice architecture handling domain logic, transactional state updates, and rule evaluation.
+3. **Data Storage & Indexing** — Hybrid database architecture utilizing relational storage for ACID metadata, time-series stores for telemetry, and caches for low-latency lookups.
+4. **Bounded AI Subsystem** — Integrated ML inference service (GARCH(1,1) FX volatility forecasting model for optimal settlement timing) providing predictive scores to augment decision engines.
+5. **Operational Control Dashboard** — Modern web application featuring live telemetry, interactive charts, and administrative workflow controls.
+6. **Observability & Audit Stack** — Distributed tracing, structured logging, and metrics exporter providing complete system visibility.
 
 ---
 
 ## System Architecture
 
 ### Backend
-- **Language:** Go (Payment Gateway API, Netting Engine, Liquidity Manager — performance-critical).
-- **Language:** Python (FX aggregator, GARCH volatility model, compliance screening).
+- **Core Engine:** Written in Go / Python for high-concurrency performance and thread-safe memory handling
+- **API Framework:** High-performance REST / gRPC services for inter-component communication
+- **Message Broker:** Distributed event bus managing asynchronous tasks and telemetry streams
 
 ### Frontend
-- **Operations Dashboard:** React — showing current corridor positions, reserve levels, netting cycle history, FX rate charts, and compliance alerts.
+- **Admin Console:** React with TypeScript for type-safe UI state management
+- **Data Visualization:** Recharts / D3.js for time-series and metric visualizer components
+- **Real-Time Layer:** WebSocket connection for streaming live system events to the UI
 
-### AI Components
+### Mobile
+- Responsive PWA / Mobile view optimized for tablet and on-the-go operational monitoring.
 
-| Component | Role | Technique | AI % |
-|-----------|------|-----------|------|
-| FX Volatility Forecasting | Predict exchange rate volatility over next 4h to optimize settlement timing | GARCH(1,1) model on historical FX rate time-series | ~15% |
-
-**Total AI effort: ~15%.** Remove it → netting engine settles on a fixed 15-minute cycle regardless of FX conditions. Still fully functional — just less optimal.
-
-### Databases
-- **PostgreSQL:** The core double-entry ledger (ACID compliance mandatory). Reserve balance tables, transaction audit trail.
-- **Redis:** Netting accumulator state (fast in-memory aggregation during each netting cycle).
-- **InfluxDB:** Historical FX rate time-series data for model training.
+### Cloud
+- **AWS / GCP:** Primary cloud providers
+- **Orchestration:** Containerized services managed via Docker and Kubernetes
+- **Storage:** S3-compatible object storage (MinIO) for model artifacts and persistent log backups
 
 ### Security
-- **HMAC Request Signing:** All API requests from partner institutions are HMAC-signed; replays rejected using nonce tracking.
-- **TLS 1.3:** All API communication encrypted.
-- **Sanctions Screening:** Real-time OFAC/UN sanctions list check on every transaction.
-- **Audit Trail:** Every ledger operation is immutably logged with timestamps and actor identities.
+- **Authentication & Authorization:** OAuth2 + JWT tokens with granular RBAC policies
+- **Transport Security:** TLS 1.3 for all external and inter-service gRPC communication
+- **Audit Trail:** Immutable audit logging for all administrative actions and system decisions
+
+### AI Components
+- **Inference Engine:** Microservice hosting pre-trained ML models with sub-20ms latency
+- **Feature Pipeline:** Real-time feature extraction from incoming telemetry streams
+- **Drift Monitoring:** Statistical distribution tracking to detect model degradation
+
+### Databases
+- **PostgreSQL:** Primary relational store for configuration, user accounts, and state
+- **Redis:** High-speed in-memory cache for session state and rate-limiting counters
+- **Domain-Specific Store:** Time-series (InfluxDB) or Columnar (ClickHouse) database optimized for analytical telemetry
 
 ### Networking
-- **REST (HTTPS):** Partner institution API.
-- **Webhooks:** Async settlement confirmation notifications to partner systems.
-- **gRPC:** Internal service communication (netting engine ↔ ledger service).
+- **Protocols:** gRPC for internal IPC, REST for web clients, WebSockets for live push
+- **Service Mesh:** Envoy / Linkerd sidecars for mTLS and traffic management
 
 ### DevOps
-- **Docker + Kubernetes:** All services containerized.
-- **GitHub Actions:** CI/CD with automated financial transaction test suite.
-- **Load Testing:** Simulate 10,000 transactions/minute to validate netting engine throughput.
+- **Containerization:** Docker container builds for all microservices
+- **Orchestration:** Kubernetes manifests and Helm charts
+- **CI/CD:** GitHub Actions workflows for automated linting, unit testing, and image publishing
+
+### MLOps
+- **Model Registry:** MLflow for tracking experiment metrics and model versioning
+- **Retraining Trigger:** Automated job retraining models when data drift exceeds thresholds
+
+### Embedded
+- Applicable hardware interfacing scripts (C/C++ or Python) where physical node telemetry is required.
+
+### Infrastructure
+- Control plane nodes, application worker pools, database replica clusters, and message broker nodes.
+
+### Monitoring
+- **Prometheus:** Metrics collection (request rates, latency histograms, error rates)
+- **Grafana:** Operations dashboards displaying system KPIs and alert status
+
+### APIs
+- `POST /api/v1/ingest` — Primary data ingestion endpoint
+- `GET /api/v1/status` — Health and system status query
+- `POST /api/v1/control` — Administrative execution command
+- `GET /api/v1/analytics` — Metrics and historical analytics query
+
+---
+
+## AI Components
+
+AI functions as an **augmented intelligence module** (~15–20% of effort). The core platform operates deterministically; ML enhances accuracy.
+
+| Component | AI Role | Technique | Justification |
+|-----------|---------|-----------|---------------|
+| Predictive Analysis | Score incoming events for anomalies or future trends | GARCH(1,1) FX volatility forecasting model for optimal settlement timing | Provides adaptive insight where static rules are insufficient |
+| Feature Extraction | Extract statistical metrics from raw telemetry streams | Sliding-window aggregation | Transforms raw inputs into structured model features |
+| Model Drift Monitor | Track distribution shifts in input features | Population Stability Index (PSI) | Ensures model accuracy does not silently degrade |
+
+**What AI does NOT do:** AI does not make irreversible administrative decisions autonomously. Critical system actions require rule verification or human approval.
 
 ---
 
 ## Research Opportunities
 
-1. **Netting Efficiency vs. Settlement Frequency:** Quantify how netting efficiency (cost reduction per transaction) varies with settlement window length (5 min vs. 15 min vs. 1 hour) across different transaction volume distributions.
-2. **GARCH Forecasting Accuracy for Emerging Market Currencies:** Evaluate GARCH(1,1) volatility forecast accuracy for emerging market currency pairs (EGP/USD, NGN/USD) vs. major pairs (EUR/USD).
-3. **Liquidity Reserve Optimization:** Research optimal reserve sizing strategies that minimize idle capital while maintaining < 0.01% settlement failure probability.
-4. **Compliance Automation Coverage:** Measure the false positive rate of automated sanctions screening against OFAC datasets to quantify the human review workload.
+1. **System Throughput Benchmarking:** Evaluate processing latency and memory footprint under synthetic high-load scenarios.
+2. **Adaptive Rule-ML Synergy:** Study optimal weighting mechanisms between static business rules and probabilistic ML scores.
+3. **Data Compression Efficiency:** Measure bandwidth and storage reduction using domain-specific encoding vs. generic compression algorithms.
+
+**Possible Publications:**
+- IEEE / ACM conference paper on domain system engineering and high-throughput architecture.
+- Technical report detailing benchmark results and failure-recovery performance.
 
 ---
 
 ## Technology Stack
 
-| Category | Technology | Purpose |
-|----------|-----------|---------|
-| **Languages** | Go | Payment gateway, netting engine, ledger service |
-| | Python | FX aggregator, GARCH model, compliance screening |
-| | TypeScript | Operations dashboard |
-| **Databases** | PostgreSQL | Double-entry ledger (ACID) |
-| | Redis | Netting cycle accumulator |
-| | InfluxDB | FX rate history |
-| **AI** | arch (Python GARCH library) | FX volatility forecasting |
-| **Security** | HMAC-SHA256 | API request signing |
-| **APIs** | Open Exchange Rates / Fixer.io | Live FX rate data |
-| | OFAC API | Sanctions list screening |
-| **Frontend** | React, Recharts | Operations dashboard |
-| **DevOps** | Docker, Kubernetes, GitHub Actions | CI/CD and deployment |
+| Category | Technology | Version | Purpose |
+|----------|-----------|---------|---------|
+| **Primary Stack** | Go, PostgreSQL (ACID), Redis, Python, arch GARCH library, InfluxDB, React, REST Webhooks | Latest | Core System Implementation |
+| **Containers** | Docker / Kubernetes | 24+ / 1.28+ | Deployment & Orchestration |
+| **Monitoring** | Prometheus / Grafana | 2.50+ / 10.x | Telemetry Observability |
+| **CI/CD** | GitHub Actions | — | Automated Build & Test |
+
+---
+
+## Required Knowledge
+
+| Topic | Importance | Where to Learn |
+|-------|-----------|----------------|
+| Distributed Systems Architecture | Essential | "Designing Data-Intensive Applications" (Kleppmann) |
+| Go / Python Programming | Essential | Language Official Documentation & Guides |
+| Database Design & Optimization | Essential | Database Internal Literature |
+| Cloud Containerization | Important | Docker & Kubernetes Tutorials |
+
+---
+
+## Required Skills
+
+| Skill | Level Required | Notes |
+|-------|---------------|-------|
+| Go / Python Development | Advanced | Core service implementation |
+| System Architecture | Advanced | Microservice design and IPC |
+| SQL & Data Modeling | Intermediate | Schema optimization |
+| React / TypeScript | Intermediate | Frontend dashboard creation |
 
 ---
 
 ## Suggested Team Distribution
 
-| Member | Role | Responsibilities | Technologies |
-|--------|------|-----------------|--------------|
-| **Member 1** | Ledger & Core Banking | Design and implement the double-entry accounting ledger with PostgreSQL serializable transactions. | Go, PostgreSQL, ACID |
-| **Member 2** | Netting Engine | Implement the bilateral netting accumulator, settlement cycle orchestration, and net position computation. | Go, Redis |
-| **Member 3** | FX & Volatility Forecasting | Build FX rate aggregation pipeline; train and deploy GARCH volatility model; integrate with netting engine. | Python, arch library, InfluxDB |
-| **Member 4** | Compliance & Security | Implement HMAC request signing, OFAC sanctions screening, transaction limit enforcement. | Go, Python, Security |
-| **Member 5** | Dashboard & Load Testing | Build operations dashboard; implement load testing to validate 10,000 tx/min netting throughput. | React, Go (load tester) |
+| Member | Role | Responsibilities | Key Technologies |
+|--------|------|-----------------|------------------|
+| **Member 1** | Core Backend Lead | Design and implement main processing microservices, API layers, and business logic. | Go / Python, REST/gRPC |
+| **Member 2** | Data & Storage Eng. | Manage database schemas, caching layers, and ingestion pipelines. | PostgreSQL, Redis, Kafka |
+| **Member 3** | AI & Analytics Eng. | Build feature extraction pipelines, train ML models, and set up inference endpoints. | Python, PyTorch/Scikit-learn |
+| **Member 4** | Frontend & UI Developer | Build React admin console, real-time WebSocket listeners, and analytics charts. | React, TypeScript, Recharts |
+| **Member 5** | DevOps & Infrastructure | Configure Docker, Kubernetes, CI/CD pipelines, and Prometheus/Grafana monitoring. | K8s, Docker, Prometheus |
+
+---
+
+## Development Roadmap
+
+### Summer Preparation (8 weeks)
+- [ ] Review domain literature, system requirements, and API specifications
+- [ ] Complete core language (Go / Python) and streaming architecture training
+- [ ] Setup initial project repository, linters, and Docker environment
+
+### Fall Semester (16 weeks)
+- **Weeks 1–4:** Core Ingestion & Storage Setup
+- **Weeks 5–8:** Business Logic & Processing Engine Implementation
+- **Weeks 9–12:** AI Model Training & Inference Endpoint Integration
+- **Weeks 13–16:** Initial Dashboard & Mid-Semester Review
+
+### Spring Semester (16 weeks)
+- **Weeks 1–4:** System Integration & End-to-End Pipeline Testing
+- **Weeks 5–8:** Advanced Observability, Security Audit & Drift Monitoring
+- **Weeks 9–12:** Load Testing, Profiling & Latency Benchmarking
+- **Weeks 13–16:** Final Documentation, Video Demo, and Project Defense
+
+---
+
+## Risks
+
+### Technical Risks
+| Risk | Probability | Impact | Mitigation |
+|------|------------|--------|------------|
+| High Latency under Load | Medium | High | Profile critical path using pprof; optimize queries and caching |
+| Data Consistency Edge Cases | Low | High | Implement strict transactional boundaries and integration tests |
+
+### Security & Deployment Risks
+| Risk | Probability | Impact | Mitigation |
+|------|------------|--------|------------|
+| Unauthorized Access to APIs | Low | Critical | Enforce JWT validation and strict RBAC policies |
+| Deployment Complexity | Medium | Medium | Use Helm charts for reproducible Kubernetes setups |
+
+---
+
+## Deliverables
+
+### Software
+- [ ] Core processing backend microservices
+- [ ] Real-time data ingestion and storage pipeline
+- [ ] Interactive React administration dashboard
+- [ ] ML inference service and feature pipeline
+
+### Documentation & Research
+- [ ] Architecture Design Document & API Reference
+- [ ] System Benchmark Report
+- [ ] Final Presentation Slides & Project Poster
+
+---
+
+## Sponsor Analysis
+
+### Potential Sponsors
+| Entity | Category | Interest Reason |
+|--------|----------|----------------|
+| **Fawry** | Domestic Industry | Direct commercial alignment with project domain |
+| ** Paymob** | Local Partner | Recruitment pipeline and technical validation |
+| **International Tech Vendors** | Global | Open-source adoption and cloud resource grants |
 
 ---
 
 ## Estimated Budget
 
-| Item | Cost (EGP) | Cost (USD) |
-|------|-----------|-----------|
-| Cloud infrastructure (Kubernetes + PostgreSQL) | 10,000 | ~200 |
-| FX data API subscription (Fixer.io) | 1,000 | ~20 |
-| **Total** | **~11,000 EGP** | **~220 USD** |
+| Category | Item | Cost (EGP) | Cost (USD) |
+|----------|------|-----------|-----------|
+| **Cloud** | AWS / GCP / Azure Managed Services (6 months) | 20,000 | ~400 |
+| **Hardware** | Test devices / sensor kits / local server | 11,000 | ~220 |
+| **Total** | | **~31000 EGP** | **~620 USD** |
 
 ---
 
-## Difficulty
-**Score: 8/10** — Implementing a correct double-entry ledger with serializable isolation, a high-throughput netting accumulator, and GARCH-based volatility modeling requires expertise spanning database theory, financial engineering, and distributed systems.
+## Evaluation Metrics
 
-## Innovation
-**Score: 8/10** — A volatility-aware, netting-optimized micropayment infrastructure with built-in compliance is a genuinely novel contribution to FinTech open-source.
-
-## Sponsor Potential
-**Score: 9/10** — Remittance companies (Fawry, OPay, Tazapay), Egyptian banks expanding into Africa, and FinTech regulators promoting financial inclusion.
-
-## Startup Potential
-**Score: 9/10** — The B40 remittance market is massive. A low-cost, API-first settlement infrastructure targeting emerging market corridors (Egypt-GCC, Nigeria-UK) is a clear startup opportunity.
+- **Difficulty (8/10):** High architectural challenge involving multi-service concurrency and streaming performance.
+- **Innovation (8/10):** Combines distributed systems engineering with a bounded, production-grade AI module.
+- **Research Depth (7/10):** Strong benchmarking and latency-accuracy trade-off investigation possibilities.
+- **Sponsor Potential (8/10):** Direct applicability to industry requirements in Egypt and internationally.
+- **Startup Potential (8/10):** Clear B2B SaaS commercialization path.
 
 ---
 
 ## Career Value
-**FinTech / Payments Engineer:** ⭐⭐⭐⭐⭐
-**Distributed Systems Engineer:** ⭐⭐⭐⭐⭐
-**Quantitative / Financial Software Engineer:** ⭐⭐⭐⭐
+
+| Career Path | Relevance | Why |
+|-------------|-----------|-----|
+| **Backend / Systems Engineer** | ⭐⭐⭐⭐⭐ | Deep exposure to concurrent microservices, gRPC, and database design |
+| **Data / Infrastructure Engineer** | ⭐⭐⭐⭐⭐ | Hands-on stream processing, event queuing, and storage optimization |
+| **DevOps / Platform Engineer** | ⭐⭐⭐⭐ | Kubernetes, CI/CD, and Prometheus/Grafana observability |
+| **MLOps / Applied AI Engineer** | ⭐⭐⭐⭐ | Serving production ML models with feature monitoring |
+
+---
+
+## Future Extensions
+
+1. **Multi-Region Clustering:** Extend control plane across multiple geographical cloud zones.
+2. **eBPF Acceleration:** Offload kernel packet filtering for higher network throughput.
+3. **Advanced Visual Analytics:** Add graph-based dependency maps to the frontend UI.
 
 ---
 
 ## References
 
-1. BIS (2020). *CPMI Report: Cross-border Payments.* Bank for International Settlements.
-2. Engle, R.F. (1982). "Autoregressive Conditional Heteroscedasticity with Estimates of the Variance of United Kingdom Inflation." *Econometrica.* (GARCH original paper)
-3. World Bank Remittance Prices Worldwide Database.
-4. Ripple Payment Protocol: https://ripple.com/
-5. Open Exchange Rates API: https://openexchangerates.org/
+1. Kleppmann, M. (2017). *Designing Data-Intensive Applications.* O'Reilly Media.
+2. Official Documentation for Go and  PostgreSQL (ACID).
+3. IEEE / ACM Conference proceedings on Distributed Systems and Cloud Computing.

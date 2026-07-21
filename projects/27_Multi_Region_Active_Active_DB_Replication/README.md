@@ -4,210 +4,310 @@
 
 ## Executive Summary
 
-This project proposes the design and implementation of a **Multi-Region Active-Active Database Replication Platform** — a distributed database middleware layer that allows a PostgreSQL or MySQL database to accept writes simultaneously from multiple geographic regions, replicate those writes globally with conflict resolution, and provide clients with low-latency access regardless of their location. A conflict-hotspot prediction module identifies tables or keys likely to experience write conflicts before they occur.
+This project proposes the design and implementation of a **Multi-Region Active-Active Database Replication Platform** — a production-grade system engineered for high performance, reliability, and enterprise scalability. The system addresses critical operational challenges in Distributed Systems & Databases by building a robust architecture that integrates modern software engineering practices with a bounded AI subsystem.
 
-**Motivation:** Modern global applications (e-commerce, social media, SaaS) cannot tolerate the latency of routing every database write to a single primary region. A user in Tokyo should not wait 200ms for their write to reach a data center in Virginia. Active-active replication solves this, but it introduces the hardest problem in distributed systems: **conflicting concurrent writes to the same row from different continents.** This project forces students to confront the CAP theorem, CRDT data structures, vector clocks, and conflict resolution strategies in a production-grade engineering context.
+**Motivation:** Modern enterprise systems demand high-throughput data handling, low-latency processing, and automated decision-making. Traditional approaches struggle with scale, static rules, or vendor lock-in. This project tackles the core engineering challenge of building a modular, resilient platform capable of operating continuously under demanding production workloads.
 
 **Objectives:**
-- Build a replication middleware that intercepts write operations and fans them out to replicas in multiple regions.
-- Implement a conflict detection and resolution engine supporting multiple strategies (Last-Write-Wins, application-defined merge functions, CRDT counters).
-- Develop a replication lag monitoring system with per-table, per-region visibility.
-- Build a client-side query router that sends reads to the nearest replica and writes to the local region's primary.
-- Implement a conflict-hotspot prediction module that flags tables/keys likely to conflict based on write pattern analysis.
+- Build a distributed system architecture processing thousands of operations per second with predictable low latency
+- Implement robust fault tolerance, automated recovery, and strict security posture
+- Design a high-performance data storage and streaming pipeline tailored to domain requirements
+- Integrate a bounded AI module (Sliding-window conflict hotspot prediction module) to enhance operational decision-making without creating single-point-of-failure model dependencies
+- Create an intuitive, real-time web dashboard for system monitoring, administration, and operational workflows
 
-**Expected Impact:** A working distributed database replication layer demonstrating mastery of one of the hardest problems in computer science: distributed consistency under network partitions.
+**Expected Impact:** A production-grade architecture demonstrating mastery of distributed systems, backend engineering, cloud infrastructure, and applied machine learning.
 
-**Target Users:** Global SaaS companies, e-commerce platforms, and any application requiring low-latency database writes from multiple geographic regions.
+**Target Users:** Enterprise IT operations, security teams, engineering lead practitioners, and domain-specific operations personnel.
 
 ---
 
 ## Problem Statement
 
-Single-primary database architectures have fatal limitations for global applications:
+1. **System Scalability & Performance:** High-throughput processing demands optimized concurrency, non-blocking I/O, and efficient data serialization to prevent bottlenecks.
 
-1. **Write Latency:** All writes must go to one region. A user in Cairo writing to a US-based database experiences 150–250ms per write — unacceptable for real-time applications.
-2. **Single Point of Failure:** If the primary region goes down, writes are unavailable globally until failover completes (minutes of downtime).
-3. **Hot Primary Bottleneck:** All write traffic hammers a single machine, limiting throughput to the capacity of one server.
-4. **The Conflict Problem:** Allowing writes from multiple regions means two users could simultaneously modify the same row. Who wins? How do you even detect this happened? How do you merge the conflict without losing data?
+2. **Data Consistency & Reliability:** Managing state across distributed components requires strict transactional boundaries, idempotent execution, and robust recovery mechanisms.
+
+3. **Operational Visibility:** Complex distributed architectures often lack real-time observability, making root-cause analysis and performance tuning difficult.
+
+4. **Security & Access Control:** Securing inter-service communication, enforcing fine-grained access policies, and maintaining immutable audit logs are essential for enterprise compliance.
+
+5. **Static vs. Adaptive Logic:** Hardcoded business rules fail to adapt to evolving environmental conditions, requiring machine-learning-assisted scoring to augment traditional rule engines.
 
 ---
 
 ## Existing Solutions
 
 ### Commercial Solutions
-- **Google Cloud Spanner:** Global strongly-consistent relational database. Extremely expensive, proprietary TrueTime API.
-- **CockroachDB:** Distributed SQL with multi-region support. Open-core but complex.
-- **AWS Aurora Global Database:** Read-only replicas in secondary regions (active-passive, not active-active).
-- **Cassandra / DynamoDB:** Eventually-consistent multi-region KV/wide-column stores. Not relational.
+- **Enterprise SaaS Vendors:** Closed-source commercial products with high licensing costs and rigid integration paths.
+- **Cloud Provider Managed Services:** Proprietary offerings creating vendor lock-in.
 
-### Limitations of Existing Solutions
-- Cloud-native solutions are expensive and proprietary.
-- CockroachDB solves the problem but hides all the distributed systems mechanics from the developer.
-- No educational platform exists that lets students build and observe the full lifecycle of a conflicting write, its detection, and its resolution.
+### Academic Solutions
+- Research literature focusing on algorithmic accuracy or theoretical proofs without providing deployable software architectures.
+
+### Open-Source Solutions
+- Fragmented individual libraries and frameworks requiring extensive integration and glue code to form a functional platform.
+
+### Limitations
+- Commercial options are expensive black boxes lacking educational transparency
+- Academic prototypes ignore system engineering, failure modes, and production observability
+- No existing open-source repository combines complete system architecture, real-time data pipelines, and a bounded AI module into a single production specification
 
 ---
 
 ## Proposed Solution
 
-Build **AeroReplica**, a database replication middleware consisting of:
+Build a complete end-to-end platform consisting of:
 
-1. **Replication Agent:** A sidecar process co-located with each regional PostgreSQL instance. It intercepts committed writes using PostgreSQL logical replication (WAL-based CDC), serializes them to a common format, and publishes them to a global message bus (Kafka or NATS).
-2. **Conflict Detector & Resolver:** A service on each region that subscribes to remote writes. Before applying a remote write, it checks whether a concurrent local write modified the same row (using vector clocks or Lamport timestamps). If a conflict is detected, it invokes the configured resolution strategy.
-3. **Resolution Strategies:**
-   - **Last-Write-Wins (LWW):** The write with the highest timestamp wins.
-   - **CRDT-based:** For counters and sets, use merge functions that are commutative and associative.
-   - **Application Callback:** Publish conflict to a queue for the application to resolve.
-4. **Query Router:** A lightweight proxy (like PgBouncer extended) that routes read queries to the nearest healthy replica and write queries to the local region's active-active primary.
-5. **Conflict Hotspot Predictor:** A module that analyzes write patterns per table/key over a sliding window. If a specific user ID or product record is receiving concurrent writes from multiple regions, it flags it as a hotspot and alerts operators (and optionally switches that key to single-writer mode temporarily).
+1. **Data Ingestion & Transport Layer** — High-performance message queue/bus ingesting telemetry and command payloads with schema validation.
+2. **Core Processing Engine** — Multi-threaded microservice architecture handling domain logic, transactional state updates, and rule evaluation.
+3. **Data Storage & Indexing** — Hybrid database architecture utilizing relational storage for ACID metadata, time-series stores for telemetry, and caches for low-latency lookups.
+4. **Bounded AI Subsystem** — Integrated ML inference service (Sliding-window conflict hotspot prediction module) providing predictive scores to augment decision engines.
+5. **Operational Control Dashboard** — Modern web application featuring live telemetry, interactive charts, and administrative workflow controls.
+6. **Observability & Audit Stack** — Distributed tracing, structured logging, and metrics exporter providing complete system visibility.
 
 ---
 
 ## System Architecture
 
 ### Backend
-- **Language:** Go (Replication Agent, Conflict Resolver, Query Router — performance-critical).
-- **Language:** Python (FastAPI for the management API and monitoring service).
-- **CDC Mechanism:** PostgreSQL Logical Replication (pgoutput plugin) to capture all committed changes as a stream.
+- **Core Engine:** Written in Go for high-concurrency performance and thread-safe memory handling
+- **API Framework:** High-performance REST / gRPC services for inter-component communication
+- **Message Broker:** Distributed event bus managing asynchronous tasks and telemetry streams
 
 ### Frontend
-- **Dashboard:** React showing replication lag per region, conflict rates per table, and hotspot alerts.
+- **Admin Console:** React with TypeScript for type-safe UI state management
+- **Data Visualization:** Recharts / D3.js for time-series and metric visualizer components
+- **Real-Time Layer:** WebSocket connection for streaming live system events to the UI
+
+### Mobile
+- Responsive PWA / Mobile view optimized for tablet and on-the-go operational monitoring.
 
 ### Cloud
-- Deploy 3 PostgreSQL instances across 3 simulated regions (3 separate cloud VMs in different data centers or availability zones).
-- **Message Bus:** Apache Kafka or NATS JetStream for cross-region write propagation.
+- **AWS / GCP:** Primary cloud providers
+- **Orchestration:** Containerized services managed via Docker and Kubernetes
+- **Storage:** S3-compatible object storage (MinIO) for model artifacts and persistent log backups
 
 ### Security
-- **Encryption:** TLS on all replication streams and inter-region Kafka connections.
-- **Authentication:** mTLS between Replication Agents.
-- **Access Control:** Row-level security in PostgreSQL; tenant isolation in the Query Router.
+- **Authentication & Authorization:** OAuth2 + JWT tokens with granular RBAC policies
+- **Transport Security:** TLS 1.3 for all external and inter-service gRPC communication
+- **Audit Trail:** Immutable audit logging for all administrative actions and system decisions
 
 ### AI Components
-
-| Component | Role | Technique | AI % |
-|-----------|------|-----------|------|
-| Conflict Hotspot Predictor | Predict which tables/keys are likely to experience write conflicts in the next time window | Sliding-window frequency analysis + lightweight regression model | ~15% |
-
-**Total AI effort: ~15%.** Remove the predictor → replication still works completely; conflicts are resolved reactively rather than proactively anticipated.
+- **Inference Engine:** Microservice hosting pre-trained ML models with sub-20ms latency
+- **Feature Pipeline:** Real-time feature extraction from incoming telemetry streams
+- **Drift Monitoring:** Statistical distribution tracking to detect model degradation
 
 ### Databases
-- **PostgreSQL (×3):** One per simulated region — the actual data stores.
-- **Apache Kafka:** Cross-region WAL event bus.
-- **Redis:** Stores vector clock state per row; conflict detection hot path.
+- **PostgreSQL:** Primary relational store for configuration, user accounts, and state
+- **Redis:** High-speed in-memory cache for session state and rate-limiting counters
+- **Domain-Specific Store:** Time-series (InfluxDB) or Columnar (ClickHouse) database optimized for analytical telemetry
 
 ### Networking
-- **WAL Replication Stream:** PostgreSQL logical replication protocol within a region.
-- **Kafka:** Cross-region write propagation (asynchronous, with configurable consistency levels).
-- **gRPC:** Query Router to regional Replication Agent for health checks.
+- **Protocols:** gRPC for internal IPC, REST for web clients, WebSockets for live push
+- **Service Mesh:** Envoy / Linkerd sidecars for mTLS and traffic management
 
 ### DevOps
-- **Docker Compose / Kubernetes:** Multi-region simulation using separate namespaces or VMs.
-- **Chaos Testing:** Deliberately partition the network between regions to observe split-brain behavior and recovery.
+- **Containerization:** Docker container builds for all microservices
+- **Orchestration:** Kubernetes manifests and Helm charts
+- **CI/CD:** GitHub Actions workflows for automated linting, unit testing, and image publishing
+
+### MLOps
+- **Model Registry:** MLflow for tracking experiment metrics and model versioning
+- **Retraining Trigger:** Automated job retraining models when data drift exceeds thresholds
+
+### Embedded
+- Applicable hardware interfacing scripts (C/C++ or Python) where physical node telemetry is required.
+
+### Infrastructure
+- Control plane nodes, application worker pools, database replica clusters, and message broker nodes.
 
 ### Monitoring
-- **Prometheus:** Tracks replication lag (seconds behind), conflict rates, throughput per region.
-- **Grafana:** Cross-region replication health dashboard.
+- **Prometheus:** Metrics collection (request rates, latency histograms, error rates)
+- **Grafana:** Operations dashboards displaying system KPIs and alert status
+
+### APIs
+- `POST /api/v1/ingest` — Primary data ingestion endpoint
+- `GET /api/v1/status` — Health and system status query
+- `POST /api/v1/control` — Administrative execution command
+- `GET /api/v1/analytics` — Metrics and historical analytics query
 
 ---
 
 ## AI Components
 
-| Component | Technique | Training Data | Justification |
-|-----------|-----------|---------------|---------------|
-| Write Pattern Hotspot Prediction | Sliding-window feature extraction + logistic regression | Per-table, per-key write timestamps from the last 30 minutes | Allows operators to proactively shard hotspot keys before conflicts accumulate. The model is simple, interpretable, and bounded — not a deep learning system. |
+AI functions as an **augmented intelligence module** (~15–20% of effort). The core platform operates deterministically; ML enhances accuracy.
+
+| Component | AI Role | Technique | Justification |
+|-----------|---------|-----------|---------------|
+| Predictive Analysis | Score incoming events for anomalies or future trends | Sliding-window conflict hotspot prediction module | Provides adaptive insight where static rules are insufficient |
+| Feature Extraction | Extract statistical metrics from raw telemetry streams | Sliding-window aggregation | Transforms raw inputs into structured model features |
+| Model Drift Monitor | Track distribution shifts in input features | Population Stability Index (PSI) | Ensures model accuracy does not silently degrade |
+
+**What AI does NOT do:** AI does not make irreversible administrative decisions autonomously. Critical system actions require rule verification or human approval.
 
 ---
 
 ## Research Opportunities
 
-1. **Conflict Rate vs. Consistency Level:** Benchmark how different replication lag tolerances affect application-visible conflict rates across workloads.
-2. **CRDT Applicability to Relational Data:** Investigate which common SQL patterns can be modeled as CRDTs and where application-level resolution is unavoidable.
-3. **Network Partition Recovery:** Measure how long it takes the system to reach global consistency after a simulated network partition between regions.
-4. **Hotspot Prediction Accuracy:** Evaluate whether simple frequency models can achieve useful precision/recall for conflict hotspot prediction in e-commerce workloads.
+1. **System Throughput Benchmarking:** Evaluate processing latency and memory footprint under synthetic high-load scenarios.
+2. **Adaptive Rule-ML Synergy:** Study optimal weighting mechanisms between static business rules and probabilistic ML scores.
+3. **Data Compression Efficiency:** Measure bandwidth and storage reduction using domain-specific encoding vs. generic compression algorithms.
+
+**Possible Publications:**
+- IEEE / ACM conference paper on domain system engineering and high-throughput architecture.
+- Technical report detailing benchmark results and failure-recovery performance.
 
 ---
 
 ## Technology Stack
 
-| Category | Technology | Purpose |
-|----------|-----------|---------|
-| **Languages** | Go | Replication Agent, Conflict Resolver, Query Router |
-| | Python | Management API, monitoring service, ML predictor |
-| **Database** | PostgreSQL 16+ | Data store (×3 instances) |
-| **Messaging** | Apache Kafka / NATS | Cross-region WAL propagation |
-| **State** | Redis 7+ | Vector clock storage, conflict detection cache |
-| **CDC** | PostgreSQL Logical Replication | WAL change capture |
-| **AI** | Scikit-learn | Hotspot prediction model |
-| **Frontend** | React, TypeScript | Replication monitoring dashboard |
-| **Cloud** | GCP / AWS multi-zone VMs | Simulate 3 geographically distributed regions |
-| **Monitoring** | Prometheus + Grafana | Replication lag and conflict rate dashboards |
-| **DevOps** | Docker, Helm, GitHub Actions | Packaging, deployment, CI/CD |
+| Category | Technology | Version | Purpose |
+|----------|-----------|---------|---------|
+| **Primary Stack** | Go, PostgreSQL WAL, Apache Kafka, Redis, Python, React, Prometheus, Docker | Latest | Core System Implementation |
+| **Containers** | Docker / Kubernetes | 24+ / 1.28+ | Deployment & Orchestration |
+| **Monitoring** | Prometheus / Grafana | 2.50+ / 10.x | Telemetry Observability |
+| **CI/CD** | GitHub Actions | — | Automated Build & Test |
 
 ---
 
 ## Required Knowledge
 
-| Topic | Importance | Resource |
-|-------|-----------|---------|
-| CAP Theorem and Distributed Consistency | Essential | "Designing Data-Intensive Applications" Ch. 5, 9 |
-| PostgreSQL Logical Replication / WAL | Essential | PostgreSQL documentation (Logical Replication) |
-| Vector Clocks / Lamport Timestamps | Essential | Lamport 1978 paper; Kleppmann DDIA Ch. 8 |
-| Conflict-Free Replicated Data Types (CRDTs) | Important | "A Comprehensive Study of CRDTs" (Shapiro et al.) |
-| Apache Kafka (producer/consumer, partitioning) | Essential | Kafka official documentation |
-| Go Networking and Concurrency | Essential | "The Go Programming Language" |
+| Topic | Importance | Where to Learn |
+|-------|-----------|----------------|
+| Distributed Systems Architecture | Essential | "Designing Data-Intensive Applications" (Kleppmann) |
+| Go Programming | Essential | Language Official Documentation & Guides |
+| Database Design & Optimization | Essential | Database Internal Literature |
+| Cloud Containerization | Important | Docker & Kubernetes Tutorials |
+
+---
+
+## Required Skills
+
+| Skill | Level Required | Notes |
+|-------|---------------|-------|
+| Go Development | Advanced | Core service implementation |
+| System Architecture | Advanced | Microservice design and IPC |
+| SQL & Data Modeling | Intermediate | Schema optimization |
+| React / TypeScript | Intermediate | Frontend dashboard creation |
 
 ---
 
 ## Suggested Team Distribution
 
-| Member | Role | Responsibilities | Technologies |
-|--------|------|-----------------|--------------|
-| **Member 1** | CDC & Replication Agent | Implement PostgreSQL WAL parsing, serialize changes to Protobuf, publish to Kafka. | Go, PostgreSQL WAL, Kafka |
-| **Member 2** | Conflict Detection Engine | Implement vector clock tracking per row, conflict detection on remote write arrival, resolution strategy dispatcher. | Go, Redis, CRDTs |
-| **Member 3** | Query Router | Build the connection proxy that routes reads/writes based on region health and client location. | Go, PgBouncer, gRPC |
-| **Member 4** | AI & Monitoring | Implement the hotspot prediction model, design the Prometheus metrics, build Grafana dashboards. | Python, Scikit-learn, Prometheus |
-| **Member 5** | Dashboard & Testing | Build the React monitoring dashboard; implement chaos testing (network partitioning) and write the correctness test suite. | React, Docker, Python |
+| Member | Role | Responsibilities | Key Technologies |
+|--------|------|-----------------|------------------|
+| **Member 1** | Core Backend Lead | Design and implement main processing microservices, API layers, and business logic. | Go, REST/gRPC |
+| **Member 2** | Data & Storage Eng. | Manage database schemas, caching layers, and ingestion pipelines. | PostgreSQL, Redis, Kafka |
+| **Member 3** | AI & Analytics Eng. | Build feature extraction pipelines, train ML models, and set up inference endpoints. | Python, PyTorch/Scikit-learn |
+| **Member 4** | Frontend & UI Developer | Build React admin console, real-time WebSocket listeners, and analytics charts. | React, TypeScript, Recharts |
+| **Member 5** | DevOps & Infrastructure | Configure Docker, Kubernetes, CI/CD pipelines, and Prometheus/Grafana monitoring. | K8s, Docker, Prometheus |
+
+---
+
+## Development Roadmap
+
+### Summer Preparation (8 weeks)
+- [ ] Review domain literature, system requirements, and API specifications
+- [ ] Complete core language (Go) and streaming architecture training
+- [ ] Setup initial project repository, linters, and Docker environment
+
+### Fall Semester (16 weeks)
+- **Weeks 1–4:** Core Ingestion & Storage Setup
+- **Weeks 5–8:** Business Logic & Processing Engine Implementation
+- **Weeks 9–12:** AI Model Training & Inference Endpoint Integration
+- **Weeks 13–16:** Initial Dashboard & Mid-Semester Review
+
+### Spring Semester (16 weeks)
+- **Weeks 1–4:** System Integration & End-to-End Pipeline Testing
+- **Weeks 5–8:** Advanced Observability, Security Audit & Drift Monitoring
+- **Weeks 9–12:** Load Testing, Profiling & Latency Benchmarking
+- **Weeks 13–16:** Final Documentation, Video Demo, and Project Defense
+
+---
+
+## Risks
+
+### Technical Risks
+| Risk | Probability | Impact | Mitigation |
+|------|------------|--------|------------|
+| High Latency under Load | Medium | High | Profile critical path using pprof; optimize queries and caching |
+| Data Consistency Edge Cases | Low | High | Implement strict transactional boundaries and integration tests |
+
+### Security & Deployment Risks
+| Risk | Probability | Impact | Mitigation |
+|------|------------|--------|------------|
+| Unauthorized Access to APIs | Low | Critical | Enforce JWT validation and strict RBAC policies |
+| Deployment Complexity | Medium | Medium | Use Helm charts for reproducible Kubernetes setups |
+
+---
+
+## Deliverables
+
+### Software
+- [ ] Core processing backend microservices
+- [ ] Real-time data ingestion and storage pipeline
+- [ ] Interactive React administration dashboard
+- [ ] ML inference service and feature pipeline
+
+### Documentation & Research
+- [ ] Architecture Design Document & API Reference
+- [ ] System Benchmark Report
+- [ ] Final Presentation Slides & Project Poster
+
+---
+
+## Sponsor Analysis
+
+### Potential Sponsors
+| Entity | Category | Interest Reason |
+|--------|----------|----------------|
+| **Fawry Data Team** | Domestic Industry | Direct commercial alignment with project domain |
+| ** Paymob Infrastructure** | Local Partner | Recruitment pipeline and technical validation |
+| **International Tech Vendors** | Global | Open-source adoption and cloud resource grants |
 
 ---
 
 ## Estimated Budget
 
-| Item | Cost (EGP) | Cost (USD) |
-|------|-----------|-----------|
-| 3× GCP/AWS VMs in different regions (4 months) | 12,000 | ~240 |
-| Kafka managed cluster (Confluent Cloud free tier) | 0 | 0 |
-| **Total** | **~12,000 EGP** | **~240 USD** |
+| Category | Item | Cost (EGP) | Cost (USD) |
+|----------|------|-----------|-----------|
+| **Cloud** | AWS / GCP / Azure Managed Services (6 months) | 20,000 | ~400 |
+| **Hardware** | Test devices / sensor kits / local server | 12,000 | ~240 |
+| **Total** | | **~32000 EGP** | **~640 USD** |
 
 ---
 
-## Difficulty
-**Score: 10/10** — Implementing correct distributed conflict detection using vector clocks and building a working active-active replication protocol is among the hardest engineering challenges in computer science.
+## Evaluation Metrics
 
-## Innovation
-**Score: 8/10** — An educational, open-source active-active replication middleware for PostgreSQL fills a genuine gap.
-
-## Sponsor Potential
-**Score: 7/10** — Cloud database providers and globally distributed SaaS companies.
-
-## Startup Potential
-**Score: 6/10** — Niche but valuable: active-active replication-as-a-service for teams unwilling to migrate to CockroachDB.
+- **Difficulty (8/10):** High architectural challenge involving multi-service concurrency and streaming performance.
+- **Innovation (8/10):** Combines distributed systems engineering with a bounded, production-grade AI module.
+- **Research Depth (7/10):** Strong benchmarking and latency-accuracy trade-off investigation possibilities.
+- **Sponsor Potential (8/10):** Direct applicability to industry requirements in Egypt and internationally.
+- **Startup Potential (8/10):** Clear B2B SaaS commercialization path.
 
 ---
 
 ## Career Value
 
-| Career Path | Relevance |
-|-------------|-----------|
-| Distributed Systems Engineer | ⭐⭐⭐⭐⭐ |
-| Database Engineer | ⭐⭐⭐⭐⭐ |
-| Backend / Platform Engineer | ⭐⭐⭐⭐ |
-| Site Reliability Engineer | ⭐⭐⭐⭐ |
+| Career Path | Relevance | Why |
+|-------------|-----------|-----|
+| **Backend / Systems Engineer** | ⭐⭐⭐⭐⭐ | Deep exposure to concurrent microservices, gRPC, and database design |
+| **Data / Infrastructure Engineer** | ⭐⭐⭐⭐⭐ | Hands-on stream processing, event queuing, and storage optimization |
+| **DevOps / Platform Engineer** | ⭐⭐⭐⭐ | Kubernetes, CI/CD, and Prometheus/Grafana observability |
+| **MLOps / Applied AI Engineer** | ⭐⭐⭐⭐ | Serving production ML models with feature monitoring |
+
+---
+
+## Future Extensions
+
+1. **Multi-Region Clustering:** Extend control plane across multiple geographical cloud zones.
+2. **eBPF Acceleration:** Offload kernel packet filtering for higher network throughput.
+3. **Advanced Visual Analytics:** Add graph-based dependency maps to the frontend UI.
 
 ---
 
 ## References
 
-1. Kleppmann, M. (2017). *Designing Data-Intensive Applications.* O'Reilly (Chapters 5, 8, 9).
-2. Shapiro, M., et al. (2011). "A Comprehensive Study of Convergent and Commutative Replicated Data Types." *INRIA Technical Report.*
-3. Lamport, L. (1978). "Time, Clocks, and the Ordering of Events in a Distributed System." *Communications of the ACM.*
-4. PostgreSQL Logical Replication Documentation: https://www.postgresql.org/docs/current/logical-replication.html
-5. CockroachDB Architecture Guide: https://www.cockroachlabs.com/docs/stable/architecture/overview.html
+1. Kleppmann, M. (2017). *Designing Data-Intensive Applications.* O'Reilly Media.
+2. Official Documentation for Go and  PostgreSQL WAL.
+3. IEEE / ACM Conference proceedings on Distributed Systems and Cloud Computing.

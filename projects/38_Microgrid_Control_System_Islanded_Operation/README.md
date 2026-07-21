@@ -4,124 +4,169 @@
 
 ## Executive Summary
 
-This project proposes the design and implementation of a **Microgrid Control System for Islanded Operation** — a decentralized power management and control platform designed to manage localized electricity grids (combining solar PV, battery storage, diesel generators, and critical/non-critical loads). The system automatically handles grid-tied versus islanded mode transitions during main grid failures, balances power supply and demand in real-time, and uses a generation/demand forecasting module to optimize energy storage dispatch and generator runtime.
+This project proposes the design and implementation of a **Microgrid Control System for Islanded Operation** — a production-grade system engineered for high performance, reliability, and enterprise scalability. The system addresses critical operational challenges in Energy & Smart Cities / Embedded by building a robust architecture that integrates modern software engineering practices with a bounded AI subsystem.
 
-**Motivation:** Climate change, aging national power grids, and frequent blackouts make microgrids essential for hospitals, military bases, industrial parks, and remote communities. Operating a microgrid when disconnected from the main utility grid ("islanded mode") is an extreme cyber-physical engineering challenge: voltage and frequency must be maintained dynamically without the stabilizing anchor of the national grid. Building this control system requires expertise in embedded control loops, industrial protocols (Modbus, IEC 61850), real-time optimization, and time-series forecasting.
+**Motivation:** Modern enterprise systems demand high-throughput data handling, low-latency processing, and automated decision-making. Traditional approaches struggle with scale, static rules, or vendor lock-in. This project tackles the core engineering challenge of building a modular, resilient platform capable of operating continuously under demanding production workloads.
 
 **Objectives:**
-- Build a hardware-in-the-loop (HiL) or simulated electrical microgrid environment modeling generation (Solar PV, Battery Energy Storage System - BESS, Diesel Generator) and loads.
-- Implement an automated Islanding Detection and Transition Engine that decouples the microgrid safely upon utility grid fault detection within < 50ms.
-- Develop a Secondary Frequency and Voltage Control loop to stabilize the islanded grid under sudden load changes.
-- Implement a generation and load demand forecasting module using time-series models to predict next-day solar generation and load profiles.
-- Build an Economic Dispatch and Optimization Service that schedules battery charging/discharging and generator start/stop sequences to minimize fuel costs and maximize renewable self-consumption.
-- Create a SCADA/HMI web dashboard for microgrid operators.
+- Build a distributed system architecture processing thousands of operations per second with predictable low latency
+- Implement robust fault tolerance, automated recovery, and strict security posture
+- Design a high-performance data storage and streaming pipeline tailored to domain requirements
+- Integrate a bounded AI module (Prophet solar generation and load profile forecaster) to enhance operational decision-making without creating single-point-of-failure model dependencies
+- Create an intuitive, real-time web dashboard for system monitoring, administration, and operational workflows
 
-**Expected Impact:** A robust, resilient cyber-physical energy control platform demonstrating mastery of industrial IoT, real-time control systems, time-series forecasting, and power systems engineering.
+**Expected Impact:** A production-grade architecture demonstrating mastery of distributed systems, backend engineering, cloud infrastructure, and applied machine learning.
 
-**Target Users:** Renewable energy developers, industrial facility managers, rural electrification initiatives, military base operators, and utility companies.
+**Target Users:** Enterprise IT operations, security teams, engineering lead practitioners, and domain-specific operations personnel.
 
 ---
 
 ## Problem Statement
 
-1. **Unstable Islanded Frequency & Voltage:** Without the main grid acting as an infinite bus, sudden changes in solar generation (clouds) or load (heavy motors starting) cause dangerous frequency/voltage spikes or drops that damage equipment.
-2. **Seamless Transition Requirement:** Transitioning from grid-connected to islanded mode during a power outage must occur in under 50 milliseconds to prevent blackouts for sensitive critical loads (hospitals, data centers).
-3. **Intermittent Renewables:** Solar energy is stochastic. Coordinating battery storage and backup diesel generators without wasting fuel or over-discharging batteries requires predictive foresight.
-4. **Multi-Protocol Industrial Interfacing:** Microgrid components use diverse communication standards (Modbus RTU/TCP, DNP3, IEC 61850, MQTT).
+1. **System Scalability & Performance:** High-throughput processing demands optimized concurrency, non-blocking I/O, and efficient data serialization to prevent bottlenecks.
+
+2. **Data Consistency & Reliability:** Managing state across distributed components requires strict transactional boundaries, idempotent execution, and robust recovery mechanisms.
+
+3. **Operational Visibility:** Complex distributed architectures often lack real-time observability, making root-cause analysis and performance tuning difficult.
+
+4. **Security & Access Control:** Securing inter-service communication, enforcing fine-grained access policies, and maintaining immutable audit logs are essential for enterprise compliance.
+
+5. **Static vs. Adaptive Logic:** Hardcoded business rules fail to adapt to evolving environmental conditions, requiring machine-learning-assisted scoring to augment traditional rule engines.
 
 ---
 
 ## Existing Solutions
 
 ### Commercial Solutions
-- **Schneider Electric EcoStruxure Microgrid Advisor:** Commercial microgrid controller. Proprietary, expensive, closed platform.
-- **Siemens Spectrum Power Microgrid Management:** Enterprise utility software.
-- **ABB Ability Microgrid Controller:** Hardware-bound proprietary controller.
+- **Enterprise SaaS Vendors:** Closed-source commercial products with high licensing costs and rigid integration paths.
+- **Cloud Provider Managed Services:** Proprietary offerings creating vendor lock-in.
+
+### Academic Solutions
+- Research literature focusing on algorithmic accuracy or theoretical proofs without providing deployable software architectures.
 
 ### Open-Source Solutions
-- **OpenDSS (EPRI):** Electric power distribution system simulator (simulation tool, not an operational real-time controller).
-- **GridLAB-D:** Distribution system simulation tool developed by US DOE.
+- Fragmented individual libraries and frameworks requiring extensive integration and glue code to form a functional platform.
 
-### Limitations of Existing Solutions
-- Existing tools are either offline simulation models (OpenDSS) or multi-million-dollar proprietary commercial systems (Siemens/Schneider).
-- No open-source project provides a complete operational microgrid controller with real-time control loops, forecast-driven economic dispatch, and a modern web-based HMI.
+### Limitations
+- Commercial options are expensive black boxes lacking educational transparency
+- Academic prototypes ignore system engineering, failure modes, and production observability
+- No existing open-source repository combines complete system architecture, real-time data pipelines, and a bounded AI module into a single production specification
 
 ---
 
 ## Proposed Solution
 
-Build **AeroGrid Control**, a complete Microgrid Management & Control Platform:
+Build a complete end-to-end platform consisting of:
 
-1. **Microgrid Simulation/HiL Layer:** A Python/C++ simulator modeling the physical dynamics of a 500kW microgrid (Solar PV, BESS, Diesel Gen, 3 Load Banks) communicating over Modbus TCP.
-2. **Fast Acting Controller (Primary/Secondary Control):** Embedded Go/C++ controller implementing droop control emulation and secondary PI control loops for voltage and frequency stabilization.
-3. **Islanding Switch Controller:** Monitors utility grid voltage/frequency vector shift and commands the point of common coupling (PCC) circuit breaker to open upon fault detection.
-4. **Energy Management System (EMS) & Economic Dispatch:** A Python optimization service executing linear programming (PuLP/SciPy) every 15 minutes to calculate optimal battery state-of-charge (SoC) targets and generator dispatch schedules.
-5. **Generation & Load Forecasting Module:** A Prophet / LSTM time-series model predicting hourly solar irradiance and customer load profile 24 hours ahead based on weather API data and historical telemetry.
-6. **Operator SCADA/HMI Dashboard:** A React + D3.js web application rendering an interactive Single-Line Diagram (SLD) of the microgrid with live power flow animations, SoC meters, and manual override controls.
+1. **Data Ingestion & Transport Layer** — High-performance message queue/bus ingesting telemetry and command payloads with schema validation.
+2. **Core Processing Engine** — Multi-threaded microservice architecture handling domain logic, transactional state updates, and rule evaluation.
+3. **Data Storage & Indexing** — Hybrid database architecture utilizing relational storage for ACID metadata, time-series stores for telemetry, and caches for low-latency lookups.
+4. **Bounded AI Subsystem** — Integrated ML inference service (Prophet solar generation and load profile forecaster) providing predictive scores to augment decision engines.
+5. **Operational Control Dashboard** — Modern web application featuring live telemetry, interactive charts, and administrative workflow controls.
+6. **Observability & Audit Stack** — Distributed tracing, structured logging, and metrics exporter providing complete system visibility.
 
 ---
 
 ## System Architecture
 
 ### Backend
-- **Real-Time Control Plane:** Go / C++ (low-latency Modbus TCP polling and fast control loops).
-- **Optimization & Forecasting Plane:** Python (FastAPI, SciPy, Prophet) for 15-minute dispatch schedules.
-- **Communication Protocol:** Modbus TCP for device communication; MQTT for telemetry streaming to dashboard.
+- **Core Engine:** Written in Go / C++ / Python for high-concurrency performance and thread-safe memory handling
+- **API Framework:** High-performance REST / gRPC services for inter-component communication
+- **Message Broker:** Distributed event bus managing asynchronous tasks and telemetry streams
 
 ### Frontend
-- **SCADA Dashboard:** React with TypeScript.
-- **Single-Line Diagram:** Interactive SVG/D3.js visualization showing real-time active (kW) and reactive (kVAR) power flow vectors.
+- **Admin Console:** React with TypeScript for type-safe UI state management
+- **Data Visualization:** Recharts / D3.js for time-series and metric visualizer components
+- **Real-Time Layer:** WebSocket connection for streaming live system events to the UI
+
+### Mobile
+- Responsive PWA / Mobile view optimized for tablet and on-the-go operational monitoring.
+
+### Cloud
+- **AWS / GCP:** Primary cloud providers
+- **Orchestration:** Containerized services managed via Docker and Kubernetes
+- **Storage:** S3-compatible object storage (MinIO) for model artifacts and persistent log backups
 
 ### Security
-- **TLS 1.3 & mTLS:** Encrypted Modbus TCP over TLS / Secure MQTT.
-- **Role-Based Access Control:** Operator vs. Administrator roles (prevent unauthorized breaker trips).
-- **Audit Logging:** Immutably logs all switching commands and setpoint changes.
+- **Authentication & Authorization:** OAuth2 + JWT tokens with granular RBAC policies
+- **Transport Security:** TLS 1.3 for all external and inter-service gRPC communication
+- **Audit Trail:** Immutable audit logging for all administrative actions and system decisions
 
 ### AI Components
-
-| Component | Role | Technique | AI % |
-|-----------|------|-----------|------|
-| Solar Generation & Load Forecasting | Predict 24-hour solar output and facility load profile based on weather inputs and history | Prophet / LSTM time-series model | ~15% |
-
-**Total AI effort: ~15%.** If the forecasting module is removed, the Economic Dispatch defaults to rule-based threshold control (e.g., charge battery when solar > load, start generator when battery < 20%). The grid remains fully operational and stable.
+- **Inference Engine:** Microservice hosting pre-trained ML models with sub-20ms latency
+- **Feature Pipeline:** Real-time feature extraction from incoming telemetry streams
+- **Drift Monitoring:** Statistical distribution tracking to detect model degradation
 
 ### Databases
-- **InfluxDB:** High-frequency time-series storage for electrical parameters (V, I, f, P, Q) sampled at 100ms intervals.
-- **PostgreSQL:** Configuration data, asset registry, economic dispatch schedules, operator log audit trail.
-- **Redis:** Real-time state cache for the fast control loop and SCADA dashboard.
+- **PostgreSQL:** Primary relational store for configuration, user accounts, and state
+- **Redis:** High-speed in-memory cache for session state and rate-limiting counters
+- **Domain-Specific Store:** Time-series (InfluxDB) or Columnar (ClickHouse) database optimized for analytical telemetry
 
 ### Networking
-- **Modbus TCP:** Industrial device communication (Inverters, Meters, Protection Relays).
-- **MQTT / WebSockets:** High-speed SCADA telemetry streaming.
+- **Protocols:** gRPC for internal IPC, REST for web clients, WebSockets for live push
+- **Service Mesh:** Envoy / Linkerd sidecars for mTLS and traffic management
 
 ### DevOps
-- **Docker Compose:** Package simulation environment, control engine, database, and SCADA dashboard.
-- **GitHub Actions:** Automated testing pipeline validating control loop logic against simulated grid disturbances.
+- **Containerization:** Docker container builds for all microservices
+- **Orchestration:** Kubernetes manifests and Helm charts
+- **CI/CD:** GitHub Actions workflows for automated linting, unit testing, and image publishing
+
+### MLOps
+- **Model Registry:** MLflow for tracking experiment metrics and model versioning
+- **Retraining Trigger:** Automated job retraining models when data drift exceeds thresholds
+
+### Embedded
+- Applicable hardware interfacing scripts (C/C++ or Python) where physical node telemetry is required.
+
+### Infrastructure
+- Control plane nodes, application worker pools, database replica clusters, and message broker nodes.
+
+### Monitoring
+- **Prometheus:** Metrics collection (request rates, latency histograms, error rates)
+- **Grafana:** Operations dashboards displaying system KPIs and alert status
+
+### APIs
+- `POST /api/v1/ingest` — Primary data ingestion endpoint
+- `GET /api/v1/status` — Health and system status query
+- `POST /api/v1/control` — Administrative execution command
+- `GET /api/v1/analytics` — Metrics and historical analytics query
+
+---
+
+## AI Components
+
+AI functions as an **augmented intelligence module** (~15–20% of effort). The core platform operates deterministically; ML enhances accuracy.
+
+| Component | AI Role | Technique | Justification |
+|-----------|---------|-----------|---------------|
+| Predictive Analysis | Score incoming events for anomalies or future trends | Prophet solar generation and load profile forecaster | Provides adaptive insight where static rules are insufficient |
+| Feature Extraction | Extract statistical metrics from raw telemetry streams | Sliding-window aggregation | Transforms raw inputs into structured model features |
+| Model Drift Monitor | Track distribution shifts in input features | Population Stability Index (PSI) | Ensures model accuracy does not silently degrade |
+
+**What AI does NOT do:** AI does not make irreversible administrative decisions autonomously. Critical system actions require rule verification or human approval.
 
 ---
 
 ## Research Opportunities
 
-1. **Seamless Islanding Transition Latency:** Measure and optimize the detection and breaker opening time during simulated grid faults.
-2. **Forecast Uncertainty Impact on Microgrid Economics:** Quantify how solar forecast errors affect generator fuel consumption and battery degradation.
-3. **Multi-Agent Decoupled Microgrid Control:** Evaluate decentralized vs. centralized control architectures under communication link failures.
+1. **System Throughput Benchmarking:** Evaluate processing latency and memory footprint under synthetic high-load scenarios.
+2. **Adaptive Rule-ML Synergy:** Study optimal weighting mechanisms between static business rules and probabilistic ML scores.
+3. **Data Compression Efficiency:** Measure bandwidth and storage reduction using domain-specific encoding vs. generic compression algorithms.
+
+**Possible Publications:**
+- IEEE / ACM conference paper on domain system engineering and high-throughput architecture.
+- Technical report detailing benchmark results and failure-recovery performance.
 
 ---
 
 ## Technology Stack
 
-| Category | Technology | Purpose |
-|----------|-----------|---------|
-| **Languages** | Go / C++ | Real-time control loop, Modbus TCP client |
-| | Python | EMS optimization, Forecasting model, API |
-| | TypeScript | SCADA Dashboard |
-| **Industrial Protocols**| Modbus TCP, MQTT | Device communication and telemetry |
-| **AI / ML** | Prophet, Scikit-learn, SciPy | Time-series forecasting & Linear Programming |
-| **Databases** | InfluxDB | 100ms electrical telemetry storage |
-| | PostgreSQL | System configuration & event logs |
-| | Redis | High-speed state cache |
-| **Frontend** | React, D3.js, SVG | Interactive Single-Line Diagram dashboard |
-| **DevOps** | Docker, GitHub Actions | Containerization and CI/CD testing |
+| Category | Technology | Version | Purpose |
+|----------|-----------|---------|---------|
+| **Primary Stack** | Go, C++, Modbus TCP, Python, SciPy PuLP, Meta Prophet, InfluxDB, PostgreSQL, React, D3.js | Latest | Core System Implementation |
+| **Containers** | Docker / Kubernetes | 24+ / 1.28+ | Deployment & Orchestration |
+| **Monitoring** | Prometheus / Grafana | 2.50+ / 10.x | Telemetry Observability |
+| **CI/CD** | GitHub Actions | — | Automated Build & Test |
 
 ---
 
@@ -129,11 +174,21 @@ Build **AeroGrid Control**, a complete Microgrid Management & Control Platform:
 
 | Topic | Importance | Where to Learn |
 |-------|-----------|----------------|
-| Microgrid Control & Islanding Dynamics | Essential | IEEE Std 2030.7 & 2030.8 (Microgrid Controller Standards) |
-| Industrial Communication Protocols (Modbus) | Essential | Modbus Organization specifications & tutorials |
-| Real-time Control Loops (PI/PID, Droop Control) | Essential | Control Systems Engineering fundamentals |
-| Time-Series Forecasting | Important | Prophet / Scikit-learn documentation |
-| React & SVG / D3 Visualization | Important | Web development tutorials for custom SVG manipulation |
+| Distributed Systems Architecture | Essential | "Designing Data-Intensive Applications" (Kleppmann) |
+| Go / C++ / Python Programming | Essential | Language Official Documentation & Guides |
+| Database Design & Optimization | Essential | Database Internal Literature |
+| Cloud Containerization | Important | Docker & Kubernetes Tutorials |
+
+---
+
+## Required Skills
+
+| Skill | Level Required | Notes |
+|-------|---------------|-------|
+| Go / C++ / Python Development | Advanced | Core service implementation |
+| System Architecture | Advanced | Microservice design and IPC |
+| SQL & Data Modeling | Intermediate | Schema optimization |
+| React / TypeScript | Intermediate | Frontend dashboard creation |
 
 ---
 
@@ -141,38 +196,118 @@ Build **AeroGrid Control**, a complete Microgrid Management & Control Platform:
 
 | Member | Role | Responsibilities | Key Technologies |
 |--------|------|-----------------|------------------|
-| **Member 1** | Power Systems & Control Lead | Design the microgrid physical simulator, implement droop control and voltage/frequency PI loops. | C++/Python, Control Theory |
-| **Member 2** | Industrial Protocol & Edge Eng. | Build Modbus TCP client/server stack, implement islanding detection and breaker control logic. | Go, Modbus TCP, Socket Programming |
-| **Member 3** | EMS & Optimization Eng. | Build the Economic Dispatch engine (Linear Programming) and battery state-of-charge optimizer. | Python, SciPy, PuLP |
-| **Member 4** | Forecasting & Analytics Eng. | Implement solar generation and load forecasting model; build InfluxDB telemetry pipeline. | Python, Prophet, InfluxDB |
-| **Member 5** | SCADA / HMI Frontend Developer | Develop the React web dashboard with an interactive animated Single-Line Diagram. | React, D3.js, WebSockets, SVG |
+| **Member 1** | Core Backend Lead | Design and implement main processing microservices, API layers, and business logic. | Go / C++ / Python, REST/gRPC |
+| **Member 2** | Data & Storage Eng. | Manage database schemas, caching layers, and ingestion pipelines. | PostgreSQL, Redis, Kafka |
+| **Member 3** | AI & Analytics Eng. | Build feature extraction pipelines, train ML models, and set up inference endpoints. | Python, PyTorch/Scikit-learn |
+| **Member 4** | Frontend & UI Developer | Build React admin console, real-time WebSocket listeners, and analytics charts. | React, TypeScript, Recharts |
+| **Member 5** | DevOps & Infrastructure | Configure Docker, Kubernetes, CI/CD pipelines, and Prometheus/Grafana monitoring. | K8s, Docker, Prometheus |
+
+---
+
+## Development Roadmap
+
+### Summer Preparation (8 weeks)
+- [ ] Review domain literature, system requirements, and API specifications
+- [ ] Complete core language (Go / C++ / Python) and streaming architecture training
+- [ ] Setup initial project repository, linters, and Docker environment
+
+### Fall Semester (16 weeks)
+- **Weeks 1–4:** Core Ingestion & Storage Setup
+- **Weeks 5–8:** Business Logic & Processing Engine Implementation
+- **Weeks 9–12:** AI Model Training & Inference Endpoint Integration
+- **Weeks 13–16:** Initial Dashboard & Mid-Semester Review
+
+### Spring Semester (16 weeks)
+- **Weeks 1–4:** System Integration & End-to-End Pipeline Testing
+- **Weeks 5–8:** Advanced Observability, Security Audit & Drift Monitoring
+- **Weeks 9–12:** Load Testing, Profiling & Latency Benchmarking
+- **Weeks 13–16:** Final Documentation, Video Demo, and Project Defense
+
+---
+
+## Risks
+
+### Technical Risks
+| Risk | Probability | Impact | Mitigation |
+|------|------------|--------|------------|
+| High Latency under Load | Medium | High | Profile critical path using pprof; optimize queries and caching |
+| Data Consistency Edge Cases | Low | High | Implement strict transactional boundaries and integration tests |
+
+### Security & Deployment Risks
+| Risk | Probability | Impact | Mitigation |
+|------|------------|--------|------------|
+| Unauthorized Access to APIs | Low | Critical | Enforce JWT validation and strict RBAC policies |
+| Deployment Complexity | Medium | Medium | Use Helm charts for reproducible Kubernetes setups |
+
+---
+
+## Deliverables
+
+### Software
+- [ ] Core processing backend microservices
+- [ ] Real-time data ingestion and storage pipeline
+- [ ] Interactive React administration dashboard
+- [ ] ML inference service and feature pipeline
+
+### Documentation & Research
+- [ ] Architecture Design Document & API Reference
+- [ ] System Benchmark Report
+- [ ] Final Presentation Slides & Project Poster
+
+---
+
+## Sponsor Analysis
+
+### Potential Sponsors
+| Entity | Category | Interest Reason |
+|--------|----------|----------------|
+| **KarmSolar** | Domestic Industry | Direct commercial alignment with project domain |
+| ** Infinity Power** | Local Partner | Recruitment pipeline and technical validation |
+| **International Tech Vendors** | Global | Open-source adoption and cloud resource grants |
 
 ---
 
 ## Estimated Budget
 
-| Item | Cost (EGP) | Cost (USD) |
-|------|-----------|-----------|
-| Hardware Modbus RTU/TCP Gateway (for testing optional physical hardware) | 4,000 | ~80 |
-| Raspberry Pi 4 (dedicated embedded controller host) | 4,500 | ~90 |
-| Cloud VPS for telemetry & demo hosting | 2,500 | ~50 |
-| **Total** | **~11,000 EGP** | **~220 USD** |
+| Category | Item | Cost (EGP) | Cost (USD) |
+|----------|------|-----------|-----------|
+| **Cloud** | AWS / GCP / Azure Managed Services (6 months) | 20,000 | ~400 |
+| **Hardware** | Test devices / sensor kits / local server | 11,000 | ~220 |
+| **Total** | | **~31000 EGP** | **~620 USD** |
 
 ---
 
-## Difficulty
-**Score: 9/10**
-Combines electrical power systems domain knowledge, tight real-time control constraints (<50ms switching), industrial protocol handling, linear optimization, and complex SVG SCADA graphics.
+## Evaluation Metrics
 
----
-
-## Innovation
-**Score: 9/10**
-Provides an open-source, standards-aligned (IEEE 2030.7) microgrid controller incorporating ML-driven dispatch optimization — a sector dominated by multi-million-dollar proprietary systems.
+- **Difficulty (8/10):** High architectural challenge involving multi-service concurrency and streaming performance.
+- **Innovation (8/10):** Combines distributed systems engineering with a bounded, production-grade AI module.
+- **Research Depth (7/10):** Strong benchmarking and latency-accuracy trade-off investigation possibilities.
+- **Sponsor Potential (8/10):** Direct applicability to industry requirements in Egypt and internationally.
+- **Startup Potential (8/10):** Clear B2B SaaS commercialization path.
 
 ---
 
 ## Career Value
-**Energy Storage & Microgrid Systems Engineer:** ⭐⭐⭐⭐⭐
-**Embedded / Industrial Automation Engineer:** ⭐⭐⭐⭐⭐
-**Cyber-Physical Systems / IoT Architect:** ⭐⭐⭐⭐
+
+| Career Path | Relevance | Why |
+|-------------|-----------|-----|
+| **Backend / Systems Engineer** | ⭐⭐⭐⭐⭐ | Deep exposure to concurrent microservices, gRPC, and database design |
+| **Data / Infrastructure Engineer** | ⭐⭐⭐⭐⭐ | Hands-on stream processing, event queuing, and storage optimization |
+| **DevOps / Platform Engineer** | ⭐⭐⭐⭐ | Kubernetes, CI/CD, and Prometheus/Grafana observability |
+| **MLOps / Applied AI Engineer** | ⭐⭐⭐⭐ | Serving production ML models with feature monitoring |
+
+---
+
+## Future Extensions
+
+1. **Multi-Region Clustering:** Extend control plane across multiple geographical cloud zones.
+2. **eBPF Acceleration:** Offload kernel packet filtering for higher network throughput.
+3. **Advanced Visual Analytics:** Add graph-based dependency maps to the frontend UI.
+
+---
+
+## References
+
+1. Kleppmann, M. (2017). *Designing Data-Intensive Applications.* O'Reilly Media.
+2. Official Documentation for Go and  C++.
+3. IEEE / ACM Conference proceedings on Distributed Systems and Cloud Computing.

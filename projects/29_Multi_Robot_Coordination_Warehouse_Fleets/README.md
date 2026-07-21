@@ -4,185 +4,310 @@
 
 ## Executive Summary
 
-This project proposes the design and implementation of a **Multi-Robot Coordination Platform for Warehouse Fleets** — a distributed middleware system that manages a fleet of autonomous mobile robots (AMRs) operating in a shared warehouse environment. The platform handles task assignment, real-time path planning, collision avoidance, fleet-wide traffic management, and predictive charging. A learned task-priority scoring module replaces hardcoded heuristics with a data-driven priority model.
+This project proposes the design and implementation of a **Multi-Robot Coordination Platform for Warehouse Fleets** — a production-grade system engineered for high performance, reliability, and enterprise scalability. The system addresses critical operational challenges in Robotics & Autonomous Systems by building a robust architecture that integrates modern software engineering practices with a bounded AI subsystem.
 
-**Motivation:** Warehouse automation is one of the fastest-growing industrial sectors. Amazon, Alibaba, and Ocado run warehouses with thousands of autonomous robots. But the core challenge — coordinating hundreds of robots in a shared space without collisions or deadlocks, while maximizing order throughput — is a deeply unsolved distributed systems and robotics problem. Building this platform from scratch exposes students to real-time distributed computing, path planning algorithms (A*, CBS), robot communication protocols (ROS 2), and distributed state management.
+**Motivation:** Modern enterprise systems demand high-throughput data handling, low-latency processing, and automated decision-making. Traditional approaches struggle with scale, static rules, or vendor lock-in. This project tackles the core engineering challenge of building a modular, resilient platform capable of operating continuously under demanding production workloads.
 
 **Objectives:**
-- Design and implement a Fleet Management System (FMS) that assigns picking/delivery tasks to robots optimally.
-- Implement a centralized collision-avoidance and traffic management layer (Conflict-Based Search or priority-based reservation tables).
-- Build a simulation environment (ROS 2 + Gazebo) as the development and testing platform.
-- Develop a task-priority scoring module that learns which order types should be prioritized based on historical data.
-- Create a warehouse operations dashboard for shift supervisors.
+- Build a distributed system architecture processing thousands of operations per second with predictable low latency
+- Implement robust fault tolerance, automated recovery, and strict security posture
+- Design a high-performance data storage and streaming pipeline tailored to domain requirements
+- Integrate a bounded AI module (XGBoost learned task-priority scoring module) to enhance operational decision-making without creating single-point-of-failure model dependencies
+- Create an intuitive, real-time web dashboard for system monitoring, administration, and operational workflows
 
-**Expected Impact:** A research-grade multi-robot coordination system demonstrating mastery of distributed real-time computing, path planning, and fleet orchestration — directly applicable to logistics automation.
+**Expected Impact:** A production-grade architecture demonstrating mastery of distributed systems, backend engineering, cloud infrastructure, and applied machine learning.
 
-**Target Users:** Logistics companies, e-commerce warehouses, pharmaceutical distribution centers, and robotic system integrators.
+**Target Users:** Enterprise IT operations, security teams, engineering lead practitioners, and domain-specific operations personnel.
 
 ---
 
 ## Problem Statement
 
-Multi-robot coordination in shared environments faces fundamental engineering challenges:
+1. **System Scalability & Performance:** High-throughput processing demands optimized concurrency, non-blocking I/O, and efficient data serialization to prevent bottlenecks.
 
-1. **Deadlocks:** Two robots waiting for each other to clear a corridor simultaneously will wait forever unless the system detects and resolves the deadlock.
-2. **Collision Risk:** Hundreds of robots moving at 1.5 m/s in tight corridors — without centralized traffic management, collisions are certain.
-3. **Throughput vs. Safety:** Aggressive path planning maximizes throughput but increases collision risk. Conservative planning is safe but slow.
-4. **Task Assignment Complexity:** Assigning 500 pick tasks to 50 robots such that travel distance is minimized and orders are fulfilled in priority order is an NP-hard combinatorial optimization problem.
-5. **Charging Coordination:** Robots need periodic charging. If all robots return to charge simultaneously, the warehouse grinds to a halt.
+2. **Data Consistency & Reliability:** Managing state across distributed components requires strict transactional boundaries, idempotent execution, and robust recovery mechanisms.
+
+3. **Operational Visibility:** Complex distributed architectures often lack real-time observability, making root-cause analysis and performance tuning difficult.
+
+4. **Security & Access Control:** Securing inter-service communication, enforcing fine-grained access policies, and maintaining immutable audit logs are essential for enterprise compliance.
+
+5. **Static vs. Adaptive Logic:** Hardcoded business rules fail to adapt to evolving environmental conditions, requiring machine-learning-assisted scoring to augment traditional rule engines.
 
 ---
 
 ## Existing Solutions
 
 ### Commercial Solutions
-- **Amazon Robotics (Kiva):** Fully proprietary. Powers Amazon warehouses. Closed source.
-- **Locus Robotics / Geek+:** Enterprise AMR platforms. Very expensive.
-- **MIR (Mobile Industrial Robots):** Commercial AMR fleet management.
+- **Enterprise SaaS Vendors:** Closed-source commercial products with high licensing costs and rigid integration paths.
+- **Cloud Provider Managed Services:** Proprietary offerings creating vendor lock-in.
 
-### Open-Source / Research Solutions
-- **ROS 2 Navigation Stack (Nav2):** Open-source robot navigation. Handles single robot navigation; does not address multi-robot coordination at fleet scale.
-- **OpenRMF (Open Robotics Management Framework):** The closest open-source FMS. Complex, hard to modify, limited documentation.
+### Academic Solutions
+- Research literature focusing on algorithmic accuracy or theoretical proofs without providing deployable software architectures.
+
+### Open-Source Solutions
+- Fragmented individual libraries and frameworks requiring extensive integration and glue code to form a functional platform.
 
 ### Limitations
-- OpenRMF handles basic task dispatch but lacks sophisticated collision avoidance for dense fleets.
-- No open-source platform combines: task assignment optimization + CBS-based collision avoidance + predictive charging + real-time operations dashboard.
+- Commercial options are expensive black boxes lacking educational transparency
+- Academic prototypes ignore system engineering, failure modes, and production observability
+- No existing open-source repository combines complete system architecture, real-time data pipelines, and a bounded AI module into a single production specification
 
 ---
 
 ## Proposed Solution
 
-Build **AeroFleet**, a complete multi-robot coordination platform:
+Build a complete end-to-end platform consisting of:
 
-1. **Simulation Environment:** ROS 2 + Gazebo — simulates a warehouse layout, AMR kinematics, and sensor data. Multiple simulated robots serve as the platform's "hardware."
-2. **Task Assignment Engine:** A centralized Hungarian Algorithm or greedy assignment solver that maps available robots to incoming tasks, minimizing travel time and respecting robot battery levels.
-3. **Traffic Management Layer:** A reservation table (space-time graph) that assigns time-stamped corridor slots to robots. If two robots request the same space at the same time, the lower-priority robot is detoured.
-4. **Conflict-Based Search (CBS) Path Planner:** For dense traffic scenarios, implements CBS — an optimal multi-agent pathfinding algorithm — to compute collision-free paths for all robots simultaneously.
-5. **Task Priority Scoring Module:** A logistic regression or gradient boosted model that assigns priority scores to incoming tasks based on features (order type, SLA deadline, customer tier, historical fulfillment rate). Replaces static priority rules.
-6. **Charging Coordinator:** Monitors battery levels across the fleet, predicts when each robot needs to charge, and schedules charging so no more than 15% of the fleet is charging simultaneously.
-7. **Operations Dashboard:** React web app showing a live top-down warehouse map with robot positions, task queues, and alert indicators.
+1. **Data Ingestion & Transport Layer** — High-performance message queue/bus ingesting telemetry and command payloads with schema validation.
+2. **Core Processing Engine** — Multi-threaded microservice architecture handling domain logic, transactional state updates, and rule evaluation.
+3. **Data Storage & Indexing** — Hybrid database architecture utilizing relational storage for ACID metadata, time-series stores for telemetry, and caches for low-latency lookups.
+4. **Bounded AI Subsystem** — Integrated ML inference service (XGBoost learned task-priority scoring module) providing predictive scores to augment decision engines.
+5. **Operational Control Dashboard** — Modern web application featuring live telemetry, interactive charts, and administrative workflow controls.
+6. **Observability & Audit Stack** — Distributed tracing, structured logging, and metrics exporter providing complete system visibility.
 
 ---
 
 ## System Architecture
 
-### Backend (Fleet Management Services)
-- **Language:** Python (ROS 2 integration, task assignment, CBS planner — extensive robotics library ecosystem).
-- **Language:** Go (task priority scoring API, REST endpoint serving — performance path).
-- **Communication:** ROS 2 DDS for robot-to-FMS communication; REST/WebSocket for dashboard.
-
-### Simulation
-- **ROS 2 Humble:** Robot Operating System 2.
-- **Gazebo Ignition:** Physics simulator for warehouse environment.
-- **Nav2:** Single-robot navigation stack (local path planning per robot).
+### Backend
+- **Core Engine:** Written in Python / Go for high-concurrency performance and thread-safe memory handling
+- **API Framework:** High-performance REST / gRPC services for inter-component communication
+- **Message Broker:** Distributed event bus managing asynchronous tasks and telemetry streams
 
 ### Frontend
-- **Dashboard:** React with a 2D canvas warehouse map rendered using Konva.js. Real-time robot position updates via WebSocket.
+- **Admin Console:** React with TypeScript for type-safe UI state management
+- **Data Visualization:** Recharts / D3.js for time-series and metric visualizer components
+- **Real-Time Layer:** WebSocket connection for streaming live system events to the UI
+
+### Mobile
+- Responsive PWA / Mobile view optimized for tablet and on-the-go operational monitoring.
+
+### Cloud
+- **AWS / GCP:** Primary cloud providers
+- **Orchestration:** Containerized services managed via Docker and Kubernetes
+- **Storage:** S3-compatible object storage (MinIO) for model artifacts and persistent log backups
+
+### Security
+- **Authentication & Authorization:** OAuth2 + JWT tokens with granular RBAC policies
+- **Transport Security:** TLS 1.3 for all external and inter-service gRPC communication
+- **Audit Trail:** Immutable audit logging for all administrative actions and system decisions
 
 ### AI Components
-
-| Component | Role | Technique | AI % |
-|-----------|------|-----------|------|
-| Task Priority Scoring | Score incoming tasks (pick, replenish, transfer) by urgency and business value | Logistic regression / XGBoost on historical task data | ~15% |
-| Charging Prediction | Predict each robot's time-to-empty based on current task load and battery discharge rate | Linear regression on discharge curve | ~5% |
-
-**Total AI effort: ~20%.** Remove it → system uses static priority rules (FIFO or hardcoded SLA tiers). Still fully functional.
+- **Inference Engine:** Microservice hosting pre-trained ML models with sub-20ms latency
+- **Feature Pipeline:** Real-time feature extraction from incoming telemetry streams
+- **Drift Monitoring:** Statistical distribution tracking to detect model degradation
 
 ### Databases
-- **PostgreSQL:** Task history, robot inventory, warehouse layout, order records.
-- **Redis:** Live robot state (position, battery, current task) — fast pub/sub for dashboard updates.
-- **InfluxDB:** Time-series robot telemetry (battery levels, position history, task completion times).
+- **PostgreSQL:** Primary relational store for configuration, user accounts, and state
+- **Redis:** High-speed in-memory cache for session state and rate-limiting counters
+- **Domain-Specific Store:** Time-series (InfluxDB) or Columnar (ClickHouse) database optimized for analytical telemetry
 
 ### Networking
-- **ROS 2 DDS:** Real-time, low-latency publish/subscribe between robots and FMS.
-- **REST / WebSocket:** Dashboard API and live position streaming.
+- **Protocols:** gRPC for internal IPC, REST for web clients, WebSockets for live push
+- **Service Mesh:** Envoy / Linkerd sidecars for mTLS and traffic management
 
 ### DevOps
-- **Docker:** All FMS services containerized.
-- **ROS 2 launch files:** Reproducible simulation startup.
-- **GitHub Actions:** CI/CD for automated unit and integration tests.
+- **Containerization:** Docker container builds for all microservices
+- **Orchestration:** Kubernetes manifests and Helm charts
+- **CI/CD:** GitHub Actions workflows for automated linting, unit testing, and image publishing
+
+### MLOps
+- **Model Registry:** MLflow for tracking experiment metrics and model versioning
+- **Retraining Trigger:** Automated job retraining models when data drift exceeds thresholds
+
+### Embedded
+- Applicable hardware interfacing scripts (C/C++ or Python) where physical node telemetry is required.
+
+### Infrastructure
+- Control plane nodes, application worker pools, database replica clusters, and message broker nodes.
+
+### Monitoring
+- **Prometheus:** Metrics collection (request rates, latency histograms, error rates)
+- **Grafana:** Operations dashboards displaying system KPIs and alert status
+
+### APIs
+- `POST /api/v1/ingest` — Primary data ingestion endpoint
+- `GET /api/v1/status` — Health and system status query
+- `POST /api/v1/control` — Administrative execution command
+- `GET /api/v1/analytics` — Metrics and historical analytics query
+
+---
+
+## AI Components
+
+AI functions as an **augmented intelligence module** (~15–20% of effort). The core platform operates deterministically; ML enhances accuracy.
+
+| Component | AI Role | Technique | Justification |
+|-----------|---------|-----------|---------------|
+| Predictive Analysis | Score incoming events for anomalies or future trends | XGBoost learned task-priority scoring module | Provides adaptive insight where static rules are insufficient |
+| Feature Extraction | Extract statistical metrics from raw telemetry streams | Sliding-window aggregation | Transforms raw inputs into structured model features |
+| Model Drift Monitor | Track distribution shifts in input features | Population Stability Index (PSI) | Ensures model accuracy does not silently degrade |
+
+**What AI does NOT do:** AI does not make irreversible administrative decisions autonomously. Critical system actions require rule verification or human approval.
 
 ---
 
 ## Research Opportunities
 
-1. **CBS vs. Priority-Based Traffic Management:** Benchmark the throughput and computation time of CBS against simpler priority-based reservation tables as fleet size scales from 10 to 100 robots.
-2. **Deadlock Detection and Recovery:** Research the frequency and type of deadlocks under different warehouse layouts and task distributions.
-3. **Fleet Size vs. Throughput:** Empirically determine the "sweet spot" fleet size for a given warehouse layout where adding more robots causes congestion (diminishing returns).
-4. **Learned Priority vs. Rule-Based Priority:** Compare order fulfillment SLA compliance rates between learned priority scoring and fixed business rules.
+1. **System Throughput Benchmarking:** Evaluate processing latency and memory footprint under synthetic high-load scenarios.
+2. **Adaptive Rule-ML Synergy:** Study optimal weighting mechanisms between static business rules and probabilistic ML scores.
+3. **Data Compression Efficiency:** Measure bandwidth and storage reduction using domain-specific encoding vs. generic compression algorithms.
+
+**Possible Publications:**
+- IEEE / ACM conference paper on domain system engineering and high-throughput architecture.
+- Technical report detailing benchmark results and failure-recovery performance.
 
 ---
 
 ## Technology Stack
 
-| Category | Technology | Purpose |
-|----------|-----------|---------|
-| **Languages** | Python | ROS 2 nodes, task planner, CBS algorithm |
-| | Go | Task priority API, REST services |
-| | TypeScript | Dashboard frontend |
-| **Robotics** | ROS 2 Humble | Robot communication middleware |
-| | Gazebo Ignition | Physics simulation |
-| | Nav2 | Per-robot local navigation |
-| **AI** | XGBoost / Scikit-learn | Task priority scoring model |
-| **Databases** | PostgreSQL | Tasks, orders, fleet inventory |
-| | Redis | Live robot state cache |
-| | InfluxDB | Robot telemetry time-series |
-| **Frontend** | React, Konva.js | Warehouse visualization dashboard |
-| **DevOps** | Docker, GitHub Actions | CI/CD and containerization |
+| Category | Technology | Version | Purpose |
+|----------|-----------|---------|---------|
+| **Primary Stack** | Python, ROS 2 Humble, Gazebo, Nav2, Go, XGBoost, PostgreSQL, Redis, React, Konva.js | Latest | Core System Implementation |
+| **Containers** | Docker / Kubernetes | 24+ / 1.28+ | Deployment & Orchestration |
+| **Monitoring** | Prometheus / Grafana | 2.50+ / 10.x | Telemetry Observability |
+| **CI/CD** | GitHub Actions | — | Automated Build & Test |
+
+---
+
+## Required Knowledge
+
+| Topic | Importance | Where to Learn |
+|-------|-----------|----------------|
+| Distributed Systems Architecture | Essential | "Designing Data-Intensive Applications" (Kleppmann) |
+| Python / Go Programming | Essential | Language Official Documentation & Guides |
+| Database Design & Optimization | Essential | Database Internal Literature |
+| Cloud Containerization | Important | Docker & Kubernetes Tutorials |
+
+---
+
+## Required Skills
+
+| Skill | Level Required | Notes |
+|-------|---------------|-------|
+| Python / Go Development | Advanced | Core service implementation |
+| System Architecture | Advanced | Microservice design and IPC |
+| SQL & Data Modeling | Intermediate | Schema optimization |
+| React / TypeScript | Intermediate | Frontend dashboard creation |
 
 ---
 
 ## Suggested Team Distribution
 
-| Member | Role | Responsibilities | Technologies |
-|--------|------|-----------------|--------------|
-| **Member 1** | ROS 2 & Simulation Engineer | Set up Gazebo warehouse environment, spawn simulated AMRs, implement ROS 2 communication nodes, integrate Nav2 for local navigation. | ROS 2, Gazebo, Python |
-| **Member 2** | Path Planning & Traffic Engineer | Implement the CBS multi-agent pathfinding algorithm and the space-time reservation table for collision avoidance. | Python, Graph Algorithms |
-| **Member 3** | Task Assignment & Coordination | Build the task assignment engine (Hungarian Algorithm), implement the charging coordinator and deadlock detection/recovery logic. | Python, Optimization Algorithms |
-| **Member 4** | AI & Analytics | Train the task priority scoring model; implement fleet performance analytics; build the InfluxDB telemetry pipeline. | Python, XGBoost, InfluxDB |
-| **Member 5** | Dashboard & Backend API | Build the React warehouse visualization dashboard with live robot positions; implement the REST/WebSocket API layer. | React, Konva.js, Go, WebSocket |
+| Member | Role | Responsibilities | Key Technologies |
+|--------|------|-----------------|------------------|
+| **Member 1** | Core Backend Lead | Design and implement main processing microservices, API layers, and business logic. | Python / Go, REST/gRPC |
+| **Member 2** | Data & Storage Eng. | Manage database schemas, caching layers, and ingestion pipelines. | PostgreSQL, Redis, Kafka |
+| **Member 3** | AI & Analytics Eng. | Build feature extraction pipelines, train ML models, and set up inference endpoints. | Python, PyTorch/Scikit-learn |
+| **Member 4** | Frontend & UI Developer | Build React admin console, real-time WebSocket listeners, and analytics charts. | React, TypeScript, Recharts |
+| **Member 5** | DevOps & Infrastructure | Configure Docker, Kubernetes, CI/CD pipelines, and Prometheus/Grafana monitoring. | K8s, Docker, Prometheus |
+
+---
+
+## Development Roadmap
+
+### Summer Preparation (8 weeks)
+- [ ] Review domain literature, system requirements, and API specifications
+- [ ] Complete core language (Python / Go) and streaming architecture training
+- [ ] Setup initial project repository, linters, and Docker environment
+
+### Fall Semester (16 weeks)
+- **Weeks 1–4:** Core Ingestion & Storage Setup
+- **Weeks 5–8:** Business Logic & Processing Engine Implementation
+- **Weeks 9–12:** AI Model Training & Inference Endpoint Integration
+- **Weeks 13–16:** Initial Dashboard & Mid-Semester Review
+
+### Spring Semester (16 weeks)
+- **Weeks 1–4:** System Integration & End-to-End Pipeline Testing
+- **Weeks 5–8:** Advanced Observability, Security Audit & Drift Monitoring
+- **Weeks 9–12:** Load Testing, Profiling & Latency Benchmarking
+- **Weeks 13–16:** Final Documentation, Video Demo, and Project Defense
+
+---
+
+## Risks
+
+### Technical Risks
+| Risk | Probability | Impact | Mitigation |
+|------|------------|--------|------------|
+| High Latency under Load | Medium | High | Profile critical path using pprof; optimize queries and caching |
+| Data Consistency Edge Cases | Low | High | Implement strict transactional boundaries and integration tests |
+
+### Security & Deployment Risks
+| Risk | Probability | Impact | Mitigation |
+|------|------------|--------|------------|
+| Unauthorized Access to APIs | Low | Critical | Enforce JWT validation and strict RBAC policies |
+| Deployment Complexity | Medium | Medium | Use Helm charts for reproducible Kubernetes setups |
+
+---
+
+## Deliverables
+
+### Software
+- [ ] Core processing backend microservices
+- [ ] Real-time data ingestion and storage pipeline
+- [ ] Interactive React administration dashboard
+- [ ] ML inference service and feature pipeline
+
+### Documentation & Research
+- [ ] Architecture Design Document & API Reference
+- [ ] System Benchmark Report
+- [ ] Final Presentation Slides & Project Poster
+
+---
+
+## Sponsor Analysis
+
+### Potential Sponsors
+| Entity | Category | Interest Reason |
+|--------|----------|----------------|
+| **Jumia Egypt** | Domestic Industry | Direct commercial alignment with project domain |
+| ** Amazon Egypt Fulfillment** | Local Partner | Recruitment pipeline and technical validation |
+| **International Tech Vendors** | Global | Open-source adoption and cloud resource grants |
 
 ---
 
 ## Estimated Budget
 
-| Item | Cost (EGP) | Cost (USD) |
-|------|-----------|-----------|
-| Cloud VM for running Gazebo simulation (GPU/high-CPU) | 10,000 | ~200 |
-| Optional: TurtleBot3 physical robots (1–2 units for demo) | 15,000 | ~300 |
-| **Total** | **~25,000 EGP** | **~500 USD** |
+| Category | Item | Cost (EGP) | Cost (USD) |
+|----------|------|-----------|-----------|
+| **Cloud** | AWS / GCP / Azure Managed Services (6 months) | 20,000 | ~400 |
+| **Hardware** | Test devices / sensor kits / local server | 25,000 | ~500 |
+| **Total** | | **~45000 EGP** | **~900 USD** |
 
 ---
 
-## Difficulty
-**Score: 8/10** — CBS is a sophisticated algorithm. Integrating multiple ROS 2 nodes, Gazebo physics simulation, and a custom FMS requires strong software architecture skills and patience with ROS 2's steep learning curve.
+## Evaluation Metrics
 
-## Innovation
-**Score: 9/10** — An open-source, simulation-backed multi-robot FMS combining CBS path planning and learned priority scoring has no direct equivalent in the academic open-source space.
-
-## Sponsor Potential
-**Score: 9/10** — Amazon Robotics, Jumia (Egyptian e-commerce), logistics companies, and any warehouse operator looking to automate.
-
-## Startup Potential
-**Score: 8/10** — Warehouse-automation-as-a-service for mid-sized Egyptian logistics companies (3PL operators, pharmaceutical distributors) that cannot afford Locus Robotics.
+- **Difficulty (8/10):** High architectural challenge involving multi-service concurrency and streaming performance.
+- **Innovation (8/10):** Combines distributed systems engineering with a bounded, production-grade AI module.
+- **Research Depth (7/10):** Strong benchmarking and latency-accuracy trade-off investigation possibilities.
+- **Sponsor Potential (8/10):** Direct applicability to industry requirements in Egypt and internationally.
+- **Startup Potential (8/10):** Clear B2B SaaS commercialization path.
 
 ---
 
 ## Career Value
 
-| Career Path | Relevance |
-|-------------|-----------|
-| Robotics Software Engineer | ⭐⭐⭐⭐⭐ |
-| Autonomous Systems Engineer | ⭐⭐⭐⭐⭐ |
-| Distributed Systems Engineer | ⭐⭐⭐⭐ |
-| Backend / Platform Engineer | ⭐⭐⭐ |
+| Career Path | Relevance | Why |
+|-------------|-----------|-----|
+| **Backend / Systems Engineer** | ⭐⭐⭐⭐⭐ | Deep exposure to concurrent microservices, gRPC, and database design |
+| **Data / Infrastructure Engineer** | ⭐⭐⭐⭐⭐ | Hands-on stream processing, event queuing, and storage optimization |
+| **DevOps / Platform Engineer** | ⭐⭐⭐⭐ | Kubernetes, CI/CD, and Prometheus/Grafana observability |
+| **MLOps / Applied AI Engineer** | ⭐⭐⭐⭐ | Serving production ML models with feature monitoring |
+
+---
+
+## Future Extensions
+
+1. **Multi-Region Clustering:** Extend control plane across multiple geographical cloud zones.
+2. **eBPF Acceleration:** Offload kernel packet filtering for higher network throughput.
+3. **Advanced Visual Analytics:** Add graph-based dependency maps to the frontend UI.
 
 ---
 
 ## References
 
-1. Sharon, G., et al. (2015). "Conflict-Based Search for Optimal Multi-Agent Pathfinding." *Artificial Intelligence.*
-2. ROS 2 Documentation: https://docs.ros.org/en/humble/
-3. Gazebo Ignition Documentation: https://gazebosim.org/docs/
-4. Open-RMF (Open Robotics Management Framework): https://www.open-rmf.org/
-5. Kuhn, H.W. (1955). "The Hungarian Method for the Assignment Problem." *Naval Research Logistics Quarterly.*
+1. Kleppmann, M. (2017). *Designing Data-Intensive Applications.* O'Reilly Media.
+2. Official Documentation for Python and  ROS 2 Humble.
+3. IEEE / ACM Conference proceedings on Distributed Systems and Cloud Computing.

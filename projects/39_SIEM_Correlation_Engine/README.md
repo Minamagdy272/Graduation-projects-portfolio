@@ -1,129 +1,172 @@
-# SIEM Correlation Engine
+# Security Information and Event Management (SIEM) Correlation Engine
 
 ---
 
 ## Executive Summary
 
-This project proposes the design and implementation of a **Security Information and Event Management (SIEM) Correlation Engine** — a high-performance, distributed log ingestion, normalization, cross-source event correlation, and security alerting platform. The system ingests logs from diverse enterprise sources (firewalls, Active Directory, web servers, endpoint agents), parses them into a standardized schema (OSSEM / ECS), applies stateful rule-based correlation across event streams, and uses an alert-prioritization scoring module to rank threats and reduce analyst alert fatigue.
+This project proposes the design and implementation of a **Security Information and Event Management (SIEM) Correlation Engine** — a production-grade system engineered for high performance, reliability, and enterprise scalability. The system addresses critical operational challenges in Cybersecurity / Big Data by building a robust architecture that integrates modern software engineering practices with a bounded AI subsystem.
 
-**Motivation:** Modern Security Operations Centers (SOCs) are overwhelmed by millions of isolated log events daily. A single failed login is noise; a failed login followed by a privilege escalation, a firewall rule modification, and an outbound connection to an unknown IP within 5 minutes is a critical breach. Traditional SIEM solutions (Splunk, QRadar) cost hundreds of thousands of dollars and often flood security teams with false positives. Building a SIEM correlation engine teaches high-throughput stream processing, security domain modeling, stateful event correlation, and noise-reduction heuristics.
+**Motivation:** Modern enterprise systems demand high-throughput data handling, low-latency processing, and automated decision-making. Traditional approaches struggle with scale, static rules, or vendor lock-in. This project tackles the core engineering challenge of building a modular, resilient platform capable of operating continuously under demanding production workloads.
 
 **Objectives:**
-- Build a multi-tenant log ingestion and normalization pipeline supporting Syslog, Beats, and HTTP webhooks.
-- Implement an event normalization engine mapping raw unstructured logs to Elastic Common Schema (ECS) format.
-- Develop a Stateful Event Correlation Engine capable of evaluating complex multi-event temporal patterns (e.g., A followed by B within T seconds).
-- Implement an Alert Prioritization Scoring Module that ranks correlated alerts based on asset criticalities, historical false-positive rates, and threat context.
-- Provide a SOC Analyst Web Dashboard for alert investigation, timeline visualization, and rule management.
+- Build a distributed system architecture processing thousands of operations per second with predictable low latency
+- Implement robust fault tolerance, automated recovery, and strict security posture
+- Design a high-performance data storage and streaming pipeline tailored to domain requirements
+- Integrate a bounded AI module (XGBoost threat alert risk scoring and false-positive suppressor) to enhance operational decision-making without creating single-point-of-failure model dependencies
+- Create an intuitive, real-time web dashboard for system monitoring, administration, and operational workflows
 
-**Expected Impact:** A enterprise-grade cybersecurity platform demonstrating mastery of big data stream processing, rule engine design, security event correlation, and incident response workflows.
+**Expected Impact:** A production-grade architecture demonstrating mastery of distributed systems, backend engineering, cloud infrastructure, and applied machine learning.
 
-**Target Users:** Security Operations Center (SOC) teams, Managed Security Service Providers (MSSPs), enterprise IT security administrators, and compliance auditors.
+**Target Users:** Enterprise IT operations, security teams, engineering lead practitioners, and domain-specific operations personnel.
 
 ---
 
 ## Problem Statement
 
-1. **Massive Log Volume & Velocity:** Enterprise networks generate 5,000 to 50,000 events per second (EPS). Ingesting and processing this stream without dropping logs requires scalable data engineering.
-2. **Siloed & Heterogeneous Formats:** Windows Event Logs, Syslog, Nginx access logs, and AWS CloudTrail all use completely different formats. Correlating across them requires schema normalization.
-3. **Complex Attack Chain Detection:** Advanced Persistent Threats (APTs) execute multi-stage attacks across different systems over time. Simple single-event alerts fail to detect multi-stage attack chains.
-4. **Severe Alert Fatigue:** SOC analysts face hundreds of false positives daily, leading to missed critical alerts and burnout.
+1. **System Scalability & Performance:** High-throughput processing demands optimized concurrency, non-blocking I/O, and efficient data serialization to prevent bottlenecks.
+
+2. **Data Consistency & Reliability:** Managing state across distributed components requires strict transactional boundaries, idempotent execution, and robust recovery mechanisms.
+
+3. **Operational Visibility:** Complex distributed architectures often lack real-time observability, making root-cause analysis and performance tuning difficult.
+
+4. **Security & Access Control:** Securing inter-service communication, enforcing fine-grained access policies, and maintaining immutable audit logs are essential for enterprise compliance.
+
+5. **Static vs. Adaptive Logic:** Hardcoded business rules fail to adapt to evolving environmental conditions, requiring machine-learning-assisted scoring to augment traditional rule engines.
 
 ---
 
 ## Existing Solutions
 
 ### Commercial Solutions
-- **Splunk Enterprise Security:** Industry leader. Extremely expensive (per-GB indexing cost), complex SPL query language.
-- **IBM QRadar / ArcSight:** Legacy enterprise SIEM systems. Heavy, slow rule engines.
-- **Microsoft Sentinel:** Cloud-native SIEM. Powerful, but binds organizations to Azure infrastructure.
+- **Enterprise SaaS Vendors:** Closed-source commercial products with high licensing costs and rigid integration paths.
+- **Cloud Provider Managed Services:** Proprietary offerings creating vendor lock-in.
+
+### Academic Solutions
+- Research literature focusing on algorithmic accuracy or theoretical proofs without providing deployable software architectures.
 
 ### Open-Source Solutions
-- **Wazuh:** Open-source SIEM / XDR platform. Excellent agent-based detection, but complex configuration and limited custom correlation engine customization.
-- **Apache Metron:** Apache big data security platform (now retired/archived by Apache Foundation).
-- **Elastic Security (ELK):** Powerful search, but complex stateful multi-stream correlation rules require heavy enterprise licenses.
+- Fragmented individual libraries and frameworks requiring extensive integration and glue code to form a functional platform.
 
-### Limitations of Existing Solutions
-- Commercial SIEMs are prohibitively expensive for mid-market enterprises.
-- Open-source platforms either lack intuitive multi-stream stateful temporal correlation capabilities or rely on complex static queries that consume immense database CPU.
+### Limitations
+- Commercial options are expensive black boxes lacking educational transparency
+- Academic prototypes ignore system engineering, failure modes, and production observability
+- No existing open-source repository combines complete system architecture, real-time data pipelines, and a bounded AI module into a single production specification
 
 ---
 
 ## Proposed Solution
 
-Build **AeroSIEM**, a distributed SIEM Correlation Engine:
+Build a complete end-to-end platform consisting of:
 
-1. **Ingestion & Normalization Pipeline:** High-performance Go-based ingestion workers receiving Syslog (UDP/TCP/TLS) and JSON webhooks. Maps raw incoming log lines to Elastic Common Schema (ECS) JSON format.
-2. **Stream Message Bus:** Apache Kafka partition cluster for buffering raw and normalized log streams.
-3. **Stateful Correlation Engine:** Built using Apache Flink or a custom Go CEP (Complex Event Processing) engine that evaluates temporal windowed rules (e.g., "3 failed SSH logins from IP $x$ followed by successful login from IP $x$ to admin account within 120 seconds").
-4. **Alert Prioritization & Scoring Module:** An ML/Heuristic module (Gradient Boosting / Random Forest) that calculates a dynamic Risk Score ($0-100$) for generated alerts based on target asset criticality score, historical analyst feedback, and event frequency.
-5. **Fast Search & Analytical Storage:** ClickHouse columnar database for sub-second log search and historical aggregation.
-6. **SOC Analyst Dashboard:** React web application featuring a live alert queue, interactive event timeline, attack chain visualization (DAG of correlated events), and a visual rule builder.
+1. **Data Ingestion & Transport Layer** — High-performance message queue/bus ingesting telemetry and command payloads with schema validation.
+2. **Core Processing Engine** — Multi-threaded microservice architecture handling domain logic, transactional state updates, and rule evaluation.
+3. **Data Storage & Indexing** — Hybrid database architecture utilizing relational storage for ACID metadata, time-series stores for telemetry, and caches for low-latency lookups.
+4. **Bounded AI Subsystem** — Integrated ML inference service (XGBoost threat alert risk scoring and false-positive suppressor) providing predictive scores to augment decision engines.
+5. **Operational Control Dashboard** — Modern web application featuring live telemetry, interactive charts, and administrative workflow controls.
+6. **Observability & Audit Stack** — Distributed tracing, structured logging, and metrics exporter providing complete system visibility.
 
 ---
 
 ## System Architecture
 
-### Backend & Data Pipeline
-- **Ingestion & Normalization:** Go (ultra-fast regex/grok parsing, low memory footprint).
-- **Correlation Processing:** Apache Flink (Complex Event Processing API) or custom Go sliding-window correlation engine.
-- **Management API:** Python FastAPI (Rule management, user administration, alert management).
+### Backend
+- **Core Engine:** Written in Go / Python for high-concurrency performance and thread-safe memory handling
+- **API Framework:** High-performance REST / gRPC services for inter-component communication
+- **Message Broker:** Distributed event bus managing asynchronous tasks and telemetry streams
 
 ### Frontend
-- **SOC Dashboard:** React with TypeScript.
-- **Visualization:** Cytoscape.js / D3.js for attack chain graph visualization; Recharts for EPS rates.
+- **Admin Console:** React with TypeScript for type-safe UI state management
+- **Data Visualization:** Recharts / D3.js for time-series and metric visualizer components
+- **Real-Time Layer:** WebSocket connection for streaming live system events to the UI
+
+### Mobile
+- Responsive PWA / Mobile view optimized for tablet and on-the-go operational monitoring.
+
+### Cloud
+- **AWS / GCP:** Primary cloud providers
+- **Orchestration:** Containerized services managed via Docker and Kubernetes
+- **Storage:** S3-compatible object storage (MinIO) for model artifacts and persistent log backups
 
 ### Security
-- **RBAC & Multi-Tenancy:** Role-based access control (SOC Tier 1 Analyst, Tier 2 Investigator, Admin).
-- **TLS 1.3 Encryption:** For all Syslog-over-TLS, HTTP API, and inter-service communications.
-- **Immutable Log Storage:** Cryptographic hash verification for archived log partitions to ensure forensic tamper evidence.
+- **Authentication & Authorization:** OAuth2 + JWT tokens with granular RBAC policies
+- **Transport Security:** TLS 1.3 for all external and inter-service gRPC communication
+- **Audit Trail:** Immutable audit logging for all administrative actions and system decisions
 
 ### AI Components
-
-| Component | Role | Technique | AI % |
-|-----------|------|-----------|------|
-| Dynamic Alert Prioritization | Score and rank correlated security alerts to suppress false positives and highlight true threats | XGBoost Classifier / Random Forest trained on analyst alert feedback features | ~15% |
-
-**Total AI effort: ~15%.** If the ML prioritization module is removed, alerts are scored using static additive risk weights (e.g., Asset Value $\times$ Rule Severity). The correlation engine and SIEM remain 100% functional.
+- **Inference Engine:** Microservice hosting pre-trained ML models with sub-20ms latency
+- **Feature Pipeline:** Real-time feature extraction from incoming telemetry streams
+- **Drift Monitoring:** Statistical distribution tracking to detect model degradation
 
 ### Databases
-- **ClickHouse:** Columnar database for high-throughput log storage and analytical search queries.
-- **PostgreSQL:** Alert records, correlation rules, asset inventory metadata, user accounts.
-- **Redis:** Active state tracking for sliding window event counters and session lookups.
+- **PostgreSQL:** Primary relational store for configuration, user accounts, and state
+- **Redis:** High-speed in-memory cache for session state and rate-limiting counters
+- **Domain-Specific Store:** Time-series (InfluxDB) or Columnar (ClickHouse) database optimized for analytical telemetry
 
 ### Networking
-- **Syslog (RFC 5424 / RFC 3164):** Standard network log forwarding.
-- **Kafka / gRPC:** High-speed internal message passing.
-- **WebSockets:** Live alert streaming to the SOC dashboard.
+- **Protocols:** gRPC for internal IPC, REST for web clients, WebSockets for live push
+- **Service Mesh:** Envoy / Linkerd sidecars for mTLS and traffic management
 
 ### DevOps
-- **Docker Compose & Helm:** Package complete stack for standalone or Kubernetes deployment.
-- **Attack Simulation Scripts:** Automated Python scripts executing simulated attack patterns (brute force, port scan, lateral movement) to test correlation rules.
+- **Containerization:** Docker container builds for all microservices
+- **Orchestration:** Kubernetes manifests and Helm charts
+- **CI/CD:** GitHub Actions workflows for automated linting, unit testing, and image publishing
+
+### MLOps
+- **Model Registry:** MLflow for tracking experiment metrics and model versioning
+- **Retraining Trigger:** Automated job retraining models when data drift exceeds thresholds
+
+### Embedded
+- Applicable hardware interfacing scripts (C/C++ or Python) where physical node telemetry is required.
+
+### Infrastructure
+- Control plane nodes, application worker pools, database replica clusters, and message broker nodes.
+
+### Monitoring
+- **Prometheus:** Metrics collection (request rates, latency histograms, error rates)
+- **Grafana:** Operations dashboards displaying system KPIs and alert status
+
+### APIs
+- `POST /api/v1/ingest` — Primary data ingestion endpoint
+- `GET /api/v1/status` — Health and system status query
+- `POST /api/v1/control` — Administrative execution command
+- `GET /api/v1/analytics` — Metrics and historical analytics query
+
+---
+
+## AI Components
+
+AI functions as an **augmented intelligence module** (~15–20% of effort). The core platform operates deterministically; ML enhances accuracy.
+
+| Component | AI Role | Technique | Justification |
+|-----------|---------|-----------|---------------|
+| Predictive Analysis | Score incoming events for anomalies or future trends | XGBoost threat alert risk scoring and false-positive suppressor | Provides adaptive insight where static rules are insufficient |
+| Feature Extraction | Extract statistical metrics from raw telemetry streams | Sliding-window aggregation | Transforms raw inputs into structured model features |
+| Model Drift Monitor | Track distribution shifts in input features | Population Stability Index (PSI) | Ensures model accuracy does not silently degrade |
+
+**What AI does NOT do:** AI does not make irreversible administrative decisions autonomously. Critical system actions require rule verification or human approval.
 
 ---
 
 ## Research Opportunities
 
-1. **Correlation Engine Scaling Limits:** Benchmark stateful CEP engine throughput (EPS) vs. memory consumption under increasing sliding window sizes (5 min vs 1 hour).
-2. **False Positive Suppression via ML:** Quantify the reduction in analyst alert review queue size achieved by XGBoost prioritization vs. static rule weighting.
-3. **Log Normalization Overhead:** Compare Go regex parsing vs. SIMD-accelerated JSON/log parsing for high-velocity ECS mapping.
+1. **System Throughput Benchmarking:** Evaluate processing latency and memory footprint under synthetic high-load scenarios.
+2. **Adaptive Rule-ML Synergy:** Study optimal weighting mechanisms between static business rules and probabilistic ML scores.
+3. **Data Compression Efficiency:** Measure bandwidth and storage reduction using domain-specific encoding vs. generic compression algorithms.
+
+**Possible Publications:**
+- IEEE / ACM conference paper on domain system engineering and high-throughput architecture.
+- Technical report detailing benchmark results and failure-recovery performance.
 
 ---
 
 ## Technology Stack
 
-| Category | Technology | Purpose |
-|----------|-----------|---------|
-| **Languages** | Go | Log ingestion, ECS normalization, Syslog receiver |
-| | Python | Management API, ML scoring microservice |
-| | TypeScript | SOC Analyst frontend |
-| **Stream Processing** | Apache Kafka | Event stream buffering |
-| | Apache Flink / Custom Go CEP | Stateful correlation engine |
-| **Databases** | ClickHouse | Columnar log search storage |
-| | PostgreSQL | System metadata, rules, alerts |
-| | Redis | Real-time sliding window cache |
-| **AI / ML** | XGBoost, Scikit-learn | Alert risk scoring & prioritization |
-| **Frontend** | React, Cytoscape.js, D3.js | Attack graph visualization & SOC UI |
-| **DevOps** | Docker, Helm, GitHub Actions | Packaging, deployment, CI/CD |
+| Category | Technology | Version | Purpose |
+|----------|-----------|---------|---------|
+| **Primary Stack** | Go, Syslog, Apache Kafka, Apache Flink CEP, ClickHouse, Python, XGBoost, Cytoscape.js, React | Latest | Core System Implementation |
+| **Containers** | Docker / Kubernetes | 24+ / 1.28+ | Deployment & Orchestration |
+| **Monitoring** | Prometheus / Grafana | 2.50+ / 10.x | Telemetry Observability |
+| **CI/CD** | GitHub Actions | — | Automated Build & Test |
 
 ---
 
@@ -131,11 +174,21 @@ Build **AeroSIEM**, a distributed SIEM Correlation Engine:
 
 | Topic | Importance | Where to Learn |
 |-------|-----------|----------------|
-| Elastic Common Schema (ECS) & Log Parsing | Essential | Elastic ECS specification documentation |
-| Complex Event Processing (CEP) Concepts | Essential | Apache Flink CEP documentation / Distributed Systems literature |
-| Columnar Databases (ClickHouse) | Essential | ClickHouse official documentation & benchmarks |
-| Cyber Kill Chain & MITRE ATT&CK Framework | Essential | MITRE ATT&CK website & documentation |
-| Go High-Concurrency Networking | Important | Go Concurrency Patterns (goroutines, channels) |
+| Distributed Systems Architecture | Essential | "Designing Data-Intensive Applications" (Kleppmann) |
+| Go / Python Programming | Essential | Language Official Documentation & Guides |
+| Database Design & Optimization | Essential | Database Internal Literature |
+| Cloud Containerization | Important | Docker & Kubernetes Tutorials |
+
+---
+
+## Required Skills
+
+| Skill | Level Required | Notes |
+|-------|---------------|-------|
+| Go / Python Development | Advanced | Core service implementation |
+| System Architecture | Advanced | Microservice design and IPC |
+| SQL & Data Modeling | Intermediate | Schema optimization |
+| React / TypeScript | Intermediate | Frontend dashboard creation |
 
 ---
 
@@ -143,37 +196,118 @@ Build **AeroSIEM**, a distributed SIEM Correlation Engine:
 
 | Member | Role | Responsibilities | Key Technologies |
 |--------|------|-----------------|------------------|
-| **Member 1** | Ingestion & Parser Lead | Build Syslog/HTTP receivers in Go, implement regex/grok ECS log normalizer. | Go, Syslog, Regular Expressions |
-| **Member 2** | Correlation Engine Eng. | Implement stateful temporal correlation rules (CEP engine) in Flink/Go for multi-stage attacks. | Apache Flink / Go, Kafka |
-| **Member 3** | Search & Storage Eng. | Design ClickHouse schema, optimize log indexing, build high-speed search API endpoints. | ClickHouse, SQL, Go/Python |
-| **Member 4** | AI & Prioritization Eng. | Develop alert scoring & false-positive reduction ML model; map rules to MITRE ATT&CK. | Python, XGBoost, Scikit-learn |
-| **Member 5** | Frontend / SOC UI Developer | Develop React SOC dashboard, attack chain visualization graph, and alert management UI. | React, Cytoscape.js, WebSockets |
+| **Member 1** | Core Backend Lead | Design and implement main processing microservices, API layers, and business logic. | Go / Python, REST/gRPC |
+| **Member 2** | Data & Storage Eng. | Manage database schemas, caching layers, and ingestion pipelines. | PostgreSQL, Redis, Kafka |
+| **Member 3** | AI & Analytics Eng. | Build feature extraction pipelines, train ML models, and set up inference endpoints. | Python, PyTorch/Scikit-learn |
+| **Member 4** | Frontend & UI Developer | Build React admin console, real-time WebSocket listeners, and analytics charts. | React, TypeScript, Recharts |
+| **Member 5** | DevOps & Infrastructure | Configure Docker, Kubernetes, CI/CD pipelines, and Prometheus/Grafana monitoring. | K8s, Docker, Prometheus |
+
+---
+
+## Development Roadmap
+
+### Summer Preparation (8 weeks)
+- [ ] Review domain literature, system requirements, and API specifications
+- [ ] Complete core language (Go / Python) and streaming architecture training
+- [ ] Setup initial project repository, linters, and Docker environment
+
+### Fall Semester (16 weeks)
+- **Weeks 1–4:** Core Ingestion & Storage Setup
+- **Weeks 5–8:** Business Logic & Processing Engine Implementation
+- **Weeks 9–12:** AI Model Training & Inference Endpoint Integration
+- **Weeks 13–16:** Initial Dashboard & Mid-Semester Review
+
+### Spring Semester (16 weeks)
+- **Weeks 1–4:** System Integration & End-to-End Pipeline Testing
+- **Weeks 5–8:** Advanced Observability, Security Audit & Drift Monitoring
+- **Weeks 9–12:** Load Testing, Profiling & Latency Benchmarking
+- **Weeks 13–16:** Final Documentation, Video Demo, and Project Defense
+
+---
+
+## Risks
+
+### Technical Risks
+| Risk | Probability | Impact | Mitigation |
+|------|------------|--------|------------|
+| High Latency under Load | Medium | High | Profile critical path using pprof; optimize queries and caching |
+| Data Consistency Edge Cases | Low | High | Implement strict transactional boundaries and integration tests |
+
+### Security & Deployment Risks
+| Risk | Probability | Impact | Mitigation |
+|------|------------|--------|------------|
+| Unauthorized Access to APIs | Low | Critical | Enforce JWT validation and strict RBAC policies |
+| Deployment Complexity | Medium | Medium | Use Helm charts for reproducible Kubernetes setups |
+
+---
+
+## Deliverables
+
+### Software
+- [ ] Core processing backend microservices
+- [ ] Real-time data ingestion and storage pipeline
+- [ ] Interactive React administration dashboard
+- [ ] ML inference service and feature pipeline
+
+### Documentation & Research
+- [ ] Architecture Design Document & API Reference
+- [ ] System Benchmark Report
+- [ ] Final Presentation Slides & Project Poster
+
+---
+
+## Sponsor Analysis
+
+### Potential Sponsors
+| Entity | Category | Interest Reason |
+|--------|----------|----------------|
+| **CIB SOC Team** | Domestic Industry | Direct commercial alignment with project domain |
+| ** EG-CERT** | Local Partner | Recruitment pipeline and technical validation |
+| **International Tech Vendors** | Global | Open-source adoption and cloud resource grants |
 
 ---
 
 ## Estimated Budget
 
-| Item | Cost (EGP) | Cost (USD) |
-|------|-----------|-----------|
-| Cloud Compute (High RAM for ClickHouse & Kafka cluster) | 12,000 | ~240 |
-| Domain & TLS Certificates | 500 | ~10 |
-| **Total** | **~12,500 EGP** | **~250 USD** |
+| Category | Item | Cost (EGP) | Cost (USD) |
+|----------|------|-----------|-----------|
+| **Cloud** | AWS / GCP / Azure Managed Services (6 months) | 20,000 | ~400 |
+| **Hardware** | Test devices / sensor kits / local server | 12,500 | ~250 |
+| **Total** | | **~32500 EGP** | **~650 USD** |
 
 ---
 
-## Difficulty
-**Score: 8/10**
-Requires processing high-velocity log streams without memory leaks, designing complex temporal correlation logic, optimizing ClickHouse queries, and building a responsive attack-graph UI.
+## Evaluation Metrics
 
----
-
-## Innovation
-**Score: 8/10**
-Combines high-performance columnar log storage (ClickHouse), open-source CEP correlation, and ML-driven alert prioritization mapped directly to MITRE ATT&CK technique IDs.
+- **Difficulty (8/10):** High architectural challenge involving multi-service concurrency and streaming performance.
+- **Innovation (8/10):** Combines distributed systems engineering with a bounded, production-grade AI module.
+- **Research Depth (7/10):** Strong benchmarking and latency-accuracy trade-off investigation possibilities.
+- **Sponsor Potential (8/10):** Direct applicability to industry requirements in Egypt and internationally.
+- **Startup Potential (8/10):** Clear B2B SaaS commercialization path.
 
 ---
 
 ## Career Value
-**Security Operations (SOC) / SIEM Engineer:** ⭐⭐⭐⭐⭐
-**Data Pipeline / Infrastructure Engineer:** ⭐⭐⭐⭐⭐
-**Cybersecurity Software Developer:** ⭐⭐⭐⭐
+
+| Career Path | Relevance | Why |
+|-------------|-----------|-----|
+| **Backend / Systems Engineer** | ⭐⭐⭐⭐⭐ | Deep exposure to concurrent microservices, gRPC, and database design |
+| **Data / Infrastructure Engineer** | ⭐⭐⭐⭐⭐ | Hands-on stream processing, event queuing, and storage optimization |
+| **DevOps / Platform Engineer** | ⭐⭐⭐⭐ | Kubernetes, CI/CD, and Prometheus/Grafana observability |
+| **MLOps / Applied AI Engineer** | ⭐⭐⭐⭐ | Serving production ML models with feature monitoring |
+
+---
+
+## Future Extensions
+
+1. **Multi-Region Clustering:** Extend control plane across multiple geographical cloud zones.
+2. **eBPF Acceleration:** Offload kernel packet filtering for higher network throughput.
+3. **Advanced Visual Analytics:** Add graph-based dependency maps to the frontend UI.
+
+---
+
+## References
+
+1. Kleppmann, M. (2017). *Designing Data-Intensive Applications.* O'Reilly Media.
+2. Official Documentation for Go and  Syslog.
+3. IEEE / ACM Conference proceedings on Distributed Systems and Cloud Computing.
