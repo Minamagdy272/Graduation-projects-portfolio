@@ -1,108 +1,139 @@
 # Project Rankings & Overall Comparison
 
-This document ranks the top 25 graduation projects based on a holistic evaluation of their Engineering Complexity, Innovation, Sponsor Potential, Startup Potential, Educational Value, and Implementation Risk.
+This document ranks the complete portfolio of **34 graduation projects** based on a holistic evaluation of their Engineering Complexity, Innovation, Sponsor Potential, Startup Potential, Educational Value, and Implementation Risk.
 
 ---
 
-## 🏆 Tier 1: The Elite Projects (Rank 1-5)
-*These projects represent the absolute pinnacle of engineering challenge. They are exceptionally difficult, highly innovative, and practically guarantee job offers from top-tier companies.*
+## 🏆 Tier 1: The Elite Systems & Infrastructure (Rank 1-8)
+*These projects represent the absolute pinnacle of engineering challenge. They are exceptionally difficult, highly innovative, and practically guarantee job offers from top-tier tech companies.*
 
-**1. Custom Distributed Key-Value Store (Project 16)**
-- **Why it's #1:** The ultimate test of computer science fundamentals. Building a consensus algorithm (Raft) and distributed storage engine from scratch separates elite engineers from the rest.
-- **Score:** 9.2/10
+**1. Multi-Region Active-Active DB Replication Platform (Project 27)**
+- **Why it's #1:** The ultimate test of distributed consistency. Building vector clocks, WAL CDC streaming, conflict detection, and application merge functions from scratch tackles the hardest problem in computer science.
+- **Score:** 8.57/10
 
-**2. Real-time Data Lakehouse Platform (Project 12)**
-- **Why it's #2:** Tackles petabyte-scale data engineering. Combining Kafka, Flink, Iceberg, and Trino is currently the most sought-after architecture in big data.
-- **Score:** 8.9/10
+**2. Multi-Tenant GPU Scheduling Platform (Project 26)**
+- **Why it's #2:** Demystifies AI cloud infrastructure. Implements Dominant Resource Fairness (DRF) scheduling, NVIDIA MIG partitioning, and predictive autoscaling to manage shared GPU clusters.
+- **Score:** 8.57/10
 
-**3. Custom Container Orchestration Engine (Project 01)**
-- **Why it's #3:** Rebuilding a mini-Kubernetes teaches Linux primitives (cgroups, namespaces) better than any course. Incredible systems engineering value.
-- **Score:** 8.8/10
+**3. Real-time Data Lakehouse Platform (Project 12)**
+- **Why it's #3:** Tackles petabyte-scale data engineering. Combining Kafka, Flink, Iceberg, and Trino is currently the most sought-after architecture in big data.
+- **Score:** 8.18/10
 
-**4. Serverless Function Orchestration Engine (Project 07)**
-- **Why it's #4:** Demystifies the cloud. Building an event-driven, scale-to-zero compute platform is a massive architectural achievement.
-- **Score:** 8.7/10
+**4. Time-Series DB Engine for Industrial Telemetry (Project 30)**
+- **Why it's #4:** Custom database engine development. Implements Gorilla delta-delta compression, write-ahead logging (WAL), LTTB downsampling, and native CUSUM anomaly queries.
+- **Score:** 8.11/10
 
 **5. Real-time Collaborative Code Editor (Project 04)**
-- **Why it's #5:** An incredibly complex frontend and distributed algorithm (CRDT) challenge, paired with secure backend code execution.
-- **Score:** 8.6/10
+- **Why it's #5:** An incredibly complex frontend and distributed algorithm (CRDT) challenge, paired with secure backend sandboxed execution.
+- **Score:** 8.03/10
+
+**6. IDS for Industrial Control Networks / SCADA (Project 28)**
+- **Why it's #6:** Deep packet inspection for raw Modbus/DNP3 industrial protocols combined with passive network baselining and Isolation Forest anomaly detection.
+- **Score:** 8.18/10
+
+**7. 5G Network Slicing Management Platform (Project 32)**
+- **Why it's #7:** Translates complex 3GPP standards into working software. Manages virtual network slice lifecycles, SLA monitoring, and Prophet traffic demand forecasting.
+- **Score:** 8.14/10
+
+**8. Multi-Robot Coordination Platform for Warehouse Fleets (Project 29)**
+- **Why it's #8:** Solves NP-hard fleet routing using Conflict-Based Search (CBS) pathfinding, ROS 2 / Gazebo simulation, and learned task-priority scoring.
+- **Score:** 8.18/10
 
 ---
 
-## 🚀 Tier 2: The Industry Innovators (Rank 6-12)
-*These projects solve massive, modern industry problems. They are highly commercializable and attractive to sponsors and startups.*
+## 🚀 Tier 2: Enterprise Systems & FinTech Leaders (Rank 9-17)
+*These projects solve massive, modern enterprise problems. They are highly commercializable and attractive to corporate sponsors and startups.*
 
-**6. Decentralized Identity Verification (Project 18)**
-- **Highlight:** Applied cryptography, Zero-Knowledge Proofs, and Web3 without the cryptocurrency hype.
+**9. In-Vehicle Network Gateway with CAN-Bus Security (Project 33)**
+- **Highlight:** Automotive security gateway implementing SocketCAN domain firewalls, DBC parsing, and ONNX anomaly detection on embedded hardware.
 
-**7. Real-time Fraud Detection Pipeline (Project 02)**
-- **Highlight:** Ultra-low latency streaming combined with machine learning. Huge demand from the FinTech sector.
+**10. Automotive Digital Twin for ECU Testing (Project 34)**
+- **Highlight:** Real-time CAN/LIN protocol simulation, Hardware-in-the-Loop (HiL) interface, and Dynamic Time Warping (DTW) signal regression detection.
 
-**8. Zero-Trust Network Access Platform (Project 03)**
-- **Highlight:** The modern replacement for VPNs. Highly relevant for cybersecurity careers.
+**11. Cross-Border Micropayment Settlement Infrastructure (Project 36)**
+- **Highlight:** High-throughput bilateral netting engine, multi-currency double-entry ledger, OFAC compliance, and GARCH FX volatility forecasting.
 
-**9. Multi-Cloud Cost Intelligence Platform (Project 25)**
-- **Highlight:** Solves a multi-billion dollar business problem (FinOps) using massive data ETL and time-series forecasting.
+**12. Core Banking Microservices Platform (Project 37)**
+- **Highlight:** Cloud-native Spring Boot core banking, ACID-compliant double-entry ledger, ISO 8583 card simulation, and ML credit limit decisioning.
 
-**10. End-to-End MLOps Platform (Project 06)**
-- **Highlight:** Bridges the gap between Jupyter notebooks and production. The definitive MLOps portfolio project.
+**13. Insider-Threat Behavioral Monitoring / UEBA (Project 31)**
+- **Highlight:** Enterprise user behavior analytics, Apache Flink feature streaming, peer-group baselining, and SHAP-explained anomaly scoring.
 
-**11. Self-Healing Infrastructure Platform (Project 19)**
-- **Highlight:** The holy grail of Site Reliability Engineering (SRE) - an infrastructure that fixes itself using AIOps.
+**14. Digital Twin for Predictive Maintenance in Manufacturing (Project 35)**
+- **Highlight:** Industrial IoT edge sensing, Apache Flink vibration FFT processing, Cox PH survival analysis (RUL), and interactive Three.js 3D dashboard.
 
-**12. Chaos Engineering Platform (Project 22)**
-- **Highlight:** Deep Linux hacking and distributed systems testing.
+**15. Real-time Fraud Detection Pipeline (Project 02)**
+- **Highlight:** Sub-50ms streaming fraud detection using Apache Flink, Redis feature stores, and XGBoost probability scoring.
+
+**16. Zero-Trust Network Access Platform (Project 03)**
+- **Highlight:** Modern identity-aware proxy replacing legacy VPNs with mTLS, WireGuard, and continuous posture evaluation.
+
+**17. SIEM Correlation Engine (Project 39)**
+- **Highlight:** High-velocity log ingestion (Go), Elastic Common Schema normalization, stateful Flink CEP correlation rules, and ClickHouse analytics.
 
 ---
 
-## 🌍 Tier 3: The Cyber-Physical & IoT Leaders (Rank 13-19)
-*These projects cross the boundary between software and the physical world. Excellent for teams with diverse hardware/software skills.*
+## 🌍 Tier 3: Cyber-Physical, IoT & Smart Grid (Rank 18-26)
+*These projects cross the boundary between software and physical hardware. Excellent for teams with combined software and hardware skills.*
 
-**13. Edge-Native Video Analytics Pipeline (Project 09)**
-- **Highlight:** Optimizing deep learning models for constrained edge hardware (Jetson/Raspberry Pi).
+**18. Microgrid Control System for Islanded Operation (Project 38)**
+- **Highlight:** IEEE 2030.7-aligned microgrid control, <50ms islanding transition, droop control emulation, Modbus TCP, and interactive SCADA SLD dashboard.
 
-**14. Smart City Traffic Optimization System (Project 15)**
-- **Highlight:** Advanced multi-agent Reinforcement Learning applied to physical infrastructure.
+**19. Mesh Networking for Disaster-Resilient Communication (Project 40)**
+- **Highlight:** Hybrid LoRa/Wi-Fi mesh nodes (ESP32 / Raspberry Pi), delay-tolerant networking (DTN), RSSI predictive link degradation, and offline PWA maps.
 
-**15. Industrial IoT Predictive Maintenance (Project 05)**
-- **Highlight:** TinyML on microcontrollers and high-frequency time-series data pipelines.
+**20. Edge-Native Video Analytics Pipeline (Project 09)**
+- **Highlight:** Optimizing deep learning models for constrained edge hardware (NVIDIA Jetson / Raspberry Pi) with RTSP and TensorRT.
 
-**16. Privacy-Preserving Healthcare Data Exchange (Project 08)**
+**21. Smart City Traffic Optimization System (Project 15)**
+- **Highlight:** Multi-agent Reinforcement Learning applied to simulated traffic grids (SUMO) with computer vision edge sensors.
+
+**22. Industrial IoT Predictive Maintenance (Project 05)**
+- **Highlight:** ESP32 sensor nodes, high-frequency vibration signal processing (FFT), InfluxDB time-series storage, and autoencoder anomaly detection.
+
+**23. Privacy-Preserving Healthcare Data Exchange (Project 08)**
 - **Highlight:** Federated Learning and Differential Privacy applied to strict medical data standards (FHIR).
 
-**17. Peer-to-Peer Energy Trading Platform (Project 11)**
-- **Highlight:** Marrying smart grid IoT with high-speed FinTech matching engines.
+**24. Peer-to-Peer Energy Trading Platform (Project 11)**
+- **Highlight:** Smart grid IoT meters combined with high-speed matching engines and time-series demand forecasting.
 
-**18. Digital Twin for Smart Building Management (Project 10)**
-- **Highlight:** 3D WebGL rendering combined with live MQTT telemetry streams.
+**25. Digital Twin for Smart Building Management (Project 10)**
+- **Highlight:** 3D WebGL (Three.js) building rendering combined with live MQTT telemetry streams and energy forecasting.
 
-**19. Remote Patient Monitoring Platform (Project 20)**
-- **Highlight:** A complete hardware-to-mobile-to-cloud telehealth pipeline.
+**26. Remote Patient Monitoring Platform (Project 20)**
+- **Highlight:** Complete hardware-to-mobile-to-cloud telehealth pipeline with BLE medical sensors and time-series telemetry.
 
 ---
 
-## 🛡️ Tier 4: The Specialized Systems (Rank 20-25)
-*These projects are highly focused on specific engineering niches like networking, offensive security, and media.*
+## 🛡️ Tier 4: DevOps, Cloud & Specialized Systems (Rank 27-34)
+*These projects focus on platform engineering, cloud cost management, developer tools, and offensive security.*
 
-**20. Intelligent API Gateway (Project 13)**
-- **Highlight:** High-concurrency Go programming and AI-driven Web Application Firewalls (WAF).
+**27. Multi-Cloud Cost Intelligence Platform (Project 25)**
+- **Highlight:** Solves FinOps challenges by ingesting multi-cloud billing CUR logs into ClickHouse with Prophet cost forecasting.
 
-**21. Automated Penetration Testing Framework (Project 17)**
-- **Highlight:** Graph databases modeling exploit paths and automated orchestration for Red Teams.
+**28. End-to-End MLOps Platform (Project 06)**
+- **Highlight:** Bridges the gap between ML notebooks and production with automated CI/CD pipelines, model registries, and drift monitoring.
 
-**22. Distributed Log Analytics and Anomaly Detection (Project 23)**
-- **Highlight:** Heavy NLP and sequence modeling (LSTMs) applied to millions of unstructured log lines.
+**29. Self-Healing Infrastructure Platform (Project 19)**
+- **Highlight:** Site Reliability Engineering (SRE) platform using Prometheus anomaly detection and automated Kubernetes remediation operators.
 
-**23. Software-Defined WAN Controller (Project 14)**
-- **Highlight:** Dynamic traffic engineering, Linux networking, and overlay VPNs.
+**30. Intelligent API Gateway (Project 13)**
+- **Highlight:** High-concurrency Go API gateway with AI-driven Web Application Firewall (WAF) anomaly detection.
 
-**24. Adaptive Video Streaming Platform (Project 21)**
-- **Highlight:** Media encoding (FFmpeg), distributed workers, and CDN edge delivery.
+**31. Automated Penetration Testing Framework (Project 17)**
+- **Highlight:** Graph databases (Neo4j) modeling exploit paths and automated orchestration for security Red Teams.
 
-**25. Smart Agriculture Monitoring & Automation System (Project 24)**
-- **Highlight:** Extreme-edge LoRaWAN networking and rugged IoT design.
+**32. Distributed Log Analytics & Anomaly Detection (Project 23)**
+- **Highlight:** Rust log shipper, Kafka stream pipeline, Drain NLP parser, and DeepLog LSTM anomaly detection.
+
+**33. Software-Defined WAN Controller (Project 14)**
+- **Highlight:** Dynamic traffic engineering, Linux networking (`tc`/`iproute2`), OpenFlow, and overlay VPN management.
+
+**34. Smart Agriculture Monitoring & Automation (Project 24)**
+- **Highlight:** Extreme-edge LoRaWAN wireless sensor network, plant disease CNN classifier, and automated irrigation control.
 
 ---
 
 ## Conclusion
-While ranked 1 to 25, **every single project on this list is a top-tier engineering challenge**. A team executing Project #25 will still stand out significantly compared to teams building standard CRUD web applications. The choice should be driven by the team's specific career interests (e.g., Data Engineering vs. Cybersecurity) rather than the absolute ranking.
+
+While ranked 1 to 34, **every single project on this list is a production-grade engineering challenge**. A team executing Project #34 will still stand out significantly compared to teams building standard CRUD web applications. The choice should be driven by the team's specific career interests (e.g., Automotive vs. FinTech vs. Cybersecurity) rather than the absolute ranking.

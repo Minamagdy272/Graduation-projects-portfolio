@@ -1,110 +1,113 @@
 # Career Path Mapping
 
-This document maps the 25 graduation projects to specific software engineering and computer engineering career paths. Choosing a project aligned with your desired career will give you a significant advantage in job interviews by providing a highly relevant portfolio piece.
+This document maps all **34 graduation projects** to specific software engineering, systems, and computer engineering career paths. Choosing a project aligned with your desired career will give you a significant advantage in job interviews by providing a highly relevant, production-grade portfolio piece.
 
 ---
 
-## 1. Site Reliability Engineer (SRE) / DevOps Engineer
-*Focus: Infrastructure, automation, observability, and system resilience.*
+## 1. Site Reliability Engineer (SRE) / DevOps / Platform Engineer
+*Focus: Infrastructure, automation, observability, multi-tenant scheduling, and system resilience.*
 
 **Core Projects:**
-- **Project 19: Self-Healing Infrastructure Platform** (The ultimate SRE project)
-- **Project 22: Chaos Engineering Platform** (Proves deep understanding of failure modes)
-- **Project 23: Distributed Log Analytics** (Building the observability stack itself)
-- **Project 06: End-to-End MLOps Platform** (DevOps applied to AI)
-- **Project 25: Multi-Cloud Cost Intelligence** (FinOps is a core DevOps responsibility)
+- **Project 19: Self-Healing Infrastructure Platform** (The ultimate SRE project: automated K8s remediation)
+- **Project 26: Multi-Tenant GPU Scheduling Platform** (K8s operator, DRF scheduling, MIG partitioning)
+- **Project 23: Distributed Log Analytics & Anomaly Detection** (Observability stack with Rust/ClickHouse)
+- **Project 06: End-to-End MLOps Platform** (DevOps applied to machine learning models)
+- **Project 25: Multi-Cloud Cost Intelligence Platform** (FinOps & cloud cost analytics)
+- **Project 39: SIEM Correlation Engine** (High-throughput stream processing & log correlation)
 
-**Key Skills Gained:** Kubernetes, Terraform, Prometheus, CI/CD, Linux Internals, Cloud Architecture.
+**Key Skills Gained:** Kubernetes Operators, Terraform, Prometheus, Go, ClickHouse, CI/CD, Linux Cgroups/Namespaces.
 
 ---
 
-## 2. Backend / Systems Software Engineer
-*Focus: High-concurrency systems, low-level network programming, and distributed algorithms.*
+## 2. Distributed Systems / Systems Software Engineer
+*Focus: High-concurrency systems, low-level network programming, database engines, and consensus algorithms.*
 
 **Core Projects:**
-- **Project 16: Custom Distributed Key-Value Store** (The hardest backend project)
-- **Project 01: Custom Container Orchestration Engine** (Linux systems programming)
-- **Project 07: Serverless Function Orchestration Engine** (Distributed scheduling)
-- **Project 13: Intelligent API Gateway** (High-performance networking)
-- **Project 04: Real-time Collaborative Code Editor** (WebSockets, CRDTs, Sandboxing)
+- **Project 27: Multi-Region Active-Active DB Replication Platform** (Vector clocks, WAL CDC, conflict resolution)
+- **Project 30: Time-Series DB Engine for Industrial Telemetry** (Storage engine, WAL, Gorilla compression)
+- **Project 26: Multi-Tenant GPU Scheduling Platform** (Bin-packing, DRF fair-share algorithm)
+- **Project 13: Intelligent API Gateway** (High-concurrency Go proxy, rate limiting, WAF)
+- **Project 04: Real-time Collaborative Code Editor** (CRDT algorithms, WebSockets, code sandboxing)
 
-**Key Skills Gained:** Go, Rust, C++, Concurrency, TCP/UDP, Distributed Consensus (Raft), Memory Management.
+**Key Skills Gained:** Go, Rust, C++, Concurrency, gRPC, Protobuf, Vector Clocks, WAL Storage Engine design.
 
 ---
 
 ## 3. Data Engineer / Big Data Developer
-*Focus: Moving, transforming, and querying massive amounts of data efficiently.*
+*Focus: Moving, transforming, and querying massive streaming data efficiently.*
 
 **Core Projects:**
-- **Project 12: Real-time Data Lakehouse Platform** (The definitive Data Engineering project)
-- **Project 02: Real-time Fraud Detection Pipeline** (Streaming data engineering)
-- **Project 25: Multi-Cloud Cost Intelligence** (Batch ETL, OLAP querying)
-- **Project 11: Peer-to-Peer Energy Trading** (Handling high-frequency time-series data)
+- **Project 12: Real-time Data Lakehouse Platform** (Apache Iceberg, Trino, Flink, Kafka)
+- **Project 02: Real-time Fraud Detection Pipeline** (Low-latency Flink streaming & Redis feature store)
+- **Project 31: Insider-Threat Behavioral Monitoring (UEBA)** (Flink feature extraction, ClickHouse analytics)
+- **Project 39: SIEM Correlation Engine** (Columnar log aggregation & temporal stream processing)
+- **Project 25: Multi-Cloud Cost Intelligence Platform** (Batch ETL, ClickHouse OLAP querying)
 
-**Key Skills Gained:** Apache Kafka, Flink, Spark, Iceberg/Delta Lake, SQL Optimization, ClickHouse.
+**Key Skills Gained:** Apache Kafka, Apache Flink, ClickHouse, Apache Iceberg, Trino, SQL Optimization, Redis.
 
 ---
 
-## 4. Machine Learning / AI Engineer
-*Focus: Training models, optimizing inference, and applying AI to real-world systems.*
+## 4. Cybersecurity / SOC / Security Software Engineer
+*Focus: Offensive security, defensive architecture, protocol inspection, and behavioral security analytics.*
 
 **Core Projects:**
-- **Project 15: Smart City Traffic Optimization** (Reinforcement Learning)
-- **Project 09: Edge-Native Video Analytics Pipeline** (Computer Vision, TensorRT optimization)
-- **Project 08: Privacy-Preserving Healthcare Data Exchange** (Federated Learning)
-- **Project 10: Digital Twin for Smart Buildings** (Time-series forecasting)
-- **Project 24: Smart Agriculture Monitoring** (CNNs for disease classification)
+- **Project 28: IDS for Industrial Control Networks (SCADA)** (Modbus/DNP3 parsing, passive anomaly detection)
+- **Project 31: Insider-Threat Behavioral Monitoring (UEBA)** (User baseline analytics, SHAP explainability)
+- **Project 39: SIEM Correlation Engine** (Elastic Common Schema, Flink CEP correlation rules, MITRE ATT&CK)
+- **Project 33: In-Vehicle Network Gateway / CAN-Bus Security** (Automotive CAN filtering, UDS diagnostics)
+- **Project 03: Zero-Trust Network Access Platform** (mTLS, WireGuard, continuous posture evaluation)
+- **Project 17: Automated Penetration Testing Framework** (Neo4j graph exploit paths, automated orchestration)
 
-**Key Skills Gained:** PyTorch/TensorFlow, Model Deployment, RL, CV, Federated Learning.
+**Key Skills Gained:** Network Security, Protocol Parsing (Modbus/DNP3/CAN), Syslog, mTLS, ClickHouse, Isolation Forest.
 
 ---
 
-## 5. Cybersecurity / Privacy Engineer
-*Focus: Offensive security, defensive architecture, and applied cryptography.*
+## 5. Automotive & Embedded Systems Engineer
+*Focus: Microcontrollers, automotive CAN/LIN networks, real-time control, and cyber-physical systems.*
 
 **Core Projects:**
-- **Project 17: Automated Penetration Testing Framework** (Offensive Security / Red Teaming)
-- **Project 03: Zero-Trust Network Access Platform** (Defensive Architecture)
-- **Project 18: Decentralized Identity Verification** (Applied Cryptography / ZKPs)
-- **Project 13: Intelligent API Gateway** (Building AI-driven WAFs)
+- **Project 33: In-Vehicle Network Gateway with CAN-Bus Security** (SocketCAN, DBC parsing, ONNX inference)
+- **Project 34: Automotive Digital Twin for ECU Testing** (Virtual CAN/LIN, HiL interface, DTW regression)
+- **Project 40: Mesh Networking for Disaster Communication** (ESP32 LoRa, 802.11s Wi-Fi mesh, DTN routing)
+- **Project 38: Microgrid Control System for Islanded Operation** (IEEE 2030.7, Modbus TCP, droop control)
+- **Project 05: Industrial IoT Predictive Maintenance** (ESP32 sensors, FFT signal processing, InfluxDB)
 
-**Key Skills Gained:** Network Security, Cryptography (mTLS, ZKPs), Vulnerability Analysis, Identity Federation (OIDC/SAML).
+**Key Skills Gained:** Embedded C/C++, SocketCAN, DBC/LDF files, ESP32, Modbus TCP, RTOS, Hardware Interfacing.
 
 ---
 
-## 6. IoT / Edge / Embedded Systems Engineer
-*Focus: Hardware interfacing, low-power networking, and edge computing.*
+## 6. FinTech & Financial Systems Engineer
+*Focus: Ledger accounting, payment rails, multi-currency netting, and financial compliance.*
 
 **Core Projects:**
-- **Project 05: Industrial IoT Predictive Maintenance** (TinyML, DSP, ESP32/Raspberry Pi)
-- **Project 24: Smart Agriculture Monitoring System** (LoRaWAN, rugged hardware design)
-- **Project 20: Remote Patient Monitoring Platform** (BLE, medical sensors)
-- **Project 09: Edge-Native Video Analytics** (Deploying AI to edge devices)
+- **Project 36: Cross-Border Micropayment Settlement Infrastructure** (Bilateral netting engine, double-entry ledger)
+- **Project 37: Core Banking Microservices Platform** (Spring Boot neobank, ISO 8583 card simulation, SEPA)
+- **Project 02: Real-time Fraud Detection Pipeline** (Sub-50ms transaction fraud scoring)
+- **Project 11: Peer-to-Peer Energy Trading Platform** (Smart grid financial matching engine)
 
-**Key Skills Gained:** C/C++, MQTT, LoRa, BLE, Embedded Linux, Hardware-Software Integration.
+**Key Skills Gained:** Double-Entry Ledger Accounting, Java Spring Boot, Go, ISO 8583, GARCH Volatility Models, ACID compliance.
 
 ---
 
-## 7. Frontend / Full-Stack Web Developer
-*Focus: Complex UIs, real-time data visualization, and user experience.*
-*(Note: None of these are "just" frontend projects; they require building complex frontends on top of heavy backends).*
+## 7. Robotics, Autonomous Systems & Telecom Engineer
+*Focus: Multi-agent coordination, 5G network slicing, computer vision, and edge AI.*
 
 **Core Projects:**
-- **Project 04: Real-time Collaborative Code Editor** (The most complex frontend challenge: Monaco + CRDTs)
-- **Project 10: Digital Twin for Smart Buildings** (3D WebGL / Three.js rendering)
-- **Project 17: Automated Penetration Testing Framework** (Graph visualizations)
-- **Project 25: Multi-Cloud Cost Intelligence** (Complex data grid rendering)
+- **Project 29: Multi-Robot Coordination Platform for Warehouse Fleets** (ROS 2, Gazebo, CBS pathfinding)
+- **Project 32: 5G Network Slicing Management Platform** (3GPP standards, ns-3 simulation, SLA monitoring)
+- **Project 09: Edge-Native Video Analytics Pipeline** (NVIDIA Jetson, TensorRT, RTSP streams)
+- **Project 15: Smart City Traffic Optimization System** (Multi-agent Reinforcement Learning, SUMO simulation)
 
-**Key Skills Gained:** React, TypeScript, WebGL/Three.js, WebSockets, State Management, Data Visualization (Chart.js/D3).
+**Key Skills Gained:** ROS 2, Gazebo, ns-3 Simulator, Python, C++, TensorRT, 3GPP 5G Specs, Multi-Agent RL.
 
 ---
 
-## How to use this guide
+## How to Use This Guide for Team Formation
 
-When forming a team, do not pick a project where everyone wants to do the exact same thing. The best teams are cross-functional. For example, Project 09 (Edge Video Analytics) is perfect for a team consisting of:
-- 1x Machine Learning Engineer (Model Optimization)
-- 1x Embedded Engineer (Edge Node Deployment)
-- 1x Data Engineer (Cloud Ingestion Pipeline)
-- 1x Frontend Developer (Dashboard Visualization)
+When forming a graduation project team, choose a project that allows each team member to specialize in their desired career trajectory. For example, **Project 35 (Digital Twin for Manufacturing)** is perfect for a 5-person team composed of:
 
-Pick a project that challenges the team while allowing individuals to specialize in their desired post-graduation career path.
+1. **Embedded/IoT Lead:** Focuses on Raspberry Pi sensor nodes & FFT signal processing (Target Career: Embedded Engineer).
+2. **Data Pipeline Lead:** Manages Kafka ingestion & Flink feature streaming (Target Career: Data Engineer).
+3. **AI Specialist:** Trains survival analysis (RUL) models (Target Career: ML Engineer).
+4. **Backend Developer:** Builds twin state engine in Go & PostgreSQL API (Target Career: Systems Engineer).
+5. **Frontend Developer:** Builds Three.js 3D factory floor dashboard (Target Career: Fullstack/Graphics Engineer).
