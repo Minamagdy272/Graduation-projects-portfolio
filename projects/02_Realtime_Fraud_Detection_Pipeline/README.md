@@ -114,6 +114,8 @@ Build **SentinelPay** — a complete real-time fraud detection pipeline with the
 - **Data Masking:** PAN (card numbers) are masked in all logs and dashboards
 
 ### AI Components
+
+**Total AI Subsystem Effort:** ~20% of overall engineering work (bounded building block)
 - **Fraud Scoring Model:** XGBoost gradient boosted trees trained on labeled transaction data
 - **Feature Engineering:** Automated feature computation from raw transaction streams
 - **Model Monitoring:** Statistical tests for data drift and model performance degradation
@@ -172,6 +174,8 @@ Build **SentinelPay** — a complete real-time fraud detection pipeline with the
 ---
 
 ## AI Components
+
+**Total AI Subsystem Effort:** ~20% of overall engineering work (bounded building block)
 
 AI is a **core but not dominant** component of this project. The system works with rules alone; ML enhances accuracy.
 

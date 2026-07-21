@@ -93,6 +93,8 @@ Build a complete end-to-end platform consisting of:
 - **Audit Trail:** Immutable audit logging for all administrative actions and system decisions
 
 ### AI Components
+
+**Total AI Subsystem Effort:** ~30% of overall engineering work (bounded building block)
 - **Inference Engine:** Microservice hosting pre-trained ML models with sub-20ms latency
 - **Feature Pipeline:** Real-time feature extraction from incoming telemetry streams
 - **Drift Monitoring:** Statistical distribution tracking to detect model degradation
@@ -134,6 +136,8 @@ Build a complete end-to-end platform consisting of:
 ---
 
 ## AI Components
+
+**Total AI Subsystem Effort:** ~30% of overall engineering work (bounded building block)
 
 AI functions as an **augmented intelligence module** (~15–20% of effort). The core platform operates deterministically; ML enhances accuracy.
 
