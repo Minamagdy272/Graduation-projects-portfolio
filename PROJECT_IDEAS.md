@@ -1,252 +1,298 @@
-# 📋 100 Graduation Project Ideas
+# 📋 Selected Graduation Project Proposals (34 Projects)
 
-> **Grouped by Engineering Domain**
-> **Format:** Project Name | Short Description | Main Technologies
-
----
-
-## Cloud & Distributed Systems (10 Projects)
-
-| # | Project Name | Description | Main Technologies |
-|---|-------------|-------------|-------------------|
-| 1 | **Custom Container Orchestration Engine** | Build a lightweight container orchestrator from scratch that handles scheduling, health checks, service discovery, and rolling deployments across a cluster of nodes | Go, Linux containers (cgroups/namespaces), gRPC, etcd, React, Prometheus |
-| 2 | **Multi-Cloud Cost Intelligence Platform** | A platform that aggregates billing data from AWS, Azure, and GCP, detects cost anomalies, recommends rightsizing, and forecasts future spending | Python, FastAPI, PostgreSQL, Redis, React, Terraform, Kafka |
-| 3 | **Serverless Function Orchestration Engine** | Design a FaaS runtime that executes user-submitted functions in sandboxed containers with auto-scaling, event triggers, and workflow chaining | Go/Rust, Docker, NATS, PostgreSQL, React, Nginx |
-| 4 | **Distributed Configuration Management System** | A centralized configuration service with version history, environment-aware overrides, real-time push updates, and encrypted secrets management | Go, etcd/Consul, gRPC, React, PostgreSQL, Vault |
-| 5 | **Cloud-Native Service Mesh** | Implement a service mesh with sidecar proxies handling mTLS, traffic splitting, circuit breaking, and distributed tracing | Go, Envoy, gRPC, Prometheus, Jaeger, Kubernetes |
-| 6 | **Multi-Tenant SaaS Platform Framework** | A reusable framework for building multi-tenant SaaS applications with tenant isolation, billing integration, RBAC, and white-labeling | Node.js, PostgreSQL (row-level security), Redis, React, Stripe API |
-| 7 | **Distributed Rate Limiter Service** | A globally consistent rate limiting service using token bucket and sliding window algorithms with Redis cluster and local caching | Go, Redis Cluster, gRPC, Prometheus, Docker |
-| 8 | **Auto-Scaling Decision Engine** | A system that monitors application metrics and makes intelligent scaling decisions using predictive models and custom policies | Python, Prometheus, Kubernetes API, TensorFlow Lite, Go, Grafana |
-| 9 | **Cloud Migration Assessment Tool** | Analyzes on-premise applications and generates cloud migration plans with cost estimates, dependency maps, and compatibility reports | Python, Neo4j, FastAPI, React, Docker, Terraform |
-| 10 | **Multi-Region Data Replication Service** | A replication engine that synchronizes data across geographic regions with configurable consistency levels and conflict resolution | Go, CockroachDB, Kafka, gRPC, Prometheus |
+> **Portfolio Specification & Project Catalog**  
+> This document lists the **34 final selected engineering graduation project proposals** curated, evaluated, and specified in this portfolio. Each project has been selected for its high engineering complexity, industry relevance, and software architecture depth.
 
 ---
 
-## Cybersecurity (8 Projects)
+## 📊 Selected Projects Overview
 
-| # | Project Name | Description | Main Technologies |
-|---|-------------|-------------|-------------------|
-| 11 | **Zero-Trust Network Access Platform** | A software-defined perimeter that authenticates every request, enforces micro-segmentation, and provides identity-aware access to internal services | Go, WireGuard, OAuth2/OIDC, PostgreSQL, React, Envoy |
-| 12 | **Automated Vulnerability Assessment Platform** | Scans networks, web applications, and containers for known vulnerabilities, prioritizes by risk score, and generates remediation reports | Python, Nmap, OWASP ZAP, Docker, PostgreSQL, FastAPI, React |
-| 13 | **Deception-Based Intrusion Detection System** | Deploys honeypots and honeytokens across a network, monitors attacker behavior, and correlates findings with real security events | Python, Docker, Elasticsearch, Kibana, Flask, Scapy |
-| 14 | **Automated Penetration Testing Framework** | An orchestration platform that chains security testing tools, automates common attack vectors, and generates compliance-ready reports | Python, Go, Docker, Metasploit API, PostgreSQL, React, Celery |
-| 15 | **Security Information & Event Management (SIEM)** | Collects, normalizes, and correlates security events from multiple sources with real-time alerting and forensic search capabilities | Python, Kafka, Elasticsearch, Kibana, PostgreSQL, Docker |
-| 16 | **Encrypted Search Engine** | A search system that operates on encrypted data using searchable encryption schemes, enabling queries without decrypting the underlying dataset | Python, Rust, PostgreSQL, FastAPI, React, OpenSSL |
-| 17 | **Network Traffic Anomaly Detector** | Captures and analyzes network packets in real time to detect DDoS attacks, port scans, data exfiltration, and protocol anomalies | Python, C++, Scapy, Kafka, InfluxDB, Grafana, TensorFlow |
-| 18 | **Firmware Vulnerability Scanner** | Extracts, decompresses, and analyzes IoT device firmware images for hardcoded credentials, outdated libraries, and misconfigurations | Python, Binwalk, Ghidra API, Docker, PostgreSQL, React |
+The selected 34 projects cover **13 core engineering domains**, ensuring broad coverage across distributed systems, cybersecurity, IoT & edge computing, data engineering, fintech, healthcare, and platform engineering.
 
----
+### Domain Distribution
 
-## IoT & Edge Computing (8 Projects)
-
-| # | Project Name | Description | Main Technologies |
-|---|-------------|-------------|-------------------|
-| 19 | **Industrial IoT Predictive Maintenance Platform** | Collects vibration, temperature, and pressure data from industrial sensors, processes at the edge, and predicts equipment failures before they occur | Python, C (ESP32/STM32), MQTT, Kafka, InfluxDB, TensorFlow Lite, Grafana, Docker |
-| 20 | **Smart Agriculture Monitoring & Automation** | An end-to-end farm monitoring system with soil moisture, weather, and crop health sensors, edge-based irrigation control, and a cloud analytics dashboard | C++ (Arduino/ESP32), Python, MQTT, FastAPI, PostgreSQL, React, LoRaWAN |
-| 21 | **Edge-Native Video Analytics Pipeline** | Processes video streams from IP cameras at the edge for object detection, counting, and anomaly alerting without streaming raw video to the cloud | Python, C++ (OpenCV), NVIDIA Jetson, MQTT, Kafka, MinIO, FastAPI, React |
-| 22 | **Smart Home Energy Management System** | Monitors electricity consumption per appliance, provides usage insights, automates scheduling for cost optimization, and integrates with smart meters | Python, ESP32, MQTT, InfluxDB, FastAPI, React Native, Docker |
-| 23 | **Environmental Sensor Mesh Network** | Deploys a mesh network of air quality, noise, and weather sensors across a campus or neighborhood with self-healing routing and centralized monitoring | C (nRF52/ESP32), Zigbee/BLE Mesh, Python, MQTT, TimescaleDB, Grafana, React |
-| 24 | **Connected Vehicle Telemetry Platform** | Collects OBD-II data from vehicles, processes driving behavior at the edge, and provides fleet-level analytics through a cloud dashboard | Python, C (Raspberry Pi), OBD-II, MQTT, Kafka, PostgreSQL, React, Docker |
-| 25 | **Wearable Health Monitor with Edge Processing** | A wrist-worn device that measures heart rate, SpO2, and activity, processes data locally for anomaly detection, and syncs with a mobile app | C (nRF52840), BLE, Python, FastAPI, PostgreSQL, React Native, TensorFlow Lite |
-| 26 | **Smart Warehouse Inventory System** | Uses RFID readers, weight sensors, and cameras to track inventory in real time, detect misplacements, and trigger reorder alerts | Python, C++ (Arduino), RFID, MQTT, PostgreSQL, FastAPI, React, Docker |
+| Domain | Count | Project IDs |
+|--------|-------|-------------|
+| **Cloud & Distributed Systems** | 3 | 26, 27, 30 |
+| **Cybersecurity & UEBA** | 5 | 03, 17, 28, 31, 39 |
+| **IoT & Edge Computing** | 4 | 05, 09, 20, 24 |
+| **Data Engineering & Big Data** | 3 | 12, 23, 25 |
+| **DevOps & Platform Engineering** | 2 | 06, 19 |
+| **Healthcare Technology** | 1 | 08 |
+| **FinTech & Enterprise Banking** | 3 | 02, 36, 37 |
+| **Smart Infrastructure & Smart Cities** | 3 | 10, 15, 35 |
+| **Developer Tools & Web Architecture** | 2 | 04, 13 |
+| **Networking & Telecommunications** | 3 | 14, 32, 40 |
+| **Automotive & Embedded Systems** | 2 | 33, 34 |
+| **Robotics & Autonomous Systems** | 1 | 29 |
+| **Energy & Cyber-Physical Systems** | 2 | 11, 38 |
+| **Total Selected Projects** | **34** | |
 
 ---
 
-## Data Engineering & Databases (8 Projects)
+## 📑 Complete Catalog of Selected Projects
 
-| # | Project Name | Description | Main Technologies |
-|---|-------------|-------------|-------------------|
-| 27 | **Real-time Data Lakehouse Platform** | A unified analytics platform that combines batch and streaming data processing with a queryable lakehouse storage layer | Python, Apache Spark, Apache Flink, MinIO (S3), Apache Iceberg, Trino, Airflow, React |
-| 28 | **Custom Distributed Key-Value Store** | Build a distributed key-value database from scratch with Raft consensus, consistent hashing, replication, and a client SDK | Go, Raft (custom implementation), gRPC, Prometheus, Docker |
-| 29 | **Automated Data Quality & Governance Platform** | Profiles datasets automatically, infers quality rules, monitors for violations, and tracks data lineage across transformation pipelines | Python, Great Expectations, Apache Airflow, PostgreSQL, FastAPI, React, Docker |
-| 30 | **Change Data Capture Pipeline System** | Captures database changes in real time using log-based CDC and replicates them to downstream systems (data warehouse, search index, cache) | Java/Python, Debezium, Kafka, PostgreSQL, Elasticsearch, Redis, Docker |
-| 31 | **Time-Series Database Engine** | Design a storage engine optimized for time-series data with columnar compression, time-based partitioning, and a SQL-compatible query layer | Go/Rust, Custom storage engine, gRPC, React (query UI), Docker |
-| 32 | **Data Catalog & Lineage Tracker** | A metadata management platform that crawls data sources, builds a searchable catalog, and visualizes end-to-end data lineage as a graph | Python, Neo4j, FastAPI, React, Apache Airflow, Docker, Elasticsearch |
-| 33 | **Stream Processing Framework** | A lightweight stream processing engine supporting windowed aggregations, joins, and exactly-once semantics | Java/Scala, Kafka, RocksDB, gRPC, Docker, Prometheus |
-| 34 | **Graph Database for Social Network Analysis** | A custom graph storage engine with Cypher-like query language, shortest path algorithms, and community detection capabilities | Go/Rust, Custom storage, gRPC, React (visualization with D3.js), Docker |
-
----
-
-## DevOps & Platform Engineering (7 Projects)
-
-| # | Project Name | Description | Main Technologies |
-|---|-------------|-------------|-------------------|
-| 35 | **Self-Healing Infrastructure Platform** | Monitors infrastructure health, detects failures automatically, and executes predefined remediation playbooks without human intervention | Python, Prometheus, Ansible, Kubernetes, PostgreSQL, FastAPI, React, Docker |
-| 36 | **Feature Flag Management System** | A centralized service for managing feature flags with percentage rollouts, user targeting, A/B testing support, and real-time flag evaluation SDKs | Go, PostgreSQL, Redis, gRPC, React, Docker, WebSocket |
-| 37 | **Deployment Pipeline Orchestrator** | A CI/CD platform that builds, tests, and deploys applications with parallel stages, approval gates, rollback support, and deployment analytics | Go, Docker, PostgreSQL, Redis, React, gRPC, MinIO |
-| 38 | **Infrastructure Drift Detection System** | Compares actual cloud infrastructure state against declared Infrastructure-as-Code definitions and alerts on unauthorized changes | Python, Terraform, AWS/GCP SDK, PostgreSQL, FastAPI, React, Docker |
-| 39 | **Chaos Engineering Platform** | Injects controlled failures (network latency, pod kills, CPU stress) into production-like environments and measures system resilience | Go, Kubernetes API, Prometheus, Grafana, PostgreSQL, React, gRPC |
-| 40 | **Developer Portal & Service Catalog** | An internal developer portal that catalogs all microservices, their APIs, ownership, dependencies, health status, and documentation | Node.js, PostgreSQL, Elasticsearch, React, Docker, OAuth2 |
-| 41 | **GitOps Continuous Deployment Controller** | A Kubernetes controller that watches Git repositories for changes and automatically reconciles cluster state with declared manifests | Go, Kubernetes API, Git, PostgreSQL, Prometheus, React |
-
----
-
-## MLOps & AI Infrastructure (6 Projects)
-
-| # | Project Name | Description | Main Technologies |
-|---|-------------|-------------|-------------------|
-| 42 | **End-to-End MLOps Platform** | A complete ML lifecycle platform covering data versioning, experiment tracking, model training, registry, serving, and monitoring for data drift | Python, MLflow, Kubeflow, Docker, PostgreSQL, FastAPI, React, MinIO |
-| 43 | **Model Serving & A/B Testing Platform** | Serves multiple ML model versions simultaneously with traffic splitting, canary deployments, latency tracking, and automatic rollback | Python, FastAPI, Docker, Kubernetes, Redis, Prometheus, React |
-| 44 | **Data Labeling & Annotation Pipeline** | A collaborative platform for labeling images, text, and audio with quality control, active learning suggestions, and labeler performance tracking | Python, FastAPI, PostgreSQL, React, MinIO, Docker, Redis |
-| 45 | **Feature Store System** | A centralized repository for ML features with offline (batch) and online (real-time) serving, feature versioning, and lineage tracking | Python, Apache Spark, Redis, PostgreSQL, FastAPI, Kafka, Docker |
-| 46 | **ML Experiment Tracking Platform** | Tracks hyperparameters, metrics, artifacts, and code versions across experiments with comparison dashboards and reproducibility guarantees | Python, FastAPI, PostgreSQL, MinIO, React, Docker, Git |
-| 47 | **AutoML Pipeline Builder** | A visual workflow builder that automates feature engineering, model selection, hyperparameter tuning, and generates deployable pipelines | Python, scikit-learn, FastAPI, PostgreSQL, React (drag-and-drop), Docker, Celery |
-
----
-
-## Healthcare Technology (6 Projects)
-
-| # | Project Name | Description | Main Technologies |
-|---|-------------|-------------|-------------------|
-| 48 | **Privacy-Preserving Healthcare Data Exchange** | Enables hospitals and clinics to share patient data for research using federated queries and differential privacy without exposing raw records | Python, FastAPI, PostgreSQL, Docker, PySyft, React, HL7 FHIR, gRPC |
-| 49 | **Remote Patient Monitoring Platform** | Collects vital signs from wearable devices, processes locally for anomaly detection, and alerts healthcare providers through a clinical dashboard | Python, C (ESP32/nRF52), BLE, MQTT, FastAPI, PostgreSQL, React, Docker |
-| 50 | **Clinical Decision Support System** | Assists physicians by analyzing patient history against clinical guidelines and providing evidence-based recommendations and drug interaction warnings | Python, FastAPI, PostgreSQL, Neo4j, React, HL7 FHIR, Docker |
-| 51 | **Medical Image Archive (PACS) System** | A DICOM-compliant picture archiving system with image viewing, annotation, search, and role-based access for radiology departments | Python, FastAPI, PostgreSQL, MinIO, DICOM (pydicom), React, Docker |
-| 52 | **Healthcare Appointment & Resource Scheduler** | An intelligent scheduling system for clinics that optimizes doctor availability, room allocation, and equipment usage while minimizing patient wait times | Python, FastAPI, PostgreSQL, Redis, React, Docker, OR-Tools |
-| 53 | **Pharmacy Management & Drug Interaction Checker** | Manages pharmacy inventory, processes prescriptions, checks for drug-drug interactions, and generates regulatory compliance reports | Python, FastAPI, PostgreSQL, React, Docker, RxNorm API |
+| ID | Project Name | Primary Domain | Core Tech Stack | Folder Link |
+|---|--------------|----------------|-----------------|-------------|
+| **02** | Real-time Fraud Detection Pipeline | FinTech / Data Engineering | Java, Flink, Kafka, Redis, XGBoost | [View Proposal](file:///c:/GP/projects/02_Realtime_Fraud_Detection_Pipeline) |
+| **03** | Zero-Trust Network Access (ZTNA) Platform | Cybersecurity / Networking | Go, WireGuard, OAuth2, eBPF, Envoy | [View Proposal](file:///c:/GP/projects/03_Zero_Trust_Network_Access_Platform) |
+| **04** | Real-time Collaborative Code Editor | DevTools / Web Architecture | TypeScript, WebSockets, CRDTs, Docker | [View Proposal](file:///c:/GP/projects/04_Realtime_Collaborative_Code_Editor) |
+| **05** | Industrial IoT Predictive Maintenance | IoT & Edge Computing | C++, ESP32, MQTT, InfluxDB, FFT | [View Proposal](file:///c:/GP/projects/05_Industrial_IoT_Predictive_Maintenance) |
+| **06** | End-to-End MLOps Platform | DevOps / AI Infrastructure | Python, Go, Kubernetes, MLflow, Airflow | [View Proposal](file:///c:/GP/projects/06_End_to_End_MLOps_Platform) |
+| **08** | Privacy-Preserving Healthcare Data Exchange | Healthcare / Security | Python, FastAPI, FHIR, PySyft, Docker | [View Proposal](file:///c:/GP/projects/08_Privacy_Preserving_Healthcare_Data_Exchange) |
+| **09** | Edge-Native Video Analytics Pipeline | IoT & Edge / Computer Vision | C++, Python, OpenCV, Jetson, TensorRT | [View Proposal](file:///c:/GP/projects/09_Edge_Native_Video_Analytics_Pipeline) |
+| **10** | Digital Twin for Smart Building Management | Smart Infrastructure | React, Three.js (WebGL), MQTT, TimescaleDB | [View Proposal](file:///c:/GP/projects/10_Digital_Twin_Smart_Building_Management) |
+| **11** | Peer-to-Peer Energy Trading Platform | Energy / Distributed Systems | Go, Smart Contracts, Kafka, TimescaleDB | [View Proposal](file:///c:/GP/projects/11_Peer_to_Peer_Energy_Trading_Platform) |
+| **12** | Real-time Data Lakehouse Platform | Data Engineering / Big Data | Apache Iceberg, Trino, Flink, Kafka | [View Proposal](file:///c:/GP/projects/12_Realtime_Data_Lakehouse_Platform) |
+| **13** | Intelligent API Gateway | Developer Tools / Networking | Go, Redis, NGINX/Lua, WAF Engine | [View Proposal](file:///c:/GP/projects/13_Intelligent_API_Gateway) |
+| **14** | Software-Defined WAN (SD-WAN) Controller | Networking & Systems | Python, Go, OpenFlow, Mininet, Linux `tc` | [View Proposal](file:///c:/GP/projects/14_Software_Defined_WAN_Controller) |
+| **15** | Smart City Traffic Optimization System | Smart Infrastructure / AI | Python, SUMO, Reinforcement Learning, OpenCV | [View Proposal](file:///c:/GP/projects/15_Smart_City_Traffic_Optimization) |
+| **17** | Automated Penetration Testing Framework | Cybersecurity | Python, Neo4j, Metasploit API, Nmap | [View Proposal](file:///c:/GP/projects/17_Automated_Penetration_Testing_Framework) |
+| **19** | Self-Healing Infrastructure Platform | DevOps / SRE | Go, Kubernetes Operator, Prometheus, Ansible | [View Proposal](file:///c:/GP/projects/19_Self_Healing_Infrastructure_Platform) |
+| **20** | Remote Patient Monitoring Platform | Healthcare / IoT | React Native, BLE, MQTT, InfluxDB, Python | [View Proposal](file:///c:/GP/projects/20_Remote_Patient_Monitoring_Platform) |
+| **23** | Distributed Log Analytics & Anomaly Detection | Observability / Big Data | Rust, Go, ClickHouse, Kafka, Drain NLP | [View Proposal](file:///c:/GP/projects/23_Distributed_Log_Analytics_Anomaly_Detection) |
+| **24** | Smart Agriculture Monitoring & Automation | IoT & Edge / AgriTech | C++, ESP32, LoRaWAN, InfluxDB, TensorFlow | [View Proposal](file:///c:/GP/projects/24_Smart_Agriculture_Monitoring_System) |
+| **25** | Multi-Cloud Cost Intelligence Platform | FinTech / Cloud Engineering | Python, Airflow, ClickHouse, Prophet | [View Proposal](file:///c:/GP/projects/25_Multi_Cloud_Cost_Intelligence_Platform) |
+| **26** | Multi-Tenant GPU Scheduling Platform | Cloud & Distributed Systems | Go, Kubernetes API, NVIDIA MIG, Redis | [View Proposal](file:///c:/GP/projects/26_Multi_Tenant_GPU_Scheduling_Platform) |
+| **27** | Multi-Region Active-Active DB Replication | Cloud & Distributed Systems | Go, PostgreSQL WAL, Kafka, Vector Clocks | [View Proposal](file:///c:/GP/projects/27_Multi_Region_Active_Active_DB_Replication) |
+| **28** | IDS for Industrial Control Networks (SCADA) | Cybersecurity / ICS | Go, gopacket, Modbus/DNP3, Isolation Forest | [View Proposal](file:///c:/GP/projects/28_IDS_Industrial_Control_Networks_SCADA) |
+| **29** | Multi-Robot Coordination for Warehouse Fleets | Robotics / Distributed Systems | Python, Go, ROS 2, Gazebo, CBS Pathfinding | [View Proposal](file:///c:/GP/projects/29_Multi_Robot_Coordination_Warehouse_Fleets) |
+| **30** | Time-Series DB Engine for Industrial Telemetry | Cloud & Database Systems | Go/Rust, Custom Storage Engine, WAL, Gorilla | [View Proposal](file:///c:/GP/projects/30_Time_Series_DB_Engine_Industrial_Telemetry) |
+| **31** | Insider-Threat Behavioral Monitoring (UEBA) | Cybersecurity / Analytics | Python, Flink, ClickHouse, SHAP | [View Proposal](file:///c:/GP/projects/31_Insider_Threat_Behavioral_Monitoring) |
+| **32** | 5G Network Slicing Management Platform | Networking & Systems / Telecom | Go, Python, ns-3, Open5GS, Prometheus | [View Proposal](file:///c:/GP/projects/32_5G_Network_Slicing_Management_Platform) |
+| **33** | In-Vehicle Network Gateway with CAN-Bus Security | Automotive / Embedded / Security | C++, SocketCAN, Raspberry Pi, ONNX | [View Proposal](file:///c:/GP/projects/33_In_Vehicle_Network_Gateway_CAN_Bus) |
+| **34** | Automotive Digital Twin for ECU Testing | Automotive / Simulation | C++, Python, SocketCAN, DTW Signal Analysis | [View Proposal](file:///c:/GP/projects/34_Automotive_Digital_Twin_ECU_Testing) |
+| **35** | Manufacturing Digital Twin for Maintenance | Industrial IoT / Smart Factory | Go, Flink, Three.js (WebGL), TimescaleDB | [View Proposal](file:///c:/GP/projects/35_Digital_Twin_Predictive_Maintenance_Manufacturing) |
+| **36** | Cross-Border Micropayment Settlement | FinTech / Distributed Systems | Go, PostgreSQL, Redis, Kafka, GARCH | [View Proposal](file:///c:/GP/projects/36_Cross_Border_Micropayment_Settlement) |
+| **37** | Core Banking Microservices Platform | FinTech / Enterprise | Java (Spring Boot), Kafka, PostgreSQL | [View Proposal](file:///c:/GP/projects/37_Core_Banking_Microservices_Platform) |
+| **38** | Microgrid Control System for Islanded Operation | Energy & Cyber-Physical | Go, C++, Modbus TCP, InfluxDB | [View Proposal](file:///c:/GP/projects/38_Microgrid_Control_System_Islanded_Operation) |
+| **39** | SIEM Correlation Engine | Cybersecurity / Big Data | Go, Flink CEP, ClickHouse, Kafka | [View Proposal](file:///c:/GP/projects/39_SIEM_Correlation_Engine) |
+| **40** | Disaster-Resilient Mesh Network | Networking / Embedded Systems | C++, ESP32, LoRa Mesh, DTN Routing | [View Proposal](file:///c:/GP/projects/40_Mesh_Networking_Disaster_Resilient_Communication) |
 
 ---
 
-## FinTech (6 Projects)
+## 🛠️ Detailed Domain Specifications
 
-| # | Project Name | Description | Main Technologies |
-|---|-------------|-------------|-------------------|
-| 54 | **Real-time Fraud Detection Pipeline** | A streaming analytics system that scores financial transactions in real time, detects fraudulent patterns, and blocks suspicious transactions within milliseconds | Python, Java, Kafka, Apache Flink, Redis, PostgreSQL, FastAPI, React |
-| 55 | **Peer-to-Peer Digital Payment System** | A mobile payment platform with wallet management, QR code payments, transaction history, and compliance with financial regulations | Node.js, PostgreSQL, Redis, React Native, Docker, Stripe/Payment API |
-| 56 | **Algorithmic Trading Backtesting Platform** | A platform for designing, backtesting, and paper-trading algorithmic strategies with historical data, performance metrics, and risk analysis | Python, FastAPI, PostgreSQL, Redis, React, TimescaleDB, Docker |
-| 57 | **Personal Finance Aggregation Engine** | Aggregates financial accounts (banks, investments, crypto) into a unified dashboard with budgeting, categorization, and financial health scoring | Python, FastAPI, PostgreSQL, Redis, React, Plaid API, Docker |
-| 58 | **KYC/AML Compliance Automation Platform** | Automates Know Your Customer identity verification and Anti-Money Laundering transaction screening with document verification and risk scoring | Python, FastAPI, PostgreSQL, Elasticsearch, React, Tesseract OCR, Docker |
-| 59 | **Micro-Lending Risk Assessment Platform** | Evaluates loan applications using alternative data sources (mobile usage, utility payments) with explainable credit scoring and portfolio management | Python, FastAPI, PostgreSQL, React, scikit-learn, Docker, Celery |
+### 1. FinTech & Enterprise Banking
 
----
+#### Project 02: Real-time Fraud Detection Pipeline
+- **Description:** A high-throughput streaming fraud detection pipeline processing financial transactions in real time, computing sliding-window features, and scoring risk using machine learning models under 50ms latency.
+- **Main Technologies:** Java, Apache Flink, Apache Kafka, Redis, PostgreSQL, XGBoost, Docker
+- **Specification Path:** [02_Realtime_Fraud_Detection_Pipeline](file:///c:/GP/projects/02_Realtime_Fraud_Detection_Pipeline)
 
-## Smart Infrastructure (6 Projects)
+#### Project 36: Cross-Border Micropayment Settlement Infrastructure
+- **Description:** High-throughput payment clearing and settlement engine using multilateral netting algorithms, double-entry ledger bookkeeping, real-time FX rate volatility tracking, and automated compliance checks.
+- **Main Technologies:** Go, PostgreSQL, Redis, Apache Kafka, FastAPI, React, Docker
+- **Specification Path:** [36_Cross_Border_Micropayment_Settlement](file:///c:/GP/projects/36_Cross_Border_Micropayment_Settlement)
 
-| # | Project Name | Description | Main Technologies |
-|---|-------------|-------------|-------------------|
-| 60 | **Digital Twin for Smart Building Management** | Creates a real-time virtual replica of a building with IoT sensor data, HVAC optimization, energy monitoring, and predictive maintenance | Python, C (ESP32), MQTT, InfluxDB, FastAPI, Three.js, React, Docker |
-| 61 | **Smart City Traffic Flow Optimization** | Processes traffic camera feeds and sensor data to optimize signal timing, detect congestion, and provide real-time routing recommendations | Python, OpenCV, MQTT, Kafka, PostgreSQL (PostGIS), FastAPI, React (Leaflet), Docker |
-| 62 | **Intelligent Parking Management System** | Uses ultrasonic sensors and cameras to detect parking occupancy, guides drivers to available spots, and handles automated billing | Python, C (Arduino/ESP32), MQTT, PostgreSQL, FastAPI, React Native, Docker |
-| 63 | **Water Distribution Monitoring System** | Monitors water pressure, flow rates, and quality across a distribution network, detects leaks, and optimizes pump scheduling | Python, C (ESP32), MQTT, InfluxDB, FastAPI, React (Leaflet), Grafana, Docker |
-| 64 | **Public Transit Real-time Tracking** | Tracks buses/trams via GPS, predicts arrival times, provides passenger information displays, and generates operational analytics | Python, C (Raspberry Pi), MQTT, PostgreSQL (PostGIS), FastAPI, React, GTFS |
-| 65 | **Smart Street Lighting System** | Controls street lights based on ambient light, motion detection, and time schedules with centralized monitoring and energy reporting | C (ESP32), Python, MQTT, InfluxDB, FastAPI, React, LoRaWAN |
+#### Project 37: Core Banking Microservices Platform
+- **Description:** Production-grade cloud-native core banking system managing customer accounts, ACID-compliant double-entry general ledgers, high-concurrency transaction processing, and automated credit assessment engines.
+- **Main Technologies:** Java (Spring Boot), Apache Kafka, PostgreSQL, Redis, Docker, React
+- **Specification Path:** [37_Core_Banking_Microservices_Platform](file:///c:/GP/projects/37_Core_Banking_Microservices_Platform)
 
 ---
 
-## Software Engineering & Developer Tools (7 Projects)
+### 2. Cybersecurity, SCADA & UEBA
 
-| # | Project Name | Description | Main Technologies |
-|---|-------------|-------------|-------------------|
-| 66 | **Real-time Collaborative Code Editor** | A browser-based code editor supporting simultaneous editing by multiple users with CRDT-based conflict resolution, syntax highlighting, and live cursors | TypeScript, Node.js, Y.js (CRDT), WebSocket, Monaco Editor, PostgreSQL, Docker |
-| 67 | **Intelligent API Gateway** | A high-performance API gateway with dynamic routing, authentication, rate limiting, request transformation, caching, and real-time analytics | Go, Redis, PostgreSQL, Prometheus, React, Docker, Lua (plugins) |
-| 68 | **Static Code Analysis Platform** | Parses source code into ASTs, applies configurable rule sets, detects code smells, security vulnerabilities, and generates quality reports | Python, Java, ANTLR, PostgreSQL, FastAPI, React, Docker, Git |
-| 69 | **Automated API Documentation Generator** | Analyzes API source code and runtime traffic to generate and keep API documentation synchronized, with interactive testing sandbox | Python, Node.js, FastAPI, PostgreSQL, React, Docker, OpenAPI |
-| 70 | **Load Testing as a Service Platform** | A distributed load testing platform that generates realistic traffic patterns, measures response times, and identifies performance bottlenecks | Go, Python, Kubernetes, InfluxDB, Grafana, React, gRPC, Docker |
-| 71 | **Dependency Vulnerability Scanner** | Scans project dependencies (npm, pip, Maven) against vulnerability databases, prioritizes by severity, and suggests upgrade paths | Python, Go, PostgreSQL, FastAPI, React, Docker, NVD API |
-| 72 | **Database Migration Manager** | A version-controlled database migration tool supporting multiple database engines, rollback, dry-run, and CI/CD integration | Go, PostgreSQL, MySQL, MongoDB, React (admin UI), Docker |
+#### Project 03: Zero-Trust Network Access (ZTNA) Platform
+- **Description:** An identity-aware software-defined perimeter replacing traditional VPNs with mTLS tunnel orchestration, continuous device posture verification, and granular dynamic access control policies.
+- **Main Technologies:** Go, WireGuard, OAuth2/OIDC, eBPF, PostgreSQL, React, Envoy
+- **Specification Path:** [03_Zero_Trust_Network_Access_Platform](file:///c:/GP/projects/03_Zero_Trust_Network_Access_Platform)
 
----
+#### Project 17: Automated Penetration Testing Framework
+- **Description:** Automated Red Team orchestration system that builds dynamic network attack graphs, executes authorized vulnerability exploits, discovers lateral movement vectors, and generates remediation roadmaps.
+- **Main Technologies:** Python, Neo4j (Graph DB), Metasploit API, Nmap, Docker, PostgreSQL, FastAPI, React
+- **Specification Path:** [17_Automated_Penetration_Testing_Framework](file:///c:/GP/projects/17_Automated_Penetration_Testing_Framework)
 
-## Networking (5 Projects)
+#### Project 28: Intrusion Detection System for Industrial Control Networks (SCADA)
+- **Description:** Deep packet inspection (DPI) security sensor for SCADA/ICS networks parsing Modbus/DNP3 industrial protocols, establishing operational baselines, and scoring anomalous control commands using Isolation Forests.
+- **Main Technologies:** Go, gopacket, Modbus/DNP3 parsers, InfluxDB, Python, Scikit-learn, React, Docker
+- **Specification Path:** [28_IDS_Industrial_Control_Networks_SCADA](file:///c:/GP/projects/28_IDS_Industrial_Control_Networks_SCADA)
 
-| # | Project Name | Description | Main Technologies |
-|---|-------------|-------------|-------------------|
-| 73 | **Software-Defined WAN Controller** | A centralized controller that manages WAN routing policies, optimizes traffic across multiple links, and provides network-wide visibility | Python, Go, OpenFlow, PostgreSQL, React, Docker, Mininet |
-| 74 | **Network Performance Monitoring Dashboard** | Continuously measures latency, jitter, packet loss, and bandwidth across network paths with historical trending and alerting | Go, Python, SNMP, InfluxDB, Grafana, FastAPI, React, Docker |
-| 75 | **DNS Resolution & Caching System** | A custom recursive DNS resolver with intelligent caching, query logging, DNS-over-HTTPS support, and ad/malware domain blocking | Go/Rust, Redis, PostgreSQL, React (admin UI), Docker |
-| 76 | **Protocol Analyzer & Packet Inspector** | Captures, decodes, and visualizes network protocols in real time with filtering, statistics, and exportable capture files | Python, C++, libpcap, Scapy, FastAPI, React, Elasticsearch, Docker |
-| 77 | **Mesh Networking Protocol Implementation** | Implements a self-organizing wireless mesh network protocol with dynamic routing, node discovery, and bandwidth optimization | C/C++ (ESP32), Python, MQTT, PostgreSQL, React, Grafana |
+#### Project 31: Insider-Threat Behavioral Monitoring (UEBA) System
+- **Description:** Enterprise User and Entity Behavior Analytics (UEBA) platform streaming user activity logs, building peer-group baselines, and identifying suspicious data exfiltration activities using ML scoring models.
+- **Main Technologies:** Python, Apache Kafka, Apache Flink, ClickHouse, FastAPI, SHAP, React, Docker
+- **Specification Path:** [31_Insider_Threat_Behavioral_Monitoring](file:///c:/GP/projects/31_Insider_Threat_Behavioral_Monitoring)
 
----
-
-## Supply Chain & Logistics (5 Projects)
-
-| # | Project Name | Description | Main Technologies |
-|---|-------------|-------------|-------------------|
-| 78 | **Supply Chain Visibility & Tracking Platform** | Provides end-to-end tracking of goods from manufacturer to consumer using IoT sensors, geofencing, and real-time event notifications | Python, Node.js, PostgreSQL (PostGIS), Kafka, MQTT, React, Docker |
-| 79 | **Warehouse Management System** | Manages receiving, putaway, picking, packing, and shipping with barcode scanning, zone optimization, and workforce scheduling | Python, FastAPI, PostgreSQL, Redis, React, React Native (mobile scanner), Docker |
-| 80 | **Last-Mile Delivery Optimization** | Optimizes delivery routes for a fleet of drivers considering time windows, vehicle capacity, traffic, and real-time order changes | Python, OR-Tools, FastAPI, PostgreSQL (PostGIS), React (Leaflet), Docker |
-| 81 | **Inventory Demand Forecasting System** | Predicts product demand using historical sales, seasonality, and external signals to optimize stock levels and prevent stockouts | Python, FastAPI, PostgreSQL, React, Prophet/statsmodels, Airflow, Docker |
-| 82 | **Fleet Management & Route Optimization** | Tracks vehicle locations, monitors driver behavior, plans optimal routes, and manages maintenance schedules for commercial fleets | Python, FastAPI, PostgreSQL (PostGIS), Redis, React, MQTT, Docker |
+#### Project 39: SIEM Correlation Engine
+- **Description:** High-velocity Security Information and Event Management (SIEM) pipeline parsing multi-source security events into Elastic Common Schema (ECS), executing stateful correlation rules, and prioritizing security alerts.
+- **Main Technologies:** Go, Apache Flink CEP, ClickHouse, Apache Kafka, FastAPI, React, Docker
+- **Specification Path:** [39_SIEM_Correlation_Engine](file:///c:/GP/projects/39_SIEM_Correlation_Engine)
 
 ---
 
-## Energy & Sustainability (4 Projects)
+### 3. Cloud & Distributed Systems
 
-| # | Project Name | Description | Main Technologies |
-|---|-------------|-------------|-------------------|
-| 83 | **Peer-to-Peer Energy Trading Platform** | Enables prosumers (solar panel owners) to sell excess energy directly to neighbors using smart meter integration and automated settlement | Python, Node.js, PostgreSQL, Kafka, MQTT, React, Docker, Smart Meter API |
-| 84 | **Smart Grid Load Balancing System** | Forecasts electricity demand, optimizes generation dispatch, and manages demand response programs across a distribution network | Python, FastAPI, PostgreSQL, InfluxDB, React, Grafana, OR-Tools, Docker |
-| 85 | **Carbon Footprint Tracking Platform** | Tracks organizational carbon emissions across Scope 1, 2, and 3, integrates with ERP/procurement systems, and generates ESG reports | Python, FastAPI, PostgreSQL, React, Airflow, Docker, Celery |
-| 86 | **Renewable Energy Output Forecasting** | Predicts solar and wind energy production using weather data, satellite imagery, and historical generation patterns | Python, FastAPI, PostgreSQL, TimescaleDB, React, Grafana, scikit-learn, Docker |
+#### Project 26: Multi-Tenant GPU Scheduling Platform
+- **Description:** Cloud resource orchestrator managing heterogeneous GPU clusters with Dominant Resource Fairness (DRF) scheduling, dynamic NVIDIA Multi-Instance GPU (MIG) slice allocation, and predictive pre-scaling.
+- **Main Technologies:** Go, Kubernetes API, NVIDIA MIG, Redis, Prometheus, FastAPI, React, Docker
+- **Specification Path:** [26_Multi_Tenant_GPU_Scheduling_Platform](file:///c:/GP/projects/26_Multi_Tenant_GPU_Scheduling_Platform)
 
----
+#### Project 27: Multi-Region Active-Active DB Replication Platform
+- **Description:** High-availability database replication middleware enabling active-active multi-region database clustering with vector clock causality tracking, log-based CDC streaming, and automatic conflict resolution.
+- **Main Technologies:** Go, PostgreSQL WAL, Apache Kafka, Redis, gRPC, Prometheus, Docker
+- **Specification Path:** [27_Multi_Region_Active_Active_DB_Replication](file:///c:/GP/projects/27_Multi_Region_Active_Active_DB_Replication)
 
-## Digital Identity & Authentication (4 Projects)
-
-| # | Project Name | Description | Main Technologies |
-|---|-------------|-------------|-------------------|
-| 87 | **Decentralized Identity Verification Platform** | Implements W3C Verifiable Credentials for self-sovereign identity with issuance, verification, and selective disclosure | Go, Python, DID/VC standards, PostgreSQL, React, Docker, Hyperledger Aries |
-| 88 | **Multi-Factor Authentication Service** | A standalone MFA service supporting TOTP, WebAuthn/FIDO2, push notifications, and SMS with risk-based authentication policies | Go, PostgreSQL, Redis, React, Docker, WebAuthn API |
-| 89 | **Biometric Access Control System** | A physical access control system using facial recognition and fingerprint sensors with audit logging and emergency override capabilities | Python, C++ (OpenCV), ESP32, FastAPI, PostgreSQL, React, Docker |
-| 90 | **Single Sign-On Federation Gateway** | Implements SAML 2.0 and OpenID Connect federation allowing users to authenticate once across multiple applications and identity providers | Go, PostgreSQL, Redis, React, Docker, SAML/OIDC libraries |
+#### Project 30: Time-Series DB Engine for Industrial Telemetry
+- **Description:** Custom high-performance time-series storage engine implementing Write-Ahead Logging (WAL), Gorilla XOR floating-point compression, LTTB downsampling, and native statistical anomaly detection queries.
+- **Main Technologies:** Go / Rust, Custom Storage Engine, gRPC, TimescaleDB benchmarks, Prometheus, Docker
+- **Specification Path:** [30_Time_Series_DB_Engine_Industrial_Telemetry](file:///c:/GP/projects/30_Time_Series_DB_Engine_Industrial_Telemetry)
 
 ---
 
-## Observability & Monitoring (4 Projects)
+### 4. IoT, Edge Computing & AgriTech
 
-| # | Project Name | Description | Main Technologies |
-|---|-------------|-------------|-------------------|
-| 91 | **Distributed Log Analytics & Anomaly Detection** | Aggregates logs from distributed systems, indexes them for full-text search, and detects anomalous patterns using statistical methods | Go, Python, Kafka, Elasticsearch, Kibana, PostgreSQL, Docker |
-| 92 | **Application Performance Monitoring System** | Instruments applications with distributed tracing, collects performance metrics, and provides service dependency maps with latency analysis | Go, OpenTelemetry, Jaeger, Prometheus, Grafana, PostgreSQL, React, Docker |
-| 93 | **Synthetic Monitoring & Uptime Platform** | Runs scheduled checks (HTTP, TCP, DNS, SSL) from multiple geographic locations and provides uptime reports, SLA tracking, and incident timelines | Go, PostgreSQL, Redis, React, Docker, Prometheus, Alertmanager |
-| 94 | **Cost-Aware Observability Pipeline** | An observability data pipeline that intelligently samples, aggregates, and routes logs/metrics/traces based on cost and importance | Go, Kafka, ClickHouse, Prometheus, React, Docker, Vector |
+#### Project 05: Industrial IoT Predictive Maintenance Platform
+- **Description:** End-to-end telemetry system collecting high-frequency sensor data from industrial machinery, running edge-side FFT signal processing, and predicting remaining useful life (RUL) with time-series models.
+- **Main Technologies:** C++, ESP32, MQTT, InfluxDB, Python, TensorFlow Lite, Grafana, Docker
+- **Specification Path:** [05_Industrial_IoT_Predictive_Maintenance](file:///c:/GP/projects/05_Industrial_IoT_Predictive_Maintenance)
 
----
+#### Project 09: Edge-Native Video Analytics Pipeline
+- **Description:** Low-latency edge computing pipeline for processing IP camera streams, performing hardware-accelerated object detection and tracking on constrained edge devices without sending raw video to the cloud.
+- **Main Technologies:** C++, Python, OpenCV, NVIDIA Jetson, TensorRT, RTSP, MQTT, FastAPI, React
+- **Specification Path:** [09_Edge_Native_Video_Analytics_Pipeline](file:///c:/GP/projects/09_Edge_Native_Video_Analytics_Pipeline)
 
-## Media & Content (3 Projects)
+#### Project 20: Remote Patient Monitoring Platform
+- **Description:** Telehealth monitoring ecosystem collecting real-time physiological vitals from wearable BLE sensors, processing telemetry at the mobile edge, and triggering clinical escalation alerts for deteriorating health metrics.
+- **Main Technologies:** React Native, BLE (Bluetooth Low Energy), MQTT, InfluxDB, Python, FastAPI, Docker
+- **Specification Path:** [20_Remote_Patient_Monitoring_Platform](file:///c:/GP/projects/20_Remote_Patient_Monitoring_Platform)
 
-| # | Project Name | Description | Main Technologies |
-|---|-------------|-------------|-------------------|
-| 95 | **Adaptive Video Streaming Platform** | A complete video platform with upload, transcoding, adaptive bitrate streaming (HLS/DASH), CDN distribution, and viewer analytics | Go, Python, FFmpeg, MinIO, Redis, PostgreSQL, React, HLS.js, Docker |
-| 96 | **Content Moderation Pipeline** | Processes user-generated content (text, images, video) through automated moderation rules with human-in-the-loop review queues | Python, FastAPI, PostgreSQL, Redis, Kafka, React, Docker, Celery |
-| 97 | **Real-time Collaborative Whiteboard** | A digital whiteboard supporting simultaneous drawing, sticky notes, shapes, and embedded media with real-time synchronization | TypeScript, Node.js, WebSocket, Canvas API, PostgreSQL, React, Docker |
-
----
-
-## Cross-Domain (3 Projects)
-
-| # | Project Name | Description | Main Technologies |
-|---|-------------|-------------|-------------------|
-| 98 | **Multiplayer Game Server Infrastructure** | A scalable backend for real-time multiplayer games with authoritative game state, matchmaking, leaderboards, and anti-cheat detection | Go, UDP/WebSocket, Redis, PostgreSQL, Docker, Prometheus, React (admin) |
-| 99 | **Online Examination & Proctoring Platform** | A secure examination system with randomized question pools, browser lockdown, webcam proctoring, and automated grading with plagiarism detection | Python, FastAPI, PostgreSQL, Redis, React, WebRTC, Docker, Celery |
-| 100 | **Disaster Response Coordination Platform** | Coordinates emergency response with real-time mapping, resource allocation, volunteer management, and multi-agency communication | Python, FastAPI, PostgreSQL (PostGIS), Redis, React (Leaflet), WebSocket, Docker |
+#### Project 24: Smart Agriculture Monitoring & Automation System
+- **Description:** Long-range agricultural monitoring network using wireless LoRaWAN sensors for soil/climate telemetry, edge-side AI leaf disease diagnosis, and automated precision irrigation scheduling.
+- **Main Technologies:** C++, ESP32, LoRaWAN, InfluxDB, Python, TensorFlow Lite, FastAPI, React
+- **Specification Path:** [24_Smart_Agriculture_Monitoring_System](file:///c:/GP/projects/24_Smart_Agriculture_Monitoring_System)
 
 ---
 
-## Domain Distribution Summary
+### 5. Data Engineering & Observability
 
-| Domain | Count | Project Numbers |
-|--------|-------|----------------|
-| Cloud & Distributed Systems | 10 | 1–10 |
-| Cybersecurity | 8 | 11–18 |
-| IoT & Edge Computing | 8 | 19–26 |
-| Data Engineering & Databases | 8 | 27–34 |
-| DevOps & Platform Engineering | 7 | 35–41 |
-| MLOps & AI Infrastructure | 6 | 42–47 |
-| Healthcare Technology | 6 | 48–53 |
-| FinTech | 6 | 54–59 |
-| Smart Infrastructure | 6 | 60–65 |
-| Developer Tools | 7 | 66–72 |
-| Networking | 5 | 73–77 |
-| Supply Chain & Logistics | 5 | 78–82 |
-| Energy & Sustainability | 4 | 83–86 |
-| Digital Identity | 4 | 87–90 |
-| Observability & Monitoring | 4 | 91–94 |
-| Media & Content | 3 | 95–97 |
-| Cross-Domain | 3 | 98–100 |
-| **Total** | **100** | |
+#### Project 12: Real-time Data Lakehouse Platform
+- **Description:** Unified big data analytics platform combining real-time event streaming and batch data processing over open table formats with ACID transaction guarantees and fast SQL analytics.
+- **Main Technologies:** Python, Java, Apache Flink, Apache Kafka, Apache Iceberg, MinIO (S3), Trino, React
+- **Specification Path:** [12_Realtime_Data_Lakehouse_Platform](file:///c:/GP/projects/12_Realtime_Data_Lakehouse_Platform)
+
+#### Project 23: Distributed Log Analytics & Anomaly Detection Platform
+- **Description:** Enterprise log management pipeline aggregating high-velocity log streams, parsing unstructured text into structured templates using NLP, and detecting system anomalies via deep learning model analysis.
+- **Main Technologies:** Rust, Go, Apache Kafka, ClickHouse, Drain NLP Parser, PyTorch/LSTM, React, Docker
+- **Specification Path:** [23_Distributed_Log_Analytics_Anomaly_Detection](file:///c:/GP/projects/23_Distributed_Log_Analytics_Anomaly_Detection)
+
+#### Project 25: Multi-Cloud Cost Intelligence Platform
+- **Description:** Multi-cloud FinOps platform ingesting AWS, Azure, and GCP billing CUR logs into a columnar data warehouse, detecting spending anomalies, and forecasting cloud infrastructure expenditure.
+- **Main Technologies:** Python, Apache Airflow, ClickHouse, PostgreSQL, React, FastAPI, Prophet, Docker
+- **Specification Path:** [25_Multi_Cloud_Cost_Intelligence_Platform](file:///c:/GP/projects/25_Multi_Cloud_Cost_Intelligence_Platform)
 
 ---
 
-*All 100 projects will be evaluated using the scoring rubric defined in EVALUATION.md. The top 25 will receive complete proposals.*
+### 6. DevOps, MLOps & Platform Engineering
+
+#### Project 06: End-to-End MLOps Platform
+- **Description:** A comprehensive ML lifecycle platform providing automated model training pipelines, experiment tracking, artifact registry, automated deployment, latency monitoring, and data drift detection.
+- **Main Technologies:** Python, Go, Kubernetes, MLflow, Apache Airflow, Docker, PostgreSQL, FastAPI, React
+- **Specification Path:** [06_End_to_End_MLOps_Platform](file:///c:/GP/projects/06_End_to_End_MLOps_Platform)
+
+#### Project 19: Self-Healing Infrastructure Platform
+- **Description:** Automated Site Reliability Engineering platform monitoring Kubernetes infrastructure, detecting operational anomalies in real time, and executing automated self-healing remediation playbooks.
+- **Main Technologies:** Go, Kubernetes Operator SDK, Prometheus, Ansible, PostgreSQL, FastAPI, React, Docker
+- **Specification Path:** [19_Self_Healing_Infrastructure_Platform](file:///c:/GP/projects/19_Self_Healing_Infrastructure_Platform)
+
+---
+
+### 7. Healthcare Technology
+
+#### Project 08: Privacy-Preserving Healthcare Data Exchange
+- **Description:** Federated medical data platform enabling multi-hospital clinical research queries using Differential Privacy and Federated Learning without exposing underlying raw patient electronic health records.
+- **Main Technologies:** Python, FastAPI, HL7 FHIR standard, PySyft, Docker, PostgreSQL, React
+- **Specification Path:** [08_Privacy_Preserving_Healthcare_Data_Exchange](file:///c:/GP/projects/08_Privacy_Preserving_Healthcare_Data_Exchange)
+
+---
+
+### 8. Smart Infrastructure & Digital Twins
+
+#### Project 10: Digital Twin for Smart Building Management
+- **Description:** Interactive 3D virtual replica of a smart facility integrating real-time IoT sensor telemetry streams, HVAC automated controls, energy consumption forecasting, and spatial anomaly alerts.
+- **Main Technologies:** React, Three.js (WebGL), MQTT, TimescaleDB, Python, FastAPI, Docker
+- **Specification Path:** [10_Digital_Twin_Smart_Building_Management](file:///c:/GP/projects/10_Digital_Twin_Smart_Building_Management)
+
+#### Project 15: Smart City Traffic Optimization System
+- **Description:** Multi-intersection adaptive traffic signal control system using computer vision vehicle queue detection and Multi-Agent Reinforcement Learning (MARL) to minimize gridlock and emergency transit times.
+- **Main Technologies:** Python, SUMO (Simulation of Urban MObility), PyTorch/RL, OpenCV, MQTT, FastAPI, React
+- **Specification Path:** [15_Smart_City_Traffic_Optimization](file:///c:/GP/projects/15_Smart_City_Traffic_Optimization)
+
+#### Project 35: Manufacturing Digital Twin for Predictive Maintenance
+- **Description:** Smart factory digital twin binding high-frequency vibration/thermal sensor streams to 3D equipment CAD models, performing real-time FFT feature extraction, and calculating Remaining Useful Life (RUL).
+- **Main Technologies:** Go, Python, Apache Flink, Three.js (WebGL), MQTT, TimescaleDB, Docker, React
+- **Specification Path:** [35_Digital_Twin_Predictive_Maintenance_Manufacturing](file:///c:/GP/projects/35_Digital_Twin_Predictive_Maintenance_Manufacturing)
+
+---
+
+### 9. Developer Tools & Systems
+
+#### Project 04: Real-time Collaborative Code Editor
+- **Description:** Cloud-based collaborative code editor supporting multi-user concurrent editing via Conflict-Free Replicated Data Types (CRDTs), web-based terminal execution in isolated containers, and real-time cursor sync.
+- **Main Technologies:** TypeScript, Node.js, Y.js (CRDT), WebSockets, Monaco Editor, Docker, PostgreSQL
+- **Specification Path:** [04_Realtime_Collaborative_Code_Editor](file:///c:/GP/projects/04_Realtime_Collaborative_Code_Editor)
+
+#### Project 13: Intelligent API Gateway
+- **Description:** High-performance microservices API gateway featuring dynamic route configuration, JWT authentication, distributed token-bucket rate limiting, and AI-driven Web Application Firewall (WAF) rule enforcement.
+- **Main Technologies:** Go, Redis, PostgreSQL, Prometheus, NGINX/Lua, React, Docker
+- **Specification Path:** [13_Intelligent_API_Gateway](file:///c:/GP/projects/13_Intelligent_API_Gateway)
+
+---
+
+### 10. Networking, Telecom & Mesh
+
+#### Project 14: Software-Defined WAN (SD-WAN) Controller
+- **Description:** Centralized network control plane orchestrating WAN overlay tunnels, measuring link quality metrics (latency, jitter, loss) in real time, and dynamically routing critical application traffic across optimal paths.
+- **Main Technologies:** Python, Go, OpenFlow, Mininet, Linux `tc`/`iproute2`, PostgreSQL, React, Docker
+- **Specification Path:** [14_Software_Defined_WAN_Controller](file:///c:/GP/projects/14_Software_Defined_WAN_Controller)
+
+#### Project 32: 5G Network Slicing Management Platform
+- **Description:** Software-defined management plane orchestrating end-to-end 5G network slices for diverse SLA requirements (eMBB, URLLC, mMTC), monitoring slice performance, and dynamically reallocating bandwidth.
+- **Main Technologies:** Go, Python, ns-3 Network Simulator, Open5GS, Docker, Prometheus, Grafana, React
+- **Specification Path:** [32_5G_Network_Slicing_Management_Platform](file:///c:/GP/projects/32_5G_Network_Slicing_Management_Platform)
+
+#### Project 40: Disaster-Resilient Mesh Network for Emergency Communication
+- **Description:** Off-grid emergency communication network combining long-range LoRa RF mesh hardware nodes with local Wi-Fi access points, Delay-Tolerant Networking (DTN) routing, and offline geospatial mapping.
+- **Main Technologies:** C++, ESP32, LoRa RF, Python, WebSockets, OpenStreetMap, PWA (Progressive Web App)
+- **Specification Path:** [40_Mesh_Networking_Disaster_Resilient_Communication](file:///c:/GP/projects/40_Mesh_Networking_Disaster_Resilient_Communication)
+
+---
+
+### 11. Automotive & Embedded Systems
+
+#### Project 33: In-Vehicle Network Gateway with CAN-Bus Security
+- **Description:** Automotive central gateway firewall running on embedded Linux, inspecting real-time CAN bus traffic, enforcing DBC signal validation rules, and blocking unauthorized CAN frame injection attacks.
+- **Main Technologies:** C++, SocketCAN, Linux Kernel, Python, ONNX Runtime, Raspberry Pi / BeagleBone
+- **Specification Path:** [33_In_Vehicle_Network_Gateway_CAN_Bus](file:///c:/GP/projects/33_In_Vehicle_Network_Gateway_CAN_Bus)
+
+#### Project 34: Automotive Digital Twin for ECU Testing
+- **Description:** Hardware-in-the-loop (HiL) testing environment creating real-time digital twins of vehicle sub-components to simulate sensor inputs, test Electronic Control Unit (ECU) firmware, and validate safety compliance.
+- **Main Technologies:** C++, Python, SocketCAN, InfluxDB, Dynamic Time Warping (DTW), React, Docker
+- **Specification Path:** [34_Automotive_Digital_Twin_ECU_Testing](file:///c:/GP/projects/34_Automotive_Digital_Twin_ECU_Testing)
+
+---
+
+### 12. Robotics & Autonomous Systems
+
+#### Project 29: Multi-Robot Coordination Platform for Warehouse Fleets
+- **Description:** Fleet management system for autonomous mobile robots (AMRs) in warehouse environments executing Multi-Agent Path Finding (MAPF) via Conflict-Based Search (CBS) to prevent collisions and optimize throughput.
+- **Main Technologies:** Python, Go, ROS 2, Gazebo Simulator, WebSockets, PostgreSQL, React (WebGL)
+- **Specification Path:** [29_Multi_Robot_Coordination_Warehouse_Fleets](file:///c:/GP/projects/29_Multi_Robot_Coordination_Warehouse_Fleets)
+
+---
+
+### 13. Energy & Cyber-Physical Systems
+
+#### Project 11: Peer-to-Peer Energy Trading Platform
+- **Description:** Decentralized microgrid energy trading platform enabling solar panel prosumers to sell surplus power directly to nearby consumers via automated matching algorithms and smart meter integration.
+- **Main Technologies:** Go, Smart Contracts, Kafka, TimescaleDB, React, Docker
+- **Specification Path:** [11_Peer_to_Peer_Energy_Trading_Platform](file:///c:/GP/projects/11_Peer_to_Peer_Energy_Trading_Platform)
+
+#### Project 38: Microgrid Control System for Islanded Operation
+- **Description:** Real-time energy management and control system for industrial microgrids managing seamless grid-connected to islanded mode transitions (<50ms), frequency regulation, droop control emulation, and solar forecasting.
+- **Main Technologies:** Go, C++, Modbus TCP, InfluxDB, Python, Grafana, React, Docker
+- **Specification Path:** [38_Microgrid_Control_System_Islanded_Operation](file:///c:/GP/projects/38_Microgrid_Control_System_Islanded_Operation)
+
+---
+
+*For detailed architectural designs, system component diagrams, data flow specifications, tech stacks, and team role distributions, visit the respective project proposal folder under `projects/`.*
